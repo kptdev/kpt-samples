@@ -1,0 +1,13 @@
+apiVersion: kpt.dev/v1
+kind: Kptfile
+metadata:
+  name: environment
+  annotations:
+    config.kubernetes.io/local-config: "true"
+info:
+  description: environment
+pipeline:
+  mutators:
+    - image: set-name-prefix
+    - image: generator-configconnectorcontext
+    - image: bind-gcp-resources

@@ -1,0 +1,10 @@
+apiVersion: configcontroller.cnrm.cloud.google.com/v1beta1
+kind: ConfigControllerInstance
+metadata:
+  name: packagename
+  namespace: binding
+spec:
+  location: us-central1
+  managementConfig:
+    standardManagementConfig:
+      masterIPv4CidrBlock: 172.16.0.128/28
