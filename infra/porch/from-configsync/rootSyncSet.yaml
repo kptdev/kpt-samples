@@ -1,0 +1,19 @@
+apiVersion: config.porch.kpt.dev/v1alpha1
+kind: RootSyncSet
+metadata:
+  name: porch-install
+  namespace: dev
+spec:
+  clusterRefs:
+  - apiVersion: container.cnrm.cloud.google.com/v1beta1
+    kind: ContainerCluster
+    name: us-central1
+    namespace: dev
+  template:
+    spec:
+      sourceFormat: unstructured
+      git:
+        auth: none
+        repo: http://github.com/GoogleContainerTools/kpt-samples.git
+        branch: dogfood-porch-installation
+        dir: infra/porch/from-yaml

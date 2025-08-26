@@ -1,0 +1,18 @@
+apiVersion: kpt.dev/v1
+kind: Kptfile
+metadata:
+  name: rbac
+upstream:
+  type: git
+  git:
+    repo: git@github.com:GoogleContainerTools/kpt
+    directory: /porch/controllers/config/rbac
+    ref: porch/v0.0.9
+  updateStrategy: resource-merge
+upstreamLock:
+  type: git
+  git:
+    repo: git@github.com:GoogleContainerTools/kpt
+    directory: /porch/controllers/config/rbac
+    ref: porch/v0.0.9
+    commit: 1c7ebea5b4c9f41321ed28126f8b2b8ff71aba71

@@ -1,0 +1,10 @@
+# Create an environment folder to hold the new project.
+apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+kind: Folder
+metadata:
+  name: environments
+  namespace: config-control
+spec:
+  displayName: environments
+  folderRef:
+    name: root
