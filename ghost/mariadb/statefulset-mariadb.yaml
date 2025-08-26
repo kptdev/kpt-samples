@@ -26,12 +26,20 @@ spec:
           env:
             - name: BITNAMI_DEBUG
               value: "true"
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb
+                  key: mysql-root-password
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb
+                  key: mysql-password
             - name: MARIADB_USER
               value: bn_ghost
             - name: MARIADB_DATABASE
               value: bitnami_ghost
-            - name: ALLOW_EMPTY_PASSWORD
-              value: "true"
           ports:
             - name: mysql
               containerPort: 3306

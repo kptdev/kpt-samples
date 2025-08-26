@@ -8,7 +8,7 @@ metadata:
 spec:
   replicas: 1
   strategy:
-    type: Recreate
+    type: RollingUpdate
   template:
     spec:
       securityContext:
@@ -23,8 +23,6 @@ spec:
           env:
             - name: BITNAMI_DEBUG
               value: "true"
-            - name: ALLOW_EMPTY_PASSWORD
-              value: "yes"
             - name: GHOST_DATABASE_HOST
               value: mariadb
             - name: GHOST_DATABASE_PORT_NUMBER
@@ -33,12 +31,22 @@ spec:
               value: bitnami_ghost
             - name: GHOST_DATABASE_USER
               value: bn_ghost
+            - name: GHOST_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb
+                  key: mysql-password
             - name: GHOST_HOST
               value: example.com
             - name: GHOST_PORT_NUMBER
               value: "2368"
             - name: GHOST_USERNAME
               value: user
+            - name: GHOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ghost-app
+                  key: ghost-password
             - name: GHOST_EMAIL
               value: user@example.com
             - name: GHOST_BLOG_TITLE
