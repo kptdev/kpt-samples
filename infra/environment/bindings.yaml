@@ -1,0 +1,9 @@
+apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+kind: Folder
+metadata:
+  name: environments
+  namespace: environments-ns
+  annotations:
+    config.kubernetes.io/local-config: "binding"
+  labels:
+    parent-for: environment
