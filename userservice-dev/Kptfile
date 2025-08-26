@@ -1,0 +1,34 @@
+apiVersion: kpt.dev/v1
+kind: Kptfile
+metadata:
+  name: userservice-dev
+  labels:
+    app: userservice
+  annotations:
+    config.kubernetes.io/local-config: "true"
+upstream:
+  type: git
+  git:
+    repo: git@github.com:droot/kpt-samples
+    directory: /userservice
+    ref: bank-of-anthos-pkgs
+  updateStrategy: resource-merge
+upstreamLock:
+  type: git
+  git:
+    repo: git@github.com:droot/kpt-samples
+    directory: /userservice
+    ref: bank-of-anthos-pkgs
+    commit: 08c7473c2b4b641c1efb4a520c39c551b87eda0b
+info:
+  description: sample description
+pipeline:
+  mutators:
+    - image: set-namespace:v0.4.1
+      configPath: package-context.yaml
+    - image: set-labels:v0.1.5
+      configPath: fn-config-setlabels.yaml
+    - image: starlark:v0.4.3
+      configPath: fn-config-setname.yaml
+    - image: set-image:v0.1.1
+      configPath: fn-config-setimage.yaml

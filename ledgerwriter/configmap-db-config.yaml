@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: # kpt-merge: example/ledger-db-config
+  name: ledger-db-config
+  labels:
+    app: ledgerwriter
+  namespace: example
+  annotations:
+    internal.kpt.dev/upstream-identifier: '|ConfigMap|example|ledger-db-config'
+data:
+  POSTGRES_DB: db
+  POSTGRES_USER: db-admin
+  POSTGRES_PASSWORD: db-pwd
+  SPRING_DATASOURCE_URL: jdbc:postgresql://ledger-db:5432/db
+  #  SPRING_DATASOURCE_URL: jdbc:postgresql://ledger-db.ledger-db-dev:5432/db
+  SPRING_DATASOURCE_USERNAME: db-admin # should match POSTGRES_USER
+  SPRING_DATASOURCE_PASSWORD: db-pwd # should match POSTGRES_PASSWORD

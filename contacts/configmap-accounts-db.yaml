@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: # kpt-merge: example/accounts-db-config
+  name: accounts-db-config
+  labels:
+    app: contacts
+  namespace: example
+  annotations:
+    internal.kpt.dev/upstream-identifier: '|ConfigMap|example|accounts-db-config'
+data:
+  POSTGRES_DB: db
+  POSTGRES_USER: db-admin
+  POSTGRES_PASSWORD: db-pwd
+  ACCOUNTS_DB_URI: postgresql://db-admin:db-pwd@accounts-db:5432/db
+  # ACCOUNTS_DB_URI: postgresql://db-admin:db-pwd@accounts-db.accounts-db-dev:5432/db

@@ -1,0 +1,10 @@
+apiVersion: kpt.dev/v1alpha1
+kind: ResourceGroup
+metadata: # kpt-merge: accounts-db-dev/inventory-99865161
+  name: inventory-99865161
+  namespace: accounts-db-dev
+  labels:
+    cli-utils.sigs.k8s.io/inventory-id: 2aca04e392c4f17d91507bedbcc8719d050a9806-1662581639705790000
+    app: accounts-db
+  annotations:
+    internal.kpt.dev/upstream-identifier: kpt.dev|ResourceGroup|accounts-db-dev|inventory-99865161

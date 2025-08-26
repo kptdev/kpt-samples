@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: # kpt-merge: example/environment-config
+  name: environment-config
+  namespace: example
+  labels:
+    app: ledgerwriter
+  annotations:
+    internal.kpt.dev/upstream-identifier: '|ConfigMap|example|environment-config'
+data:
+  LOCAL_ROUTING_NUM: "883745000"
+  PUB_KEY_PATH: /tmp/.ssh/publickey

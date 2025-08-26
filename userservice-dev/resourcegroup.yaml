@@ -1,0 +1,10 @@
+apiVersion: kpt.dev/v1alpha1
+kind: ResourceGroup
+metadata: # kpt-merge: userservice-dev/inventory-19648536
+  name: inventory-19648536
+  namespace: userservice-dev
+  labels:
+    cli-utils.sigs.k8s.io/inventory-id: b0c9fc5bdb4a0728aea685a250d2fb2e0d592506-1662510690668497000
+    app: userservice
+  annotations:
+    internal.kpt.dev/upstream-identifier: kpt.dev|ResourceGroup|userservice-dev|inventory-19648536

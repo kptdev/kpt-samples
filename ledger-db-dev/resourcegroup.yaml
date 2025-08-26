@@ -1,0 +1,9 @@
+apiVersion: kpt.dev/v1alpha1
+kind: ResourceGroup
+metadata: # kpt-merge: ledger-db-dev/inventory-04233442
+  name: inventory-04233442
+  namespace: ledger-db-dev
+  labels:
+    cli-utils.sigs.k8s.io/inventory-id: c253a06522b00c265d26fb2969f981972c5836d5-1662582878972770000
+  annotations:
+    internal.kpt.dev/upstream-identifier: kpt.dev|ResourceGroup|ledger-db-dev|inventory-04233442

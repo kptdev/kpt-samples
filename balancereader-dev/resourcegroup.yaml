@@ -1,0 +1,10 @@
+apiVersion: kpt.dev/v1alpha1
+kind: ResourceGroup
+metadata: # kpt-merge: balancereader-dev/inventory-52957346
+  name: inventory-52957346
+  namespace: balancereader-dev
+  labels:
+    cli-utils.sigs.k8s.io/inventory-id: 2ff98c7dfb36097fb10b38d6b5ee1a178b0dd47c-1662508216914293000
+    app: balancereader
+  annotations:
+    internal.kpt.dev/upstream-identifier: kpt.dev|ResourceGroup|balancereader-dev|inventory-52957346

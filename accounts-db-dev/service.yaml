@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata: # kpt-merge: example/base-db
+  name: accounts-db
+  labels:
+    tier: db
+    app: accounts-db
+  namespace: accounts-db-dev
+  annotations:
+    internal.kpt.dev/upstream-identifier: '|Service|example|base-db'
+spec:
+  ports:
+    - port: 5432
+      name: tcp
+      targetPort: 5432
+      protocol: TCP
+  selector:
+    tier: db
+    app: accounts-db

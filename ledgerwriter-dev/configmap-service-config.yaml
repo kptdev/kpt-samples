@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: # kpt-merge: example/service-api-config
+  name: service-api-config
+  namespace: ledgerwriter-dev
+  labels:
+    app: ledgerwriter
+  annotations:
+    internal.kpt.dev/upstream-identifier: '|ConfigMap|example|service-api-config'
+data:
+  TRANSACTIONS_API_ADDR: ledgerwriter.ledgerwriter-dev:80
+  BALANCES_API_ADDR: balancereader.balancereader-dev:80
+  HISTORY_API_ADDR: transactionhistory.transactionhistory-dev:80
+  CONTACTS_API_ADDR: contacts.contacts-dev:80
+  USERSERVICE_API_ADDR: userservice.userservice-dev:80

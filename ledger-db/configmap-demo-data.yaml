@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: # kpt-merge: example/demo-data-config
+  name: demo-data-config
+  namespace: example
+  annotations:
+    internal.kpt.dev/upstream-identifier: '|ConfigMap|example|demo-data-config'
+  labels:
+    app: ledger-db
+data:
+  USE_DEMO_DATA: "True"
+  DEMO_LOGIN_USERNAME: testuser
+  # All demo user accounts are hardcoded to use the login password 'bankofanthos'
+  DEMO_LOGIN_PASSWORD: bankofanthos

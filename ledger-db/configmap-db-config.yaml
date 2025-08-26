@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: # kpt-merge: example/db-config
+  name: db-config
+  namespace: example
+  annotations:
+    internal.kpt.dev/upstream-identifier: '|ConfigMap|example|db-config'
+  labels:
+    app: ledger-db
+data:
+  POSTGRES_DB: db
+  POSTGRES_USER: db-admin
+  POSTGRES_PASSWORD: db-pwd
+  ACCOUNTS_DB_URI: postgresql://db-admin:db-pwd@base-db:5432/base-db

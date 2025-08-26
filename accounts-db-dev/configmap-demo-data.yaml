@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: # kpt-merge: accounts-db-dev/demo-data-config
+  name: demo-data-config
+  namespace: accounts-db-dev
+  labels:
+    app: accounts-db
+  annotations:
+    internal.kpt.dev/upstream-identifier: '|ConfigMap|accounts-db-dev|demo-data-config'
+data:
+  USE_DEMO_DATA: "True"
+  DEMO_LOGIN_USERNAME: testuser
+  # All demo user accounts are hardcoded to use the login password 'bankofanthos'
+  DEMO_LOGIN_PASSWORD: bankofanthos

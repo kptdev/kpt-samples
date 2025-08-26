@@ -1,0 +1,34 @@
+apiVersion: kpt.dev/v1
+kind: Kptfile
+metadata:
+  name: accounts-db
+  labels:
+    app: accounts-db
+  annotations:
+    config.kubernetes.io/local-config: "true"
+upstream:
+  type: git
+  git:
+    repo: git@github.com:droot/kpt-samples
+    directory: /base-db
+    ref: bank-of-anthos-pkgs
+  updateStrategy: resource-merge
+upstreamLock:
+  type: git
+  git:
+    repo: git@github.com:droot/kpt-samples
+    directory: /base-db
+    ref: bank-of-anthos-pkgs
+    commit: 4c4d5c5e2b5fe6dea6851f5985e33711afc753f8
+info:
+  description: sample description
+pipeline:
+  mutators:
+    - image: set-namespace:v0.4.1
+      configPath: package-context.yaml
+    - image: set-labels:v0.1.5
+      configPath: fn-config-setlabels.yaml
+    - image: starlark:v0.4.3
+      configPath: fn-config-setname.yaml
+    - image: set-image:v0.1.1
+      configPath: fn-config-setimage.yaml

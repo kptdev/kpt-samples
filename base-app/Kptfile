@@ -1,0 +1,20 @@
+apiVersion: kpt.dev/v1
+kind: Kptfile
+metadata:
+  name: base-app
+  annotations:
+    config.kubernetes.io/local-config: "true"
+  labels:
+    app: base-app
+info:
+  description: sample description
+pipeline:
+  mutators:
+    - image: set-namespace:v0.4.1
+      configPath: package-context.yaml
+    - image: set-labels:v0.1.5
+      configPath: fn-config-setlabels.yaml
+    - image: starlark:v0.4.3
+      configPath: fn-config-setname.yaml
+    - image: set-image:v0.1.1
+      configPath: fn-config-setimage.yaml

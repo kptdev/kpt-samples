@@ -1,0 +1,10 @@
+apiVersion: fn.kpt.dev/v1alpha1
+kind: SetLabels
+metadata:
+  name: set-labels
+  annotations:
+    config.kubernetes.io/local-config: "true"
+  labels:
+    app: base-db
+labels:
+  app: base-db

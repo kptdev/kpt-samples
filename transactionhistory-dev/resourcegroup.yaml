@@ -1,0 +1,10 @@
+apiVersion: kpt.dev/v1alpha1
+kind: ResourceGroup
+metadata: # kpt-merge: transactionhistory-dev/inventory-44246773
+  name: inventory-44246773
+  namespace: transactionhistory-dev
+  labels:
+    cli-utils.sigs.k8s.io/inventory-id: 5f2e51fa06ff172974a6750abd2e15f4d820d42b-1662510089262370000
+    app: transactionhistory
+  annotations:
+    internal.kpt.dev/upstream-identifier: kpt.dev|ResourceGroup|transactionhistory-dev|inventory-44246773

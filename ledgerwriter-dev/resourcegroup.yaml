@@ -1,0 +1,10 @@
+apiVersion: kpt.dev/v1alpha1
+kind: ResourceGroup
+metadata: # kpt-merge: ledgerwriter-dev/inventory-22531502
+  name: inventory-22531502
+  namespace: ledgerwriter-dev
+  labels:
+    cli-utils.sigs.k8s.io/inventory-id: 1802fd43d94cc4583d4850ba1edaba5164bb6d48-1662509199816075000
+    app: ledgerwriter
+  annotations:
+    internal.kpt.dev/upstream-identifier: kpt.dev|ResourceGroup|ledgerwriter-dev|inventory-22531502
