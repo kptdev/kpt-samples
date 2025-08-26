@@ -14,8 +14,15 @@ spec:
     type: RollingUpdate
   template:
     spec:
+      serviceAccountName: mariadb
       securityContext:
         fsGroup: 1001
+      initContainers:
+      - name: create-secret
+        image: gcr.io/kpt-fn-demo/yuwenma-secret:v0.6
+        env:
+        - name: SECRET_NAME
+          value: mariadb
       containers:
         - name: mariadb
           image: docker.io/bitnami/mariadb:10.6.7-debian-10-r62
@@ -32,9 +39,51 @@ spec:
               value: bitnami_ghost
             - name: ALLOW_EMPTY_PASSWORD
               value: "true"
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb
+                  key: mariadb-root-password
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb
+                  key: mariadb-password
           ports:
             - name: mysql
               containerPort: 3306
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            exec:
+              command:
+              - /bin/bash
+              - -ec
+              - |
+                password_aux="${MARIADB_ROOT_PASSWORD:-}"
+                if [[ -f "${MARIADB_ROOT_PASSWORD_FILE:-}" ]]; then
+                    password_aux=$(cat "$MARIADB_ROOT_PASSWORD_FILE")
+                fi
+                mysqladmin status -uroot -p"${password_aux}"
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            exec:
+              command:
+              - /bin/bash
+              - -ec
+              - |
+                password_aux="${MARIADB_ROOT_PASSWORD:-}"
+                if [[ -f "${MARIADB_ROOT_PASSWORD_FILE:-}" ]]; then
+                    password_aux=$(cat "$MARIADB_ROOT_PASSWORD_FILE")
+                fi
+                mysqladmin status -uroot -p"${password_aux}"
           resources:
             limits: {}
             requests: {}

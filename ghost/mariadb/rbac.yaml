@@ -1,0 +1,28 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: create-secrets
+  namespace: example
+subjects:
+- kind: ServiceAccount
+  name: mariadb
+  namespace: example
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: create-secrets
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: create-secrets
+  namespace: example
+rules:
+  - apiGroups:
+    - ""
+    resources:
+    - secrets
+    verbs:
+    - create
+    - get
+    - delete
