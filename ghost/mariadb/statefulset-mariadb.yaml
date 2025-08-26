@@ -16,6 +16,28 @@ spec:
     spec:
       securityContext:
         fsGroup: 1001
+      initContainers:
+      - name: configmap-map-to-file
+        image: gcr.io/kpt-fn-demo/yuwenma-cm-env-to-ini:v0.12
+        env:
+        - name: CM_INI_FILE_NAME
+          value: my.cnf
+        envFrom:
+        - configMapRef:
+            name: mariadb
+        volumeMounts:
+        - name: ini-config
+          # the env-to-ini.py cannot be placed in the same mount dir.
+          # Because it will be overridden.
+          mountPath: /app
+      - name: verify
+        image: ubuntu
+        command: ["/bin/sh","-c"]
+        args: ["ls /tmp; cat /tmp/my.cnf"]
+        volumeMounts:
+          - name: ini-config
+            mountPath: /tmp/my.cnf
+            subPath: my.cnf
       containers:
         - name: mariadb
           image: docker.io/bitnami/mariadb:10.6.7-debian-10-r62
@@ -24,44 +46,43 @@ spec:
             runAsNonRoot: true
             runAsUser: 1001
           env:
-            - name: BITNAMI_DEBUG
-              value: "true"
-            - name: MARIADB_USER
-              value: bn_ghost
-            - name: MARIADB_DATABASE
-              value: bitnami_ghost
-            - name: ALLOW_EMPTY_PASSWORD
-              value: "true"
+          - name: BITNAMI_DEBUG
+            value: "true"
+          - name: MARIADB_USER
+            value: bn_ghost
+          - name: MARIADB_DATABASE
+            value: bitnami_ghost
+          - name: ALLOW_EMPTY_PASSWORD
+            value: "true"
           ports:
-            - name: mysql
-              containerPort: 3306
+          - name: mysql
+            containerPort: 3307
           resources:
             limits: {}
             requests: {}
           volumeMounts:
-            - name: data
-              mountPath: /bitnami/mariadb
-            - name: config
-              mountPath: /opt/bitnami/mariadb/conf/my.ini
-              subPath: my.ini
+          - name: data
+            mountPath: /bitnami/mariadb
+          - name: ini-config
+            mountPath: /opt/bitnami/mariadb/conf/my.cnf
+            subPath: my.cnf
       volumes:
-        - name: config
-          configMap:
-            name: mariadb
+      - name: ini-config
+        emptyDir: {}
     metadata:
       labels:
         app.kubernetes.io/name: mariadb
   volumeClaimTemplates:
-    - metadata:
-        name: data
-        labels:
-          app.kubernetes.io/name: mariadb
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 8Gi
+  - metadata:
+      name: data
+      labels:
+        app.kubernetes.io/name: mariadb
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
   selector:
     matchLabels:
       app.kubernetes.io/name: mariadb
