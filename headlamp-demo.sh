@@ -117,7 +117,7 @@ pause
 banner "Step 5: Deploy to cluster, expose port, and create service account token"
 
 run kpt live init
-run kpt live apply --reconcile-timeout=5m
+run kpt live apply --output=table --reconcile-timeout=5m
 
 echo ""
 echo -e "${GREEN}> kubectl port-forward -n kube-system service/headlamp 8080:80 &${RESET}"
