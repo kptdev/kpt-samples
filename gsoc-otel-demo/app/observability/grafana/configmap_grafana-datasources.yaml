@@ -1,0 +1,82 @@
+# Source: opentelemetry-demo/templates/grafana-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  labels:
+    helm.sh/chart: opentelemetry-demo-0.40.9
+    app.kubernetes.io/version: 2.2.0
+    app.kubernetes.io/part-of: opentelemetry-demo
+    app.kubernetes.io/managed-by: Helm
+    grafana_datasource: "1"
+  namespace: otel-demo
+data:
+  default.yaml: |
+    # Copyright The OpenTelemetry Authors
+    # SPDX-License-Identifier: Apache-2.0
+
+
+    apiVersion: 1
+
+    datasources:
+      - name: Prometheus
+        uid: webstore-metrics
+        type: prometheus
+        url: http://prometheus:9090
+        editable: true
+        isDefault: true
+        jsonData:
+          # Align Prometheus data source time interval with the OTel SDKs' export interval (see OTEL_METRIC_EXPORT_INTERVAL)
+          timeInterval: "60s"
+          exemplarTraceIdDestinations:
+            - datasourceUid: webstore-traces
+              name: trace_id
+
+            - url: http://localhost:8080/jaeger/ui/trace/$${__value.raw}
+              name: trace_id
+              urlDisplayLabel: View in Jaeger UI
+  jaeger.yaml: |
+    # Copyright The OpenTelemetry Authors
+    # SPDX-License-Identifier: Apache-2.0
+
+
+    apiVersion: 1
+
+    datasources:
+      - name: Jaeger
+        uid: webstore-traces
+        type: jaeger
+        url: http://jaeger:16686/jaeger/ui
+        editable: true
+        isDefault: false
+        jsonData:
+          tracesToLogsV2:
+            datasourceUid: webstore-logs
+            spanStartTimeShift: "-20m"
+            spanEndTimeShift: "20m"
+            filterByTraceID: true
+            filterBySpanID: true
+            customQuery: true
+            query: traceId:"$${__trace.traceId}" AND spanId:"$${__span.spanId}"
+  opensearch.yaml: |
+    # Copyright The OpenTelemetry Authors
+    # SPDX-License-Identifier: Apache-2.0
+
+    apiVersion: 1
+
+    datasources:
+      - name: OpenSearch
+        uid: webstore-logs
+        type: grafana-opensearch-datasource
+        url: http://opensearch:9200/
+        access: proxy
+        editable: true
+        isDefault: false
+        jsonData:
+          database: otel-logs-*
+          flavor: opensearch
+          logLevelField: severity.text.keyword
+          logMessageField: body
+          pplEnabled: true
+          timeField: observedTimestamp
+          version: 3.6.0

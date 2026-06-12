@@ -1,0 +1,72 @@
+# Source: opentelemetry-demo/templates/component.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quote
+  labels:
+    helm.sh/chart: opentelemetry-demo-0.40.9
+    opentelemetry.io/name: quote
+    app.kubernetes.io/version: 2.2.0
+    app.kubernetes.io/component: quote
+    app.kubernetes.io/name: quote
+    app.kubernetes.io/part-of: opentelemetry-demo
+    app.kubernetes.io/managed-by: Helm
+  namespace: otel-demo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      opentelemetry.io/name: quote
+  template:
+    metadata:
+      labels:
+        opentelemetry.io/name: quote
+        app.kubernetes.io/version: 2.2.0
+        app.kubernetes.io/component: quote
+        app.kubernetes.io/name: quote
+      annotations: {}
+    spec:
+      serviceAccountName: opentelemetry-demo
+      containers:
+        - name: quote
+          image: ghcr.io/open-telemetry/demo:2.2.0-quote
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: service
+          env:
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['app.kubernetes.io/component']
+            - name: OTEL_COLLECTOR_NAME
+              value: otel-collector
+            - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+              value: cumulative
+            - name: QUOTE_PORT
+              value: "8080"
+            - name: OTEL_PHP_AUTOLOAD_ENABLED
+              value: "true"
+            - name: OTEL_PHP_INTERNAL_METRICS_ENABLED
+              value: "true"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector:4318
+            - name: IPV6_ENABLED
+              value: "false"
+            - name: OTEL_COLLECTOR_HOST
+              value: otel-collector
+            - name: GRAFANA_HOST
+              value: grafana
+            - name: JAEGER_HOST
+              value: jaeger
+          resources:
+            limits:
+              memory: 40Mi
+          securityContext:
+            runAsGroup: 33
+            runAsNonRoot: true
+            runAsUser: 33
+          volumeMounts: null
+      volumes: null

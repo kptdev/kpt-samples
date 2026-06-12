@@ -1,0 +1,101 @@
+# Source: opentelemetry-demo/templates/component.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-proxy
+  labels:
+    helm.sh/chart: opentelemetry-demo-0.40.9
+    opentelemetry.io/name: frontend-proxy
+    app.kubernetes.io/version: 2.2.0
+    app.kubernetes.io/component: frontend-proxy
+    app.kubernetes.io/name: frontend-proxy
+    app.kubernetes.io/part-of: opentelemetry-demo
+    app.kubernetes.io/managed-by: Helm
+  namespace: otel-demo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      opentelemetry.io/name: frontend-proxy
+  template:
+    metadata:
+      labels:
+        opentelemetry.io/name: frontend-proxy
+        app.kubernetes.io/version: 2.2.0
+        app.kubernetes.io/component: frontend-proxy
+        app.kubernetes.io/name: frontend-proxy
+      annotations:
+        io.opentelemetry.discovery.metrics/config: |
+          targets:
+            - endpoint: "http://`endpoint`"
+        io.opentelemetry.discovery.metrics/enabled: "true"
+        io.opentelemetry.discovery.metrics/scraper: httpcheck
+    spec:
+      serviceAccountName: opentelemetry-demo
+      containers:
+        - name: frontend-proxy
+          image: ghcr.io/open-telemetry/demo:2.2.0-frontend-proxy
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: service
+          env:
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['app.kubernetes.io/component']
+            - name: OTEL_COLLECTOR_NAME
+              value: otel-collector
+            - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+              value: cumulative
+            - name: ENVOY_PORT
+              value: "8080"
+            - name: ENVOY_ADDR
+              value: 0.0.0.0
+            - name: ENVOY_ADMIN_PORT
+              value: "10000"
+            - name: FLAGD_HOST
+              value: flagd
+            - name: FLAGD_PORT
+              value: "8013"
+            - name: FLAGD_UI_HOST
+              value: flagd
+            - name: FLAGD_UI_PORT
+              value: "4000"
+            - name: FRONTEND_HOST
+              value: frontend
+            - name: FRONTEND_PORT
+              value: "8080"
+            - name: GRAFANA_HOST
+              value: grafana
+            - name: GRAFANA_PORT
+              value: "80"
+            - name: IMAGE_PROVIDER_HOST
+              value: image-provider
+            - name: IMAGE_PROVIDER_PORT
+              value: "8081"
+            - name: JAEGER_HOST
+              value: jaeger
+            - name: JAEGER_UI_PORT
+              value: "16686"
+            - name: LOCUST_WEB_HOST
+              value: load-generator
+            - name: LOCUST_WEB_PORT
+              value: "8089"
+            - name: OTEL_COLLECTOR_HOST
+              value: otel-collector
+            - name: OTEL_COLLECTOR_PORT_GRPC
+              value: "4317"
+            - name: OTEL_COLLECTOR_PORT_HTTP
+              value: "4318"
+          resources:
+            limits:
+              memory: 65Mi
+          securityContext:
+            runAsGroup: 101
+            runAsNonRoot: true
+            runAsUser: 101
+          volumeMounts: null
+      volumes: null

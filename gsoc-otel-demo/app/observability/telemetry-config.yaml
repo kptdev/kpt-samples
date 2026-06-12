@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telemetry-config
+  namespace: otel-demo
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  opensearch-endpoint: http://opensearch:9200
+  prometheus-otlp-endpoint: http://prometheus:9090/api/v1/otlp
+  jaeger-otlp-endpoint: jaeger:4317
+  collector-self-otlp-endpoint: http://otel-collector:4318
+  prometheus-addr: prometheus:9090
+  otel-collector-host: otel-collector
+  otel-collector-port-http: "4318"
+  jaeger-host: 0.0.0.0
+  jaeger-grpc-port: "4317"
+  grafana-prometheus-url: http://prometheus:9090
+  grafana-jaeger-url: http://jaeger:16686/jaeger/ui
+  grafana-opensearch-url: http://opensearch:9200/

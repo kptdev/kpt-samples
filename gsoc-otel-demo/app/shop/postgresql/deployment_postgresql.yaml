@@ -1,0 +1,86 @@
+# Source: opentelemetry-demo/templates/component.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  labels:
+    helm.sh/chart: opentelemetry-demo-0.40.9
+    opentelemetry.io/name: postgresql
+    app.kubernetes.io/version: 2.2.0
+    app.kubernetes.io/component: postgresql
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/part-of: opentelemetry-demo
+    app.kubernetes.io/managed-by: Helm
+  namespace: otel-demo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      opentelemetry.io/name: postgresql
+  template:
+    metadata:
+      labels:
+        opentelemetry.io/name: postgresql
+        app.kubernetes.io/version: 2.2.0
+        app.kubernetes.io/component: postgresql
+        app.kubernetes.io/name: postgresql
+      annotations:
+        io.opentelemetry.discovery.metrics/config: |
+          username: root
+          password: otel
+          metrics:
+            postgresql.blks_hit:
+              enabled: true
+            postgresql.blks_read:
+              enabled: true
+            postgresql.tup_fetched:
+              enabled: true
+            postgresql.tup_returned:
+              enabled: true
+            postgresql.tup_inserted:
+              enabled: true
+            postgresql.tup_updated:
+              enabled: true
+            postgresql.tup_deleted:
+              enabled: true
+            postgresql.deadlocks:
+              enabled: true
+          tls:
+            insecure: true
+        io.opentelemetry.discovery.metrics/enabled: "true"
+        io.opentelemetry.discovery.metrics/scraper: postgresql
+    spec:
+      serviceAccountName: opentelemetry-demo
+      containers:
+        - name: postgresql
+          image: postgres:17.6
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: service
+          env:
+            - name: POSTGRES_USER
+              value: root
+            - name: POSTGRES_PASSWORD
+              value: otel
+            - name: POSTGRES_DB
+              value: otel
+            - name: OTEL_COLLECTOR_NAME
+              value: otel-collector
+            - name: OTEL_COLLECTOR_HOST
+              value: otel-collector
+            - name: GRAFANA_HOST
+              value: grafana
+            - name: JAEGER_HOST
+              value: jaeger
+          resources:
+            limits:
+              memory: 100Mi
+          volumeMounts:
+            - name: postgresql-init
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: postgresql-init
+          configMap:
+            name: postgresql-init

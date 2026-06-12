@@ -1,0 +1,22 @@
+# Source: opentelemetry-demo/templates/component.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-provider
+  labels:
+    helm.sh/chart: opentelemetry-demo-0.40.9
+    opentelemetry.io/name: image-provider
+    app.kubernetes.io/version: 2.2.0
+    app.kubernetes.io/component: image-provider
+    app.kubernetes.io/name: image-provider
+    app.kubernetes.io/part-of: opentelemetry-demo
+    app.kubernetes.io/managed-by: Helm
+  namespace: otel-demo
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8081
+      name: tcp-service
+      targetPort: 8081
+  selector:
+    opentelemetry.io/name: image-provider
