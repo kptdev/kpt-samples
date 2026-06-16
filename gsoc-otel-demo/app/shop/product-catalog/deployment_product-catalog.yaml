@@ -52,7 +52,7 @@ spec:
             - name: FLAGD_PORT
               value: "8013"
             - name: GOMEMLIMIT
-              value: 16MiB
+              value: 96MiB
             - name: DB_CONNECTION_STRING
               value: postgres://otelu:otelp@postgresql/otel?sslmode=disable
             - name: OTEL_SEMCONV_STABILITY_OPT_IN
@@ -67,6 +67,6 @@ spec:
               value: jaeger
           resources:
             limits:
-              memory: 20Mi
+              memory: 200Mi
           volumeMounts: null
       volumes: null

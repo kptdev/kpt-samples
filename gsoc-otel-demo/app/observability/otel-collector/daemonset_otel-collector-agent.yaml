@@ -111,13 +111,24 @@ spec:
             httpGet:
               path: /
               port: 13133
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /
               port: 13133
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           resources:
             limits:
-              memory: 200Mi
+              memory: 1Gi
+            requests:
+              memory: 500Mi
+              cpu: 250m
           volumeMounts:
             - mountPath: /conf
               name: opentelemetry-collector-configmap
