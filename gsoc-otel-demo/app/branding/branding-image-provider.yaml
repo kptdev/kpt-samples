@@ -5,10 +5,17 @@ metadata:
   annotations:
     config.kubernetes.io/local-config: "true"
 replacements:
-- sourceValue: "florist:v1"
-  targets:
-  - select:
-      kind: Deployment
-      name: image-provider
-    fieldPaths:
-    - spec.template.spec.containers.[name=image-provider].image
+  - sourceValue: "florist:v1"
+    targets:
+      - select:
+          kind: Deployment
+          name: image-provider
+        fieldPaths:
+          - spec.template.spec.containers.[name=image-provider].image
+  - sourceValue: "florist-frontend:v1"
+    targets:
+      - select:
+          kind: Deployment
+          name: frontend
+        fieldPaths:
+          - spec.template.spec.containers.[name=frontend].image
