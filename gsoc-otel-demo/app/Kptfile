@@ -6,24 +6,9 @@ metadata:
     config.kubernetes.io/local-config: "true"
 info:
   description: sample description
-status:
-  conditions:
-    - type: Rendered
-      status: "True"
-      reason: RenderSuccess
-  renderStatus:
-    mutationSteps:
-      - image: ghcr.io/kptdev/krm-functions-catalog/set-namespace:v0.4.1
-        exitCode: 0
-        results:
-          - message: all namespaces are already "otel-demo". no value changed
-            severity: info
-      - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.4.3
-        exitCode: 0
-      - image: ghcr.io/kptdev/krm-functions-catalog/set-namespace:v0.4.1
-        exitCode: 0
-        results:
-          - message: all namespaces are already "otel-demo". no value changed
-            severity: info
-      - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.4.3
-        exitCode: 0
+pipeline:
+  mutators:
+    - image: ghcr.io/kptdev/krm-functions-catalog/apply-replacements:v0.1.5
+      configPath: branding/replace-postgresql-init.yaml
+    - image: ghcr.io/kptdev/krm-functions-catalog/apply-replacements:v0.1.5
+      configPath: branding/branding-image-provider.yaml
