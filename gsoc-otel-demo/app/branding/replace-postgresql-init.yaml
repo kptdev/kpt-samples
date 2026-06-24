@@ -7,7 +7,7 @@ metadata:
 replacements:
 - source:
     kind: ConfigMap
-    name: florist-postgresql-init
+    name: active-postgresql-init
     fieldPath: data.init\.sql
   targets:
   - select:

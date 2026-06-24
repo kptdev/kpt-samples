@@ -61,7 +61,7 @@ spec:
             - name: FLAGD_OTEL_COLLECTOR_URI
               value: otel-collector:4317
             - name: GOMEMLIMIT
-              value: 60MiB
+              value: 300MiB
             - name: OTEL_COLLECTOR_HOST
               value: otel-collector
             - name: GRAFANA_HOST
