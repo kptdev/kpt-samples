@@ -8,12 +8,12 @@ info:
   description: sample description
 pipeline:
   mutators:
-    - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.4.3
+    - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
       configPath: branding/setup-branding.yaml
     - image: ghcr.io/kptdev/krm-functions-catalog/apply-replacements:v0.1.5
       configPath: branding/replace-postgresql-init.yaml
     - image: ghcr.io/kptdev/krm-functions-catalog/apply-replacements:v0.1.5
       configPath: branding/branding-image-provider.yaml
   validators:
-    - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.4.3
+    - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
       configPath: branding/validator-branding.yaml

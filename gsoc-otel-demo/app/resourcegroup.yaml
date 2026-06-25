@@ -1,7 +1,0 @@
-apiVersion: kpt.dev/v1alpha1
-kind: ResourceGroup
-metadata:
-  name: gsoc-kpt
-  namespace: otel-demo
-  labels:
-    cli-utils.sigs.k8s.io/inventory-id: 4e02b17d1a987447df1c37dfad6a5772e4d99909
