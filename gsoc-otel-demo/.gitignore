@@ -48,3 +48,6 @@ cypress/videos/
 .vercel
 .cache
 source-code
+
+# Yaml files
+resourcegroup.yaml
