@@ -71,11 +71,11 @@ data:
     -- Product Review Service:  add product review data
     INSERT INTO reviews.productreviews (product_id, username, description, score)
     VALUES
-        ('L9ECAV7KIM', 'flower_lover', 'These red roses were absolutely stunning! They arrived fresh and vibrant, and the bouquet lasted over a week. Perfect for anniversaries.', '5.0'),
-        ('L9ECAV7KIM', 'romantic_guy', 'Ordered these for Valentine''s Day and my partner was thrilled. The fragrance filled the room. Highly recommend for any romantic occasion.', '4.5'),
-        ('L9ECAV7KIM', 'gift_giver', 'Beautiful packaging and the roses were in full bloom. Made a wonderful birthday gift. Will definitely order again.', '4.5'),
-        ('L9ECAV7KIM', 'home_decorator', 'The deep red color was exactly as pictured. Added such elegance to my living room. Freshness guarantee is real.', '4.0'),
-        ('L9ECAV7KIM', 'repeat_buyer', 'My third time ordering this bouquet. Consistent quality every time. The roses are always long-stemmed and gorgeous.', '5.0'),
+        ('FLR001', 'flower_lover', 'These red roses were absolutely stunning! They arrived fresh and vibrant, and the bouquet lasted over a week. Perfect for anniversaries.', '5.0'),
+        ('FLR001', 'romantic_guy', 'Ordered these for Valentine''s Day and my partner was thrilled. The fragrance filled the room. Highly recommend for any romantic occasion.', '4.5'),
+        ('FLR001', 'gift_giver', 'Beautiful packaging and the roses were in full bloom. Made a wonderful birthday gift. Will definitely order again.', '4.5'),
+        ('FLR001', 'home_decorator', 'The deep red color was exactly as pictured. Added such elegance to my living room. Freshness guarantee is real.', '4.0'),
+        ('FLR001', 'repeat_buyer', 'My third time ordering this bouquet. Consistent quality every time. The roses are always long-stemmed and gorgeous.', '5.0'),
 
         ('FLR002', 'minimalist_fan', 'The white lilies were pure elegance. Their subtle fragrance is heavenly without being overpowering. Perfect for modern décor.', '5.0'),
         ('FLR002', 'sympathy_sender', 'Sent these to a grieving friend. The pure white lilies brought comfort and peace. Arrangement was tasteful and dignified.', '4.5'),
@@ -123,7 +123,7 @@ data:
     -- Product Catalog Service: add product data
     INSERT INTO catalog.products (id, name, description, picture, price_currency_code, price_units, price_nanos, categories)
     VALUES
-        ('L9ECAV7KIM', 'Red Roses Bouquet', 'A dozen long-stemmed premium red roses hand-tied with eucalyptus and baby''s breath. Perfect for romantic occasions, anniversaries, or simply to say "I love you." Each rose is carefully selected for its velvety petals and rich crimson hue, then arranged in our signature wrapping.', 'RedRosesBouquet.jpg', 'USD', 29, 990000000, 'flowers'),
+        ('FLR001', 'Red Roses Bouquet', 'A dozen long-stemmed premium red roses hand-tied with eucalyptus and baby''s breath. Perfect for romantic occasions, anniversaries, or simply to say "I love you." Each rose is carefully selected for its velvety petals and rich crimson hue, then arranged in our signature wrapping.', 'RedRosesBouquet.jpg', 'USD', 29, 990000000, 'flowers'),
         ('FLR002', 'White Lilies Arrangement', 'An elegant arrangement of pure white oriental lilies nestled in a sleek glass vase. Their delicate fragrance fills any room with tranquility. Ideal for weddings, sympathy gestures, or sophisticated home décor. Each stem features 3-5 large trumpet blooms.', 'WhiteLiliesArrangement.png', 'USD', 34, 500000000, 'flowers'),
         ('FLR003', 'Spring Tulip Mix', 'A vibrant medley of seasonal tulips in pink, yellow, and soft purple. These cheerful blooms are perfect for celebrating new beginnings, birthdays, or brightening up your workspace. Delivered in bud form so you can watch them unfurl into full beauty.', 'SpringTulipMix.png', 'USD', 19, 990000000, 'flowers'),
         ('FLR004', 'Orchid Elegance Pot', 'A stunning phalaenopsis orchid displayed in a premium white ceramic pot. This long-lasting beauty blooms for months with minimal care. Each pot contains two mature orchid stems with 8-12 blossoms, creating an eye-catching centerpiece that exudes sophistication.', 'OrchidElegancePot.jpg', 'USD', 49, 990000000, 'flowers,premium'),

@@ -119,10 +119,11 @@ source: |-
 
     all_product_ids = [store_data[k]["llm_product_id"] for k in store_data]
     for i in range(len(resources)):
-      # Do not modify this StarlarkRun itself nor the store data it manages
-      if krmfn.match_gvk(resources[i], "fn.kpt.dev/v1alpha1", "StarlarkRun") and krmfn.match_name(resources[i], "setup-branding"):
-        continue
-      if krmfn.match_gvk(resources[i], "v1", "ConfigMap") and krmfn.match_name(resources[i], "value-store"):
+      # Never touch resources that live inside the branding folder itself
+      # (per-store init configmaps like florist-postgresql-init keep the
+      # original product IDs as data and must not be rewritten).
+      path = resources[i].get("metadata", {}).get("annotations", {}).get("internal.config.kubernetes.io/path", "")
+      if path.startswith("branding/"):
         continue
       for old_id in all_product_ids:
         if old_id != data["llm_product_id"]:
