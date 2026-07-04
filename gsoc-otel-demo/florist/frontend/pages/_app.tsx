@@ -12,6 +12,7 @@ import FrontendTracer from '../utils/telemetry/FrontendTracer';
 import SessionGateway from '../gateways/Session.gateway';
 import { OpenFeatureProvider, OpenFeature } from '@openfeature/react-sdk';
 import { FlagdWebProvider } from '@openfeature/flagd-web-provider';
+import { I18nProvider } from '../utils/i18n';
 
 declare global {
   interface Window {
@@ -61,15 +62,17 @@ const queryClient = new QueryClient();
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider theme={Theme}>
-      <OpenFeatureProvider>
-        <QueryClientProvider client={queryClient}>
-          <CurrencyProvider>
-            <CartProvider>
-              <Component {...pageProps} />
-            </CartProvider>
-          </CurrencyProvider>
-        </QueryClientProvider>
-      </OpenFeatureProvider>
+      <I18nProvider>
+        <OpenFeatureProvider>
+          <QueryClientProvider client={queryClient}>
+            <CurrencyProvider>
+              <CartProvider>
+                <Component {...pageProps} />
+              </CartProvider>
+            </CurrencyProvider>
+          </QueryClientProvider>
+        </OpenFeatureProvider>
+      </I18nProvider>
     </ThemeProvider>
   );
 }

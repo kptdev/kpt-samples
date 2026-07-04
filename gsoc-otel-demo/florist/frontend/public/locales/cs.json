@@ -1,0 +1,28 @@
+{
+  "cart": {
+    "title": "Váš košík",
+    "empty": "Váš košík je prázdný",
+    "checkout": "Pokladna",
+    "subtotal": "Mezisoučet",
+    "remove": "Odebrat"
+  },
+  "checkout": {
+    "place_order": "Objednat",
+    "total": "Celkem",
+    "shipping": "Doprava",
+    "tax_label": "Daň"
+  },
+  "currency": {
+    "switcher_label": "Měna"
+  },
+  "products": {
+    "add_to_cart": "Přidat do košíku",
+    "out_of_stock": "Vyprodáno",
+    "in_stock": "Skladem"
+  },
+  "layout": {
+    "store_name": "Květinářství",
+    "home": "Domů",
+    "cart": "Košík"
+  }
+}

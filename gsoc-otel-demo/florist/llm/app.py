@@ -23,6 +23,40 @@ product_review_summaries_file_path = "./product-review-summaries.json"
 inaccurate_product_review_summaries = None
 inaccurate_product_review_summaries_file_path = "./inaccurate-product-review-summaries.json"
 
+# i18n: locale is injected via the LOCALE env var (e.g. "en-US", "ja-JP", "cs-CZ").
+# Hardcoded response strings below are translated via t(); per-product summaries
+# are loaded from locale-suffixed JSON files (e.g. product-review-summaries-ja.json).
+LOCALE = (os.environ.get("LOCALE") or "en-US").split("-")[0] or "en"
+
+TRANSLATIONS = {
+    "en": {
+        "recommended_all_ages": "This product is recommended for all ages and occasions.",
+        "no_negative_reviews": "No, there were no reviews less than three stars for this product.",
+        "unable_to_answer": "Sorry, I'm not able to answer that question.",
+    },
+    "ja": {
+        "recommended_all_ages": "この商品はあらゆる年齢層、場面におすすめです。",
+        "no_negative_reviews": "この商品に3つ星未満のレビューはありませんでした。",
+        "unable_to_answer": "申し訳ありませんが、その質問にはお答えできません。",
+    },
+    "cs": {
+        "recommended_all_ages": "Tento produkt je doporučen pro všechny věkové kategorie a příležitosti.",
+        "no_negative_reviews": "Ne, pro tento produkt neexistují žádné recenze s hodnocením nižším než tři hvězdy.",
+        "unable_to_answer": "Omlouvám se, ale na tuto otázku nedokážu odpovědět.",
+    },
+}
+
+def t(key):
+    return TRANSLATIONS.get(LOCALE, TRANSLATIONS["en"]).get(key, key)
+
+def summary_file_for_locale(base_path):
+    """Return `<base>-<LOCALE>.json` if it exists, otherwise the default file."""
+    if LOCALE == "en":
+        return base_path
+    root, ext = os.path.splitext(base_path)
+    candidate = f"{root}-{LOCALE}{ext}"
+    return candidate if os.path.exists(candidate) else base_path
+
 def load_product_review_summaries(file_path):
     try:
         with open(file_path, 'r') as file:
@@ -98,13 +132,13 @@ def chat_completions():
     app.logger.info("Processing last chat message")
 
     if 'What age(s) is this recommended for?' in last_message:
-        response_text = 'This product is recommended for all ages and occasions.'
+        response_text = t('recommended_all_ages')
         return build_response(model, messages, response_text)
     elif 'Were there any negative reviews?' in last_message:
-        response_text = 'No, there were no reviews less than three stars for this product.'
+        response_text = t('no_negative_reviews')
         return build_response(model, messages, response_text)
     elif not ('Can you summarize the product reviews?' in last_message or 'Based on the tool results, answer the original question about product ID' in last_message):
-        response_text = 'Sorry, I\'m not able to answer that question.'
+        response_text = t('unable_to_answer')
         return build_response(model, messages, response_text)
 
     # otherwise, process the product review summary
@@ -212,8 +246,9 @@ def check_feature_flag(flag_name: str):
 if __name__ == '__main__':
 
     api.set_provider(FlagdProvider(host=os.environ.get('FLAGD_HOST', 'flagd'), port=os.environ.get('FLAGD_PORT', 8013)))
-    product_review_summaries = load_product_review_summaries(product_review_summaries_file_path)
-    inaccurate_product_review_summaries = load_product_review_summaries(inaccurate_product_review_summaries_file_path)
+    # Route summary files by LOCALE so each language loads its own JSON if present.
+    product_review_summaries = load_product_review_summaries(summary_file_for_locale(product_review_summaries_file_path))
+    inaccurate_product_review_summaries = load_product_review_summaries(summary_file_for_locale(inaccurate_product_review_summaries_file_path))
 
     app.logger.info(product_review_summaries)
 

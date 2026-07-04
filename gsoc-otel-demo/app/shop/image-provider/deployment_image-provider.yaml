@@ -36,7 +36,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: image-provider
-          image: ghcr.io/open-telemetry/demo:2.2.0-image-provider
+          image: florist-image-provider:v1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081

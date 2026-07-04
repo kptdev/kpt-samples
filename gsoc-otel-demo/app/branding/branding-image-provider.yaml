@@ -55,3 +55,13 @@ replacements:
           name: load-generator
         fieldPaths:
           - spec.template.spec.containers.[name=load-generator].image
+  - source:
+      kind: ConfigMap
+      name: value-store
+      fieldPath: data.emailImage
+    targets:
+      - select:
+          kind: Deployment
+          name: email
+        fieldPaths:
+          - spec.template.spec.containers.[name=email].image

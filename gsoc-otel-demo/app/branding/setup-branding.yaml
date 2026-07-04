@@ -83,6 +83,7 @@ source: |-
           "llmImage": data["llm_image"],
           "loadGeneratorImage": data["load_generator_image"],
           "llmProductId": data["llm_product_id"],
+          "emailImage":"email:v1"
         }
         store_found = True
         break
@@ -102,6 +103,7 @@ source: |-
           "llmImage": data["llm_image"],
           "loadGeneratorImage": data["load_generator_image"],
           "llmProductId": data["llm_product_id"],
+          "emailImage":"email:v1"
         }
       })
 
@@ -119,11 +121,11 @@ source: |-
 
     all_product_ids = [store_data[k]["llm_product_id"] for k in store_data]
     for i in range(len(resources)):
-      # Never touch resources that live inside the branding folder itself
-      # (per-store init configmaps like florist-postgresql-init keep the
-      # original product IDs as data and must not be rewritten).
+      # Only touch resources that live inside the shop folder.
+      # All other directories (branding/, observability/, regional/, etc.)
+      # must be left untouched by the search-replace.
       path = resources[i].get("metadata", {}).get("annotations", {}).get("internal.config.kubernetes.io/path", "")
-      if path.startswith("branding/"):
+      if not path.startswith("shop/"):
         continue
       for old_id in all_product_ids:
         if old_id != data["llm_product_id"]:

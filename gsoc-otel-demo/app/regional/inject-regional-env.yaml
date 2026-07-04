@@ -1,0 +1,78 @@
+apiVersion: fn.kpt.dev/v1alpha1
+kind: ApplyReplacements
+metadata:
+  name: inject-regional-env
+  annotations:
+    config.kubernetes.io/local-config: "true"
+replacements:
+  # --- Frontend Tax & Currency ---
+  - source:
+      kind: ConfigMap
+      name: regional-value-store
+      fieldPath: data.taxRate
+    targets:
+      - select:
+          kind: Deployment
+          name: frontend
+        fieldPaths:
+          - spec.template.spec.containers.[name=frontend].env.[name=TAX_RATE].value
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: regional-value-store
+      fieldPath: data.taxLabel
+    targets:
+      - select:
+          kind: Deployment
+          name: frontend
+        fieldPaths:
+          - spec.template.spec.containers.[name=frontend].env.[name=TAX_LABEL].value
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: regional-value-store
+      fieldPath: data.currency
+    targets:
+      - select:
+          kind: Deployment
+          name: frontend
+        fieldPaths:
+          - spec.template.spec.containers.[name=frontend].env.[name=DEFAULT_CURRENCY].value
+        options:
+          create: true
+  # --- LOCALE Injection (for i18n) ---
+  - source:
+      kind: ConfigMap
+      name: regional-value-store
+      fieldPath: data.locale
+    targets:
+      - select:
+          kind: Deployment
+          name: frontend
+        fieldPaths:
+          - spec.template.spec.containers.[name=frontend].env.[name=LOCALE].value
+        options:
+          create: true
+      - select:
+          kind: Deployment
+          name: ad
+        fieldPaths:
+          - spec.template.spec.containers.[name=ad].env.[name=LOCALE].value
+        options:
+          create: true
+      - select:
+          kind: Deployment
+          name: llm
+        fieldPaths:
+          - spec.template.spec.containers.[name=llm].env.[name=LOCALE].value
+        options:
+          create: true
+      - select:
+          kind: Deployment
+          name: email
+        fieldPaths:
+          - spec.template.spec.containers.[name=email].env.[name=LOCALE].value
+        options:
+          create: true

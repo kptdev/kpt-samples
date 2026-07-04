@@ -30,7 +30,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: frontend
-          image: ghcr.io/open-telemetry/demo:2.2.0-frontend
+          image: florist-frontend:v1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -85,6 +85,14 @@ spec:
               value: grafana
             - name: JAEGER_HOST
               value: jaeger
+            - name: TAX_RATE
+              value: 8
+            - name: TAX_LABEL
+              value: Sales Tax
+            - name: DEFAULT_CURRENCY
+              value: USD
+            - name: LOCALE
+              value: en-US
           resources:
             limits:
               memory: 250Mi

@@ -61,6 +61,8 @@ spec:
               value: grafana
             - name: JAEGER_HOST
               value: jaeger
+            - name: LOCALE
+              value: en-US
           resources:
             limits:
               memory: 100Mi

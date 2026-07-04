@@ -1,0 +1,28 @@
+{
+  "cart": {
+    "title": "Your Cart",
+    "empty": "Your cart is empty",
+    "checkout": "Checkout",
+    "subtotal": "Subtotal",
+    "remove": "Remove"
+  },
+  "checkout": {
+    "place_order": "Place Order",
+    "total": "Total",
+    "shipping": "Shipping",
+    "tax_label": "Tax"
+  },
+  "currency": {
+    "switcher_label": "Currency"
+  },
+  "products": {
+    "add_to_cart": "Add to Cart",
+    "out_of_stock": "Out of stock",
+    "in_stock": "In stock"
+  },
+  "layout": {
+    "store_name": "Florist Shop",
+    "home": "Home",
+    "cart": "Cart"
+  }
+}

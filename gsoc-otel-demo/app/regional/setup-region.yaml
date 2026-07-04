@@ -1,0 +1,151 @@
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: setup-region
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  load("krmfn.star", "krmfn")
+
+  def setup_region(resources):
+    region = "us"
+    store_type = "astronomy"
+
+    # Detect configuration inputs
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap"):
+        if krmfn.match_name(r, "region-config"):
+          region = r.get("data", {}).get("region", "us")
+        elif krmfn.match_name(r, "branding-config"):
+          store_type = r.get("data", {}).get("storeType", "astronomy")
+
+    if region == "":
+      fail("region cannot be empty in region-config")
+
+    # === THE DERIVATION MATRIX ===
+    # One variable (region) derives: locale, currency, tax_rate
+    region_matrix = {
+      "us": {
+        "locale": "en-US",
+        "currency": "USD",
+        "tax_rate": "8",
+        "tax_label": "Sales Tax",
+      },
+      "india": {
+        "locale": "hi-IN",
+        "currency": "INR",
+        "tax_rate": "18",
+        "tax_label": "GST",
+      },
+      "czech-republic": {
+        "locale": "cs-CZ",
+        "currency": "CZK",
+        "tax_rate": "21",
+        "tax_label": "VAT",
+      },
+      "china": {
+        "locale": "zh-CN",
+        "currency": "CNY",
+        "tax_rate": "13",
+        "tax_label": "VAT",
+      },
+      "japan": {
+        "locale": "ja-JP",
+        "currency": "JPY",
+        "tax_rate": "10",
+        "tax_label": "Consumption Tax",
+      },
+    }
+
+    if region not in region_matrix:
+      fail("Unsupported region: " + region + ". Allowed: us, india, czech-republic, china, japan")
+
+    derived = region_matrix[region]
+    locale = derived["locale"]
+
+    # === 2D RESOLUTION: (storeType × locale) → SQL ===
+    locale_data = {
+      "astronomy": {
+        "en-US": {"init_configmap": "astronomy-en-US-postgresql-init"},
+        "en-IN": {"init_configmap": "astronomy-hi-IN-postgresql-init"},
+        "cs-CZ": {"init_configmap": "astronomy-cs-CZ-postgresql-init"},
+        "zh-CN": {"init_configmap": "astronomy-zh-CN-postgresql-init"},
+        "ja-JP": {"init_configmap": "astronomy-ja-JP-postgresql-init"},
+      },
+      "florist": {
+        "en-US": {"init_configmap": "florist-en-US-postgresql-init"},
+        "en-IN": {"init_configmap": "florist-hi-IN-postgresql-init"},
+        "cs-CZ": {"init_configmap": "florist-cs-CZ-postgresql-init"},
+        "zh-CN": {"init_configmap": "florist-zh-CN-postgresql-init"},
+        "ja-JP": {"init_configmap": "florist-ja-JP-postgresql-init"},
+      },
+    }
+
+    if store_type not in locale_data:
+      fail("Unsupported storeType: " + store_type)
+    if locale not in locale_data[store_type]:
+      fail("Unsupported locale: " + locale + " for storeType: " + store_type)
+
+    data = locale_data[store_type][locale]
+
+    # --- Resolve postgresql init SQL ---
+    init_sql = ""
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, data["init_configmap"]):
+        init_sql = r.get("data", {}).get("init.sql", "")
+        break
+
+    if init_sql == "":
+      fail("init.sql not found in " + data["init_configmap"])
+
+    # --- Create/Update active-region-postgresql-init ---
+    active_found = False
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "active-region-postgresql-init"):
+        r["data"] = {"init.sql": init_sql}
+        active_found = True
+        break
+
+    if not active_found:
+      resources.append({
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "active-region-postgresql-init",
+          "annotations": {"config.kubernetes.io/local-config": "true"}
+        },
+        "data": {"init.sql": init_sql}
+      })
+
+    # --- Create/Update regional-value-store ---
+    # Locale, currency, and tax are passed in as environment variables by
+    # `inject-regional-env.yaml`, which reads them from this ConfigMap.
+    # The email service image is also swapped per-locale (since email
+    # templates are baked into the image); the per-locale tag is consumed
+    # by the apply-replacements step that targets the email Deployment.
+    store_data = {
+      "locale": derived["locale"],
+      "taxRate": derived["tax_rate"],
+      "taxLabel": derived["tax_label"],
+      "currency": derived["currency"]
+    }
+
+    store_found = False
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "regional-value-store"):
+        r["data"] = store_data
+        store_found = True
+        break
+
+    if not store_found:
+      resources.append({
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "regional-value-store",
+          "annotations": {"config.kubernetes.io/local-config": "true"}
+        },
+        "data": store_data
+      })
+
+  setup_region(ctx.resource_list["items"])

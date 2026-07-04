@@ -1,0 +1,28 @@
+{
+  "cart": {
+    "title": "カート",
+    "empty": "カートは空です",
+    "checkout": "チェックアウト",
+    "subtotal": "小計",
+    "remove": "削除"
+  },
+  "checkout": {
+    "place_order": "注文を確定する",
+    "total": "合計",
+    "shipping": "配送料",
+    "tax_label": "税金"
+  },
+  "currency": {
+    "switcher_label": "通貨"
+  },
+  "products": {
+    "add_to_cart": "カートに追加",
+    "out_of_stock": "在庫切れ",
+    "in_stock": "在庫あり"
+  },
+  "layout": {
+    "store_name": "花屋",
+    "home": "ホーム",
+    "cart": "カート"
+  }
+}

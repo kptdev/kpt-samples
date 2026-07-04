@@ -31,8 +31,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Random;
+import java.util.ResourceBundle;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,6 +80,17 @@ public final class AdService {
           .help("Total number of ads served, labeled by category")
           .labelNames("category")
           .register();
+
+  // i18n: locale is injected via the LOCALE env var (e.g. "en-US", "ja-JP", "cs-CZ").
+  // ResourceBundle falls back to ads.properties (en-US) when a locale is missing.
+  private static final ResourceBundle adBundle = loadAdBundle();
+
+  private static ResourceBundle loadAdBundle() {
+    String localeStr = System.getenv().getOrDefault("LOCALE", "en-US");
+    String[] parts = localeStr.split("-");
+    Locale locale = parts.length > 1 ? new Locale(parts[0], parts[1]) : new Locale(parts[0]);
+    return ResourceBundle.getBundle("i18n.ads", locale);
+  }
 
   private static final AdService service = new AdService();
   private static final Tracer tracer = GlobalOpenTelemetry.getTracer("ad");
@@ -309,27 +322,27 @@ public final class AdService {
     Ad redRoses =
         Ad.newBuilder()
             .setRedirectUrl("/product/FLR001")
-            .setText("Red Roses Bouquet for sale. 50% off.")
+            .setText(adBundle.getString("ad.redRoses"))
             .build();
     Ad whiteLilies =
         Ad.newBuilder()
             .setRedirectUrl("/product/FLR002")
-            .setText("White Lilies Arrangement for sale. 20% off.")
+            .setText(adBundle.getString("ad.whiteLilies"))
             .build();
     Ad springTulips =
         Ad.newBuilder()
             .setRedirectUrl("/product/FLR003")
-            .setText("Spring Tulip Mix for sale. 30% off.")
+            .setText(adBundle.getString("ad.springTulips"))
             .build();
     Ad orchidElegance =
         Ad.newBuilder()
             .setRedirectUrl("/product/FLR004")
-            .setText("Orchid Elegance Pot for sale. Buy one, get second one for free")
+            .setText(adBundle.getString("ad.orchidElegance"))
             .build();
     Ad sunflowerBox =
         Ad.newBuilder()
             .setRedirectUrl("/product/FLR005")
-            .setText("Sunflower Sunshine Box for sale. Buy two, get third one for free")
+            .setText(adBundle.getString("ad.sunflowerBox"))
             .build();
     return ImmutableListMultimap.<String, Ad>builder()
         .putAll("flowers", redRoses, whiteLilies, springTulips, sunflowerBox)
