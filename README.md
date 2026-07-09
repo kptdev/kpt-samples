@@ -14,7 +14,6 @@ Some notes about publishing a package are [here](./notes.md).
 Code is under the [Apache License 2.0](LICENSE), documentation is [CC BY 4.0](LICENSE-documentation).
 
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkptdev%2Fkpt-samples.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkptdev%2Fkpt-samples?ref=badge_large)
 
 ## Governance
 
