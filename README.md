@@ -1,4 +1,6 @@
 # kpt-samples
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkptdev%2Fkpt-samples.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkptdev%2Fkpt-samples?ref=badge_shield)
+
 
 kpt project samples
 
@@ -10,6 +12,8 @@ Some notes about publishing a package are [here](./notes.md).
 ## License
 
 Code is under the [Apache License 2.0](LICENSE), documentation is [CC BY 4.0](LICENSE-documentation).
+
+
 
 ## Governance
 
@@ -25,4 +29,3 @@ More information and links about the CNCF Code of Conduct are [here](code-of-con
 ## CNCF
 
 The kpt project including the KRM Functions Catalog is a [CNCF Sandbox](https://www.cncf.io/sandbox-projects/) project.
-
