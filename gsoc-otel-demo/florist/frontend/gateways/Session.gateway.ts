@@ -6,13 +6,33 @@ import { v4 } from 'uuid';
 interface ISession {
   userId: string;
   currencyCode: string;
+  currencyExplicitlySelected: boolean;
 }
 
 const sessionKey = 'session';
 const defaultSession: Readonly<ISession> = Object.freeze({
   userId: v4(),
-  currencyCode: 'USD',
+  currencyCode: '',
+  currencyExplicitlySelected: false,
 });
+
+const normalizeSession = (session: unknown): ISession | null => {
+  if (typeof session !== 'object' || session === null) {
+    return null;
+  }
+
+  const candidate = session as Partial<ISession>;
+
+  if (typeof candidate.userId !== 'string' || typeof candidate.currencyCode !== 'string') {
+    return null;
+  }
+
+  return {
+    userId: candidate.userId,
+    currencyCode: candidate.currencyCode,
+    currencyExplicitlySelected: candidate.currencyExplicitlySelected === true,
+  };
+};
 
 const SessionGateway = () => ({
   getSession(): ISession {
@@ -22,8 +42,9 @@ const SessionGateway = () => ({
     if (sessionString) {
       try {
         const parsed: unknown = JSON.parse(sessionString);
-        if (isValid(parsed)) {
-          return parsed;
+        const normalized = normalizeSession(parsed);
+        if (normalized) {
+          return normalized;
         }
       } catch (e) {
         console.warn('Failed to parse session from localStorage', e);
@@ -38,14 +59,5 @@ const SessionGateway = () => ({
     localStorage.setItem(sessionKey, JSON.stringify({ ...session, [key]: value }));
   },
 });
-
-const isValid = (session: unknown): session is ISession => {
-  return (
-    typeof session === 'object' &&
-    session !== null &&
-    typeof (session as ISession).userId === 'string' &&
-    typeof (session as ISession).currencyCode === 'string'
-  );
-};
 
 export default SessionGateway();

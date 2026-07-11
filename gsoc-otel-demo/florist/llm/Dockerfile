@@ -19,8 +19,10 @@ COPY --from=build-venv /venv/ /venv/
 WORKDIR /app
 
 COPY ./app.py app.py
-COPY ./product-review-summaries/product-review-summaries.json product-review-summaries.json
-COPY ./product-review-summaries/inaccurate-product-review-summaries.json inaccurate-product-review-summaries.json
+# Copy all per-locale product review JSONs flat into /app/.
+# The LLM's summary_file_for_locale() looks for <base>-<LOCALE>.json next to
+# product-review-summaries.json, so all locale variants must sit at /app/.
+COPY ./product-review-summaries/*.json ./
 
 ENV LLM_PORT=8000
 EXPOSE ${LLM_PORT}

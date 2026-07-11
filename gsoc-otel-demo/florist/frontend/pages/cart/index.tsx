@@ -10,8 +10,10 @@ import CartDetail from '../../components/Cart/CartDetail';
 import EmptyCart from '../../components/Cart/EmptyCart';
 import { useCart } from '../../providers/Cart.provider';
 import AdProvider from '../../providers/Ad.provider';
+import { useTranslation } from '../../utils/i18n';
 
 const Cart: NextPage = () => {
+  const { t } = useTranslation();
   const {
     cart: { items },
   } = useCart();
@@ -22,7 +24,7 @@ const Cart: NextPage = () => {
       contextKeys={[...new Set(items.flatMap(({ product }) => product.categories))]}
     >
       <Head>
-        <title>Otel Demo - Cart</title>
+        <title>{t('page_titles.cart')}</title>
       </Head>
       <Layout>
         <S.Cart>

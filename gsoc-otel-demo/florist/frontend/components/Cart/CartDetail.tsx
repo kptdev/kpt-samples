@@ -10,6 +10,7 @@ import SessionGateway from '../../gateways/Session.gateway';
 import { useCart } from '../../providers/Cart.provider';
 import { useCurrency } from '../../providers/Currency.provider';
 import * as S from '../../styles/Cart.styled';
+import { useTranslation } from '../../utils/i18n';
 
 const { userId } = SessionGateway.getSession();
 
@@ -20,6 +21,7 @@ const CartDetail = () => {
     placeOrder,
   } = useCart();
   const { selectedCurrency } = useCurrency();
+  const { t } = useTranslation();
   const { push } = useRouter();
 
   const onPlaceOrder = useCallback(
@@ -66,9 +68,9 @@ const CartDetail = () => {
     <S.Container>
       <div>
         <S.Header>
-          <S.CarTitle>Shopping Cart</S.CarTitle>
+          <S.CarTitle>{t('cart.title')}</S.CarTitle>
           <S.EmptyCartButton onClick={emptyCart} $type="link">
-            Empty Cart
+            {t('cart.empty_button')}
           </S.EmptyCartButton>
         </S.Header>
         <CartItems productList={items} />

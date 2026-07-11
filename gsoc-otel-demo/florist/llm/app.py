@@ -23,10 +23,10 @@ product_review_summaries_file_path = "./product-review-summaries.json"
 inaccurate_product_review_summaries = None
 inaccurate_product_review_summaries_file_path = "./inaccurate-product-review-summaries.json"
 
-# i18n: locale is injected via the LOCALE env var (e.g. "en-US", "ja-JP", "cs-CZ").
+# i18n: locale is injected via the NEXT_PUBLIC_LOCALE env var (e.g. "en-US", "ja-JP", "cs-CZ").
 # Hardcoded response strings below are translated via t(); per-product summaries
 # are loaded from locale-suffixed JSON files (e.g. product-review-summaries-ja.json).
-LOCALE = (os.environ.get("LOCALE") or "en-US").split("-")[0] or "en"
+LOCALE = (os.environ.get("NEXT_PUBLIC_LOCALE") or "en-US").split("-")[0] or "en"
 
 TRANSLATIONS = {
     "en": {
@@ -43,6 +43,16 @@ TRANSLATIONS = {
         "recommended_all_ages": "Tento produkt je doporučen pro všechny věkové kategorie a příležitosti.",
         "no_negative_reviews": "Ne, pro tento produkt neexistují žádné recenze s hodnocením nižším než tři hvězdy.",
         "unable_to_answer": "Omlouvám se, ale na tuto otázku nedokážu odpovědět.",
+    },
+    "hi": {
+        "recommended_all_ages": "यह उत्पाद सभी आयु वर्गों और अवसरों के लिए अनुशंसित है।",
+        "no_negative_reviews": "नहीं, इस उत्पाद के लिए तीन सितारों से कम की कोई समीक्षा नहीं थी।",
+        "unable_to_answer": "क्षमा करें, मैं इस प्रश्न का उत्तर देने में असमर्थ हूँ।",
+    },
+    "zh": {
+        "recommended_all_ages": "本产品推荐给所有年龄段和场合使用。",
+        "no_negative_reviews": "不，此产品没有三星以下的评价。",
+        "unable_to_answer": "抱歉，我无法回答这个问题。",
     },
 }
 

@@ -1,0 +1,93 @@
+{
+  "page_titles": {
+    "home": "花店",
+    "cart": "花店 - 购物车",
+    "product": "花店 - 商品",
+    "checkout": "花店 - 结账"
+  },
+  "home": {
+    "banner_title": "适合每个场合的新鲜花卉",
+    "banner_cta": "选购花束",
+    "hot_products": "最新上架"
+  },
+  "footer": {
+    "demo_notice": "本网站仅用于演示目的，不是实际商店。"
+  },
+  "common": {
+    "continue_shopping": "继续购物"
+  },
+  "empty_cart": {
+    "title": "您的购物车是空的！",
+    "subtitle": "您添加到购物车的商品会显示在这里。"
+  },
+  "cart": {
+    "title": "您的购物车",
+    "empty": "您的购物车是空的",
+    "checkout": "结账",
+    "subtotal": "小计",
+    "remove": "移除",
+    "empty_button": "清空购物车",
+    "shopping_cart": "购物车",
+    "close": "关闭",
+    "empty_dropdown": "您的购物车是空的",
+    "go_to_cart": "前往购物车"
+  },
+  "cart_table": {
+    "product": "商品",
+    "quantity": "数量",
+    "price": "价格"
+  },
+  "product": {
+    "quantity": "数量"
+  },
+  "checkout_item": {
+    "shipping_data": "配送信息",
+    "street": "街道",
+    "city": "城市",
+    "state": "州/省",
+    "zip_code": "邮政编码",
+    "country": "国家",
+    "see_more": "查看更多",
+    "done": "完成"
+  },
+  "checkout_form": {
+    "shipping_address": "收货地址",
+    "email_address": "电子邮件地址",
+    "street_address": "街道地址",
+    "zip_code": "邮政编码",
+    "city": "城市",
+    "state": "州/省",
+    "country": "国家",
+    "country_placeholder": "国家名称",
+    "payment_method": "支付方式",
+    "credit_card_number": "信用卡号码",
+    "credit_card_number_placeholder": "0000-0000-0000-0000",
+    "month": "月份",
+    "year": "年份",
+    "cvv": "CVV",
+    "place_order": "下单"
+  },
+  "checkout_summary": {
+    "complete": "您的订单已完成！",
+    "sent_email": "我们已经向您发送了确认邮件。",
+    "order_id": "订单编号",
+    "shipping_address": "收货地址",
+    "order_items": "订单商品",
+    "quantity": "数量",
+    "shipping": "运费",
+    "total": "总计"
+  },
+  "currency": {
+    "switcher_label": "货币"
+  },
+  "products": {
+    "add_to_cart": "加入购物车",
+    "out_of_stock": "缺货",
+    "in_stock": "有货"
+  },
+  "layout": {
+    "store_name": "花店",
+    "home": "首页",
+    "cart": "购物车"
+  }
+}

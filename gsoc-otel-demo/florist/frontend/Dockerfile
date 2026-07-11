@@ -19,8 +19,11 @@ COPY ./services/ services/
 COPY ./styles/ styles/
 COPY ./types/ types/
 
+COPY ./public/ public/
+
 COPY ./utils/enums/ utils/enums/
 COPY ./utils/telemetry/ utils/telemetry/
+COPY ./utils/i18n.tsx utils/i18n.tsx
 COPY ./utils/imageLoader.js utils/imageLoader.js
 COPY ./utils/Request.ts utils/Request.ts
 

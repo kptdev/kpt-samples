@@ -11,9 +11,11 @@ import ApiGateway from '../gateways/Api.gateway';
 import Banner from '../components/Banner';
 import { CypressFields } from '../utils/enums/CypressFields';
 import { useCurrency } from '../providers/Currency.provider';
+import { useTranslation } from '../utils/i18n';
 
 const Home: NextPage = () => {
   const { selectedCurrency } = useCurrency();
+  const { t } = useTranslation();
   const { data: productList = [] } = useQuery({
     queryKey: ['products', selectedCurrency],
     queryFn: () => ApiGateway.listProducts(selectedCurrency),
@@ -22,7 +24,7 @@ const Home: NextPage = () => {
   return (
     <Layout>
       <Head>
-        <title>Bloom & Petal Florist</title>
+        <title>{t('page_titles.home')}</title>
       </Head>
       <S.Home data-cy={CypressFields.HomePage}>
         <Banner />
@@ -31,7 +33,7 @@ const Home: NextPage = () => {
             <S.Content>
               <S.HotProducts>
                 <S.HotProductsTitle data-cy={CypressFields.HotProducts} id="hot-products">
-                  Fresh Arrivals
+                  {t('home.hot_products')}
                 </S.HotProductsTitle>
                 <ProductList productList={productList} />
               </S.HotProducts>

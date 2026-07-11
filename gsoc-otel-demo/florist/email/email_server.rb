@@ -18,9 +18,9 @@ require "opentelemetry/instrumentation/sinatra"
 
 set :port, ENV["EMAIL_PORT"]
 
-# i18n: locale is injected via the LOCALE env var (e.g. "en-US", "ja-JP", "cs-CZ").
+# i18n: locale is injected via the NEXT_PUBLIC_LOCALE env var (e.g. "en-US", "ja-JP", "cs-CZ").
 # Falls back to en.yml when the requested locale file is missing.
-LOCALE_CODE = ENV.fetch("LOCALE", "en-US").split("-").first
+LOCALE_CODE = ENV.fetch("NEXT_PUBLIC_LOCALE", "en-US").split("-").first
 TRANSLATIONS =
   begin
     YAML.load_file(File.join(__dir__, "locales", "#{LOCALE_CODE}.yml")) || {}

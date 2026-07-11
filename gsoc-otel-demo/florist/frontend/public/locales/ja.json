@@ -1,16 +1,81 @@
 {
+  "page_titles": {
+    "home": "花屋",
+    "cart": "花屋 - カート",
+    "product": "花屋 - 商品",
+    "checkout": "花屋 - チェックアウト"
+  },
+  "home": {
+    "banner_title": "あらゆる場面に新鮮な花を",
+    "banner_cta": "花束を見る",
+    "hot_products": "新着商品"
+  },
+  "footer": {
+    "demo_notice": "このサイトはデモ目的で公開されています。実際の店舗ではありません。"
+  },
+  "common": {
+    "continue_shopping": "買い物を続ける"
+  },
+  "empty_cart": {
+    "title": "ショッピングカートは空です！",
+    "subtitle": "ショッピングカートに追加した商品がここに表示されます。"
+  },
   "cart": {
     "title": "カート",
     "empty": "カートは空です",
     "checkout": "チェックアウト",
     "subtotal": "小計",
-    "remove": "削除"
+    "remove": "削除",
+    "empty_button": "カートを空にする",
+    "shopping_cart": "ショッピングカート",
+    "close": "閉じる",
+    "empty_dropdown": "ショッピングカートは空です",
+    "go_to_cart": "ショッピングカートへ進む"
   },
-  "checkout": {
-    "place_order": "注文を確定する",
-    "total": "合計",
+  "cart_table": {
+    "product": "商品",
+    "quantity": "数量",
+    "price": "価格"
+  },
+  "product": {
+    "quantity": "数量"
+  },
+  "checkout_item": {
+    "shipping_data": "配送情報",
+    "street": "番地",
+    "city": "市区町村",
+    "state": "都道府県",
+    "zip_code": "郵便番号",
+    "country": "国",
+    "see_more": "さらに表示",
+    "done": "完了"
+  },
+  "checkout_form": {
+    "shipping_address": "配送先住所",
+    "email_address": "メールアドレス",
+    "street_address": "番地",
+    "zip_code": "郵便番号",
+    "city": "市区町村",
+    "state": "都道府県",
+    "country": "国",
+    "country_placeholder": "国名",
+    "payment_method": "支払い方法",
+    "credit_card_number": "クレジットカード番号",
+    "credit_card_number_placeholder": "0000-0000-0000-0000",
+    "month": "月",
+    "year": "年",
+    "cvv": "CVV",
+    "place_order": "注文を確定する"
+  },
+  "checkout_summary": {
+    "complete": "ご注文は完了しました！",
+    "sent_email": "確認メールを送信しました。",
+    "order_id": "注文ID",
+    "shipping_address": "配送先住所",
+    "order_items": "注文商品",
+    "quantity": "数量",
     "shipping": "配送料",
-    "tax_label": "税金"
+    "total": "合計"
   },
   "currency": {
     "switcher_label": "通貨"

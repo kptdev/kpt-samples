@@ -81,12 +81,12 @@ public final class AdService {
           .labelNames("category")
           .register();
 
-  // i18n: locale is injected via the LOCALE env var (e.g. "en-US", "ja-JP", "cs-CZ").
+  // i18n: locale is injected via the NEXT_PUBLIC_LOCALE env var (e.g. "en-US", "ja-JP", "cs-CZ").
   // ResourceBundle falls back to ads.properties (en-US) when a locale is missing.
   private static final ResourceBundle adBundle = loadAdBundle();
 
   private static ResourceBundle loadAdBundle() {
-    String localeStr = System.getenv().getOrDefault("LOCALE", "en-US");
+    String localeStr = System.getenv().getOrDefault("NEXT_PUBLIC_LOCALE", "en-US");
     String[] parts = localeStr.split("-");
     Locale locale = parts.length > 1 ? new Locale(parts[0], parts[1]) : new Locale(parts[0]);
     return ResourceBundle.getBundle("i18n.ads", locale);

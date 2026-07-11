@@ -1,0 +1,93 @@
+{
+  "page_titles": {
+    "home": "फ्लोरिस्ट शॉप",
+    "cart": "फ्लोरिस्ट शॉप - कार्ट",
+    "product": "फ्लोरिस्ट शॉप - उत्पाद",
+    "checkout": "फ्लोरिस्ट शॉप - चेकआउट"
+  },
+  "home": {
+    "banner_title": "हर अवसर के लिए ताज़े फूल",
+    "banner_cta": "गुलदस्ते देखें",
+    "hot_products": "नई वस्तुएँ"
+  },
+  "footer": {
+    "demo_notice": "यह वेबसाइट केवल डेमो उद्देश्य के लिए होस्ट की गई है। यह वास्तविक दुकान नहीं है।"
+  },
+  "common": {
+    "continue_shopping": "खरीदारी जारी रखें"
+  },
+  "empty_cart": {
+    "title": "आपकी शॉपिंग कार्ट खाली है!",
+    "subtitle": "आपकी शॉपिंग कार्ट में जो आइटम जोड़ेंगे, वे यहाँ दिखेंगे।"
+  },
+  "cart": {
+    "title": "आपकी कार्ट",
+    "empty": "आपकी कार्ट खाली है",
+    "checkout": "चेकआउट",
+    "subtotal": "उप-योग",
+    "remove": "हटाएं",
+    "empty_button": "कार्ट खाली करें",
+    "shopping_cart": "खरीदारी कार्ट",
+    "close": "बंद करें",
+    "empty_dropdown": "आपकी खरीदारी कार्ट खाली है",
+    "go_to_cart": "खरीदारी कार्ट पर जाएं"
+  },
+  "cart_table": {
+    "product": "उत्पाद",
+    "quantity": "मात्रा",
+    "price": "मूल्य"
+  },
+  "product": {
+    "quantity": "मात्रा"
+  },
+  "checkout_item": {
+    "shipping_data": "शिपिंग विवरण",
+    "street": "सड़क",
+    "city": "शहर",
+    "state": "राज्य",
+    "zip_code": "पिन कोड",
+    "country": "देश",
+    "see_more": "और देखें",
+    "done": "पूर्ण"
+  },
+  "checkout_form": {
+    "shipping_address": "शिपिंग पता",
+    "email_address": "ई-मेल पता",
+    "street_address": "सड़क का पता",
+    "zip_code": "पिन कोड",
+    "city": "शहर",
+    "state": "राज्य",
+    "country": "देश",
+    "country_placeholder": "देश का नाम",
+    "payment_method": "भुगतान विधि",
+    "credit_card_number": "क्रेडिट कार्ड नंबर",
+    "credit_card_number_placeholder": "0000-0000-0000-0000",
+    "month": "महीना",
+    "year": "वर्ष",
+    "cvv": "CVV",
+    "place_order": "ऑर्डर दें"
+  },
+  "checkout_summary": {
+    "complete": "आपका ऑर्डर पूरा हो गया है!",
+    "sent_email": "हमने आपको एक पुष्टि ईमेल भेज दी है।",
+    "order_id": "ऑर्डर आईडी",
+    "shipping_address": "शिपिंग पता",
+    "order_items": "ऑर्डर आइटम",
+    "quantity": "मात्रा",
+    "shipping": "शिपिंग",
+    "total": "कुल"
+  },
+  "currency": {
+    "switcher_label": "मुद्रा"
+  },
+  "products": {
+    "add_to_cart": "कार्ट में डालें",
+    "out_of_stock": "स्टॉक में नहीं",
+    "in_stock": "स्टॉक में"
+  },
+  "layout": {
+    "store_name": "फ्लोरिस्ट शॉप",
+    "home": "होम",
+    "cart": "कार्ट"
+  }
+}

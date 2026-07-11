@@ -68,7 +68,7 @@ spec:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: http://otel-collector:4317
             - name: GOMEMLIMIT
-              value: 16MiB
+              value: 96MiB
             - name: OTEL_COLLECTOR_HOST
               value: otel-collector
             - name: GRAFANA_HOST
@@ -77,7 +77,7 @@ spec:
               value: jaeger
           resources:
             limits:
-              memory: 20Mi
+              memory: 128Mi
           volumeMounts: null
       initContainers:
         - command:

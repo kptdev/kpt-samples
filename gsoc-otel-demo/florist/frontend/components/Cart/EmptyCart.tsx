@@ -4,16 +4,19 @@
 import Link from 'next/link';
 import Button from '../Button';
 import * as S from '../../styles/Cart.styled';
+import { useTranslation } from '../../utils/i18n';
 
 const EmptyCart = () => {
+  const { t } = useTranslation();
+
   return (
     <S.EmptyCartContainer>
-      <S.Title>Your shopping cart is empty!</S.Title>
-      <S.Subtitle>Items you add to your shopping cart will appear here.</S.Subtitle>
+      <S.Title>{t('empty_cart.title')}</S.Title>
+      <S.Subtitle>{t('empty_cart.subtitle')}</S.Subtitle>
 
       <S.ButtonContainer>
         <Link href="/">
-          <Button type="submit">Continue Shopping</Button>
+          <Button type="submit">{t('common.continue_shopping')}</Button>
         </Link>
       </S.ButtonContainer>
     </S.EmptyCartContainer>

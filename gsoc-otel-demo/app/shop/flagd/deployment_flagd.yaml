@@ -70,7 +70,7 @@ spec:
               value: jaeger
           resources:
             limits:
-              memory: 300Mi
+              memory: 512Mi
           volumeMounts:
             - name: config-rw
               mountPath: /etc/flagd
@@ -108,7 +108,7 @@ spec:
               value: jaeger
           resources:
             limits:
-              memory: 300Mi
+              memory: 512Mi
           volumeMounts:
             - mountPath: /app/data
               name: config-rw

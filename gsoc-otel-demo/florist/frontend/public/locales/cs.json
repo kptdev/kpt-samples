@@ -1,16 +1,81 @@
 {
+  "page_titles": {
+    "home": "Květinářství",
+    "cart": "Květinářství - Košík",
+    "product": "Květinářství - Produkt",
+    "checkout": "Květinářství - Pokladna"
+  },
+  "home": {
+    "banner_title": "Čerstvé květiny pro každou příležitost",
+    "banner_cta": "Prohlédnout kytice",
+    "hot_products": "Novinky"
+  },
+  "footer": {
+    "demo_notice": "Tento web je hostovaný pouze pro demo účely. Nejde o skutečný obchod."
+  },
+  "common": {
+    "continue_shopping": "Pokračovat v nákupu"
+  },
+  "empty_cart": {
+    "title": "Váš nákupní košík je prázdný!",
+    "subtitle": "Položky, které přidáte do košíku, se zobrazí zde."
+  },
   "cart": {
     "title": "Váš košík",
     "empty": "Váš košík je prázdný",
     "checkout": "Pokladna",
     "subtotal": "Mezisoučet",
-    "remove": "Odebrat"
+    "remove": "Odebrat",
+    "empty_button": "Vyprázdnit košík",
+    "shopping_cart": "Nákupní košík",
+    "close": "Zavřít",
+    "empty_dropdown": "Váš nákupní košík je prázdný",
+    "go_to_cart": "Přejít do košíku"
   },
-  "checkout": {
-    "place_order": "Objednat",
-    "total": "Celkem",
+  "cart_table": {
+    "product": "Produkt",
+    "quantity": "Množství",
+    "price": "Cena"
+  },
+  "product": {
+    "quantity": "Množství"
+  },
+  "checkout_item": {
+    "shipping_data": "Dodací údaje",
+    "street": "Ulice",
+    "city": "Město",
+    "state": "Stát",
+    "zip_code": "PSČ",
+    "country": "Země",
+    "see_more": "Zobrazit více",
+    "done": "Hotovo"
+  },
+  "checkout_form": {
+    "shipping_address": "Doručovací adresa",
+    "email_address": "E-mailová adresa",
+    "street_address": "Ulice",
+    "zip_code": "PSČ",
+    "city": "Město",
+    "state": "Stát",
+    "country": "Země",
+    "country_placeholder": "Název země",
+    "payment_method": "Platební metoda",
+    "credit_card_number": "Číslo platební karty",
+    "credit_card_number_placeholder": "0000-0000-0000-0000",
+    "month": "Měsíc",
+    "year": "Rok",
+    "cvv": "CVV",
+    "place_order": "Objednat"
+  },
+  "checkout_summary": {
+    "complete": "Vaše objednávka je dokončena!",
+    "sent_email": "Poslali jsme vám potvrzovací e-mail.",
+    "order_id": "ID objednávky",
+    "shipping_address": "Doručovací adresa",
+    "order_items": "Položky objednávky",
+    "quantity": "Množství",
     "shipping": "Doprava",
-    "tax_label": "Daň"
+    "total": "Celkem"
   },
   "currency": {
     "switcher_label": "Měna"

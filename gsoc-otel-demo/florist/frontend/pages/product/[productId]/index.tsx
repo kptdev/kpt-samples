@@ -22,6 +22,7 @@ import * as S from '../../../styles/ProductDetail.styled';
 import { useCurrency } from '../../../providers/Currency.provider';
 import ProductReviewProvider from '../../../providers/ProductReview.provider';
 import ProductAIAssistantProvider from '../../../providers/ProductAIAssistant.provider';
+import { useTranslation } from '../../../utils/i18n';
 
 const quantityOptions = new Array(10).fill(0).map((_, i) => i + 1);
 
@@ -33,6 +34,7 @@ const ProductDetail: NextPage = () => {
     cart: { items },
   } = useCart();
   const { selectedCurrency } = useCurrency();
+  const { t } = useTranslation();
   const productId = query.productId as string;
 
   useEffect(() => {
@@ -68,7 +70,7 @@ const ProductDetail: NextPage = () => {
       contextKeys={[...new Set(categories)]}
     >
       <Head>
-        <title>Otel Demo - Product</title>
+        <title>{t('page_titles.product')}</title>
       </Head>
       <Layout>
         <S.ProductDetail data-cy={CypressFields.ProductDetail}>
@@ -85,7 +87,7 @@ const ProductDetail: NextPage = () => {
               <S.ProductPrice>
                 <ProductPrice price={priceUsd} />
               </S.ProductPrice>
-              <S.Text>Quantity</S.Text>
+              <S.Text>{t('product.quantity')}</S.Text>
               <Select
                 data-cy={CypressFields.ProductQuantity}
                 onChange={event => setQuantity(+event.target.value)}
@@ -98,7 +100,7 @@ const ProductDetail: NextPage = () => {
                 ))}
               </Select>
               <S.AddToCart data-cy={CypressFields.ProductAddToCart} onClick={onAddItem}>
-                <Image src="/icons/Cart.svg" height="15" width="15" alt="cart" /> Add To Cart
+                <Image src="/icons/Cart.svg" height="15" width="15" alt="cart" /> {t('products.add_to_cart')}
               </S.AddToCart>
             </S.Details>
           </S.Container>

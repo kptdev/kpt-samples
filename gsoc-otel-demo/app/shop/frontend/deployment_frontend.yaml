@@ -85,14 +85,6 @@ spec:
               value: grafana
             - name: JAEGER_HOST
               value: jaeger
-            - name: TAX_RATE
-              value: 8
-            - name: TAX_LABEL
-              value: Sales Tax
-            - name: DEFAULT_CURRENCY
-              value: USD
-            - name: LOCALE
-              value: en-US
           resources:
             limits:
               memory: 250Mi
