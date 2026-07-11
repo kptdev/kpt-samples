@@ -30,7 +30,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: email
-          image: email:v1
+          image: astronomy-email:v1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -61,6 +61,10 @@ spec:
               value: grafana
             - name: JAEGER_HOST
               value: jaeger
+            - name: LOCALE
+              value: hi-IN
+            - name: NEXT_PUBLIC_LOCALE
+              value: hi-IN
           resources:
             limits:
               memory: 100Mi

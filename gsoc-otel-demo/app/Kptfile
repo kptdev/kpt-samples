@@ -23,3 +23,43 @@ pipeline:
       configPath: branding/validator-branding.yaml
     - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
       configPath: regional/validator-region.yaml
+status:
+  conditions:
+    - type: Rendered
+      status: "True"
+      reason: RenderSuccess
+  renderStatus:
+    mutationSteps:
+      - image: ghcr.io/kptdev/krm-functions-catalog/set-namespace:v0.4.5
+        exitCode: 0
+        results:
+          - message: all matching namespaces are already "otel-demo". no value changed
+            severity: info
+          - message: all `depends-on` annotations are up-to-date. no `namespace` changed
+            severity: info
+      - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+        exitCode: 0
+      - image: ghcr.io/kptdev/krm-functions-catalog/set-namespace:v0.4.5
+        exitCode: 0
+        results:
+          - message: all matching namespaces are already "otel-demo". no value changed
+            severity: info
+          - message: all `depends-on` annotations are up-to-date. no `namespace` changed
+            severity: info
+      - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+        exitCode: 0
+      - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+        exitCode: 0
+      - image: ghcr.io/kptdev/krm-functions-catalog/apply-replacements:v0.1.5
+        exitCode: 0
+      - image: ghcr.io/kptdev/krm-functions-catalog/apply-replacements:v0.1.5
+        exitCode: 0
+      - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+        exitCode: 0
+      - image: ghcr.io/kptdev/krm-functions-catalog/apply-replacements:v0.1.5
+        exitCode: 0
+    validationSteps:
+      - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+        exitCode: 0
+      - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+        exitCode: 0

@@ -1,0 +1,11 @@
+email:
+  subject: "\u60a8\u7684\u786e\u8ba4\u90ae\u4ef6"
+confirmation:
+  title: "\u8ba2\u5355\u786e\u8ba4"
+  thanks: "\u611f\u8c22\u60a8\u7684\u8d2d\u4e70\uff01"
+  order_id: "\u8ba2\u5355 ID:"
+  shipping: "\u914d\u9001"
+  items: "\u5546\u54c1"
+  item_no: "\u5546\u54c1"
+  quantity: "\u6570\u91cf"
+  price: "\u4ef7\u683c"

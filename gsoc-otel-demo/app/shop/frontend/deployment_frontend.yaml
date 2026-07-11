@@ -30,7 +30,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: frontend
-          image: florist-frontend:v1
+          image: astronomy-frontend:v1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -85,6 +85,14 @@ spec:
               value: grafana
             - name: JAEGER_HOST
               value: jaeger
+            - name: TAX_RATE
+              value: "18"
+            - name: TAX_LABEL
+              value: GST
+            - name: DEFAULT_CURRENCY
+              value: INR
+            - name: NEXT_PUBLIC_LOCALE
+              value: hi-IN
           resources:
             limits:
               memory: 250Mi

@@ -26,15 +26,17 @@ source: |-
         "llm_image": "florist-llm:v1",
         "load_generator_image": "florist-load-generator:v1",
         "llm_product_id": "FLR001",
+        "email_image":"email:v1"
       },
       "astronomy": {
         "init_configmap": "astronomy-postgresql-init",
         "image_provider": "ghcr.io/open-telemetry/demo:2.2.0-image-provider",
-        "frontend_image": "ghcr.io/open-telemetry/demo:2.2.0-frontend",
-        "ad_image": "ghcr.io/open-telemetry/demo:2.2.0-ad",
-        "llm_image": "ghcr.io/open-telemetry/demo:2.2.0-llm",
+        "frontend_image": "astronomy-frontend:v1",
+        "ad_image": "astronomy-ad:v1",
+        "llm_image": "astronomy-llm:v1",
         "load_generator_image": "ghcr.io/open-telemetry/demo:2.2.0-load-generator",
         "llm_product_id": "L9ECAV7KIM",
+        "email_image":"astronomy-email:v1"
       },
     }
 
@@ -83,7 +85,7 @@ source: |-
           "llmImage": data["llm_image"],
           "loadGeneratorImage": data["load_generator_image"],
           "llmProductId": data["llm_product_id"],
-          "emailImage":"email:v1"
+          "emailImage":data["email_image"]
         }
         store_found = True
         break
@@ -103,7 +105,7 @@ source: |-
           "llmImage": data["llm_image"],
           "loadGeneratorImage": data["load_generator_image"],
           "llmProductId": data["llm_product_id"],
-          "emailImage":"email:v1"
+          "emailImage":data["email_image"]
         }
       })
 

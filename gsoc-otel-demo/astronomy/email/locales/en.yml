@@ -1,0 +1,11 @@
+email:
+  subject: "Your confirmation email"
+confirmation:
+  title: "Order Confirmation"
+  thanks: "Thanks for shopping with us!"
+  order_id: "Order ID:"
+  shipping: "Shipping"
+  items: "Items"
+  item_no: "Item"
+  quantity: "Quantity"
+  price: "Price"

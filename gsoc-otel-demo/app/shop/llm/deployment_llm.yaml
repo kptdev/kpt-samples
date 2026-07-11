@@ -30,7 +30,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: llm
-          image: florist-llm:v1
+          image: astronomy-llm:v1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -55,6 +55,10 @@ spec:
               value: grafana
             - name: JAEGER_HOST
               value: jaeger
+            - name: LOCALE
+              value: hi-IN
+            - name: NEXT_PUBLIC_LOCALE
+              value: hi-IN
           resources: null
           volumeMounts: null
       volumes: null

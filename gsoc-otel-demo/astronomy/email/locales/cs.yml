@@ -1,0 +1,11 @@
+email:
+  subject: "Potvrzen\u00ed Va\u0161\u00ed objedn\u00e1vky"
+confirmation:
+  title: "Potvrzen\u00ed objedn\u00e1vky"
+  thanks: "D\u011bkujeme za v\u00e1\u0161 n\u00e1kup!"
+  order_id: "ID objedn\u00e1vky:"
+  shipping: "Doprava"
+  items: "Polo\u017eky"
+  item_no: "Polo\u017eka"
+  quantity: "Mno\u017estv\u00ed"
+  price: "Cena"
