@@ -32,26 +32,21 @@ const CurrencyProvider = ({ children }: IProps) => {
   });
 
   const runtimeConfig = useRuntimeConfig();
-  const session = SessionGateway.getSession();
-  const sessionCurrency = session.currencyExplicitlySelected ? session.currencyCode : '';
-  const initialCurrency = sessionCurrency || runtimeConfig.currency || 'USD';
-
-  const [selectedCurrency, setSelectedCurrency] = useState<string>(initialCurrency);
-  const [hasUserSelected, setHasUserSelected] = useState<boolean>(Boolean(session.currencyExplicitlySelected));
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(runtimeConfig.currency || 'USD');
+  const [hasUserSelectedCurrency, setHasUserSelectedCurrency] = useState(false);
 
   useEffect(() => {
-    if (runtimeConfig.currency && !hasUserSelected) {
-      setSelectedCurrency(runtimeConfig.currency);
+    if (!hasUserSelectedCurrency) {
+      const resolvedCurrency = runtimeConfig.currency || 'USD';
+      setSelectedCurrency(resolvedCurrency);
+      SessionGateway.setSessionValue('currencyCode', resolvedCurrency);
+      SessionGateway.setSessionValue('currencyExplicitlySelected', false);
     }
-  }, [runtimeConfig.currency, hasUserSelected]);
-
-  useEffect(() => {
-    if (session.currencyExplicitlySelected && sessionCurrency) setSelectedCurrency(sessionCurrency);
-  }, [sessionCurrency, session.currencyExplicitlySelected]);
+  }, [runtimeConfig.currency, hasUserSelectedCurrency]);
 
   const onSelectCurrency = useCallback((currencyCode: string) => {
     setSelectedCurrency(currencyCode);
-    setHasUserSelected(true);
+    setHasUserSelectedCurrency(true);
     SessionGateway.setSessionValue('currencyCode', currencyCode);
     SessionGateway.setSessionValue('currencyExplicitlySelected', true);
   }, []);

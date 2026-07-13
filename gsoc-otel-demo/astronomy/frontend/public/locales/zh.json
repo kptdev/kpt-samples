@@ -55,7 +55,8 @@
     "built_with": "\u6784\u5efa\u4f7f\u7528",
     "open_telemetry": "OpenTelemetry",
     "this_project": "\u8be5\u9879\u76ee\u662f",
-    "open_source": "\u5f00\u6e90\u7684"
+    "open_source": "\u5f00\u6e90\u7684",
+    "disclaimer": "\u672c\u7f51\u7ad9\u4ec5\u7528\u4e8e\u6f14\u793a\u76ee\u7684\u3002\u5e76\u975e\u771f\u5b9e\u5546\u5e97\u3002"
   },
   "header": {
     "cart": "\u8d2d\u7269\u8f66"

@@ -55,7 +55,8 @@
     "built_with": "Built with",
     "open_telemetry": "OpenTelemetry",
     "this_project": "This project is",
-    "open_source": "open source"
+    "open_source": "open source",
+    "disclaimer": "このサイトはデモ目的で公開されています。実際のショップではありません。"
   },
   "header": {
     "cart": "\u30ab\u30fc\u30c8"

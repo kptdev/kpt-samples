@@ -18,18 +18,26 @@ import { IProductCheckout } from '../../../../types/Cart';
 import { useTranslation } from '../../../../utils/i18n';
 
 const Checkout: NextPage = () => {
-  const { t } = useTranslation();
   const { query } = useRouter();
-  const { orderId, items = [], shippingAddress, shippingCost = { units: 0, currencyCode: 'USD', nanos: 0 } } = JSON.parse((query.order || '{}') as string) as IProductCheckout;
+  const { t } = useTranslation();
+  const {
+    orderId,
+    items = [],
+    shippingAddress,
+    shippingCost = { units: 0, currencyCode: 'USD', nanos: 0 },
+  } = JSON.parse((query.order || '{}') as string) as IProductCheckout;
 
   const orderTotal = useMemo<Money>(() => {
-    const itemsTotal = items.reduce((acc, { item, cost = { units: 0, nanos: 0, currencyCode: 'USD' } }) => {
-      return {
-        units: acc.units + (cost.units || 0) * item.quantity,
-        nanos: acc.nanos + (cost.nanos || 0) * item.quantity,
-        currencyCode: cost.currencyCode || 'USD',
-      };
-    }, { units: 0, nanos: 0, currencyCode: 'USD' });
+    const itemsTotal = items.reduce(
+      (acc, { item, cost = { units: 0, nanos: 0, currencyCode: 'USD' } }) => {
+        return {
+          units: acc.units + (cost.units || 0) * item.quantity,
+          nanos: acc.nanos + (cost.nanos || 0) * item.quantity,
+          currencyCode: cost.currencyCode || 'USD',
+        };
+      },
+      { units: 0, nanos: 0, currencyCode: 'USD' }
+    );
 
     const totalNanos = itemsTotal.nanos + (shippingCost.nanos || 0);
     const nanoExceed = Math.floor(totalNanos / 1000000000);
@@ -64,7 +72,9 @@ const Checkout: NextPage = () => {
             <S.RightColumn>
               <S.SectionTitle>{t('checkout_summary.shipping_address')}</S.SectionTitle>
               <S.AddressText>{shippingAddress.streetAddress}</S.AddressText>
-              <S.AddressText>{shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}</S.AddressText>
+              <S.AddressText>
+                {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}
+              </S.AddressText>
               <S.AddressText>{shippingAddress.country}</S.AddressText>
             </S.RightColumn>
 
@@ -84,10 +94,12 @@ const Checkout: NextPage = () => {
 
                   return (
                     <S.OrderItem key={item.productId}>
-                      <S.ItemImage src={"/images/products/" + item.product.picture} alt={item.product.name}/>
+                      <S.ItemImage src={'/images/products/' + item.product.picture} alt={item.product.name} />
                       <S.ItemDetails>
                         <S.ItemName>{item.product.name}</S.ItemName>
-                        <S.ItemQuantity>{t('checkout_summary.quantity')}: {item.quantity}</S.ItemQuantity>
+                        <S.ItemQuantity>
+                          {t('checkout_summary.quantity')}: {item.quantity}
+                        </S.ItemQuantity>
                       </S.ItemDetails>
                       <S.ItemPrice>
                         <ProductPrice price={itemTotal} />

@@ -6,12 +6,14 @@ import * as S from './Footer.styled';
 import SessionGateway from '../../gateways/Session.gateway';
 import { CypressFields } from '../../utils/enums/CypressFields';
 import PlatformFlag from '../PlatformFlag';
+import { useTranslation } from '../../utils/i18n';
 
 const currentYear = new Date().getFullYear();
 
 const { userId } = SessionGateway.getSession();
 
 const Footer = () => {
+  const { t } = useTranslation();
   const [sessionId, setSessionId] = useState('');
 
   useEffect(() => {
@@ -21,7 +23,7 @@ const Footer = () => {
   return (
     <S.Footer>
       <div>
-        <p>This website is hosted for demo purpose only. It is not an actual shop.</p>
+        <p>{t('footer.disclaimer')}</p>
         <p>
           <span data-cy={CypressFields.SessionId}>session-id: {sessionId}</span>
         </p>

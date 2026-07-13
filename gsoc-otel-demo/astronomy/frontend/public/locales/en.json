@@ -55,7 +55,8 @@
     "built_with": "Built with",
     "open_telemetry": "OpenTelemetry",
     "this_project": "This project is",
-    "open_source": "open source"
+    "open_source": "open source",
+    "disclaimer": "This website is hosted for demo purpose only. It is not an actual shop."
   },
   "header": {
     "cart": "Cart"

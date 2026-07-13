@@ -5,8 +5,7 @@ import { createContext, useCallback, useContext, useMemo, useState, useEffect } 
 import { useQuery } from '@tanstack/react-query';
 import ApiGateway from '../gateways/Api.gateway';
 import SessionGateway from '../gateways/Session.gateway';
-
-const { currencyCode } = SessionGateway.getSession();
+import { useRuntimeConfig } from '../utils/i18n';
 
 interface IContext {
   currencyCodeList: string[];
@@ -27,30 +26,39 @@ interface IProps {
 export const useCurrency = () => useContext(Context);
 
 const CurrencyProvider = ({ children }: IProps) => {
+  const runtimeConfig = useRuntimeConfig();
   const { data: currencyCodeListUnsorted = [] } = useQuery({
     queryKey: ['currency'],
-    queryFn: ApiGateway.getSupportedCurrencyList
+    queryFn: ApiGateway.getSupportedCurrencyList,
   });
-  const [selectedCurrency, setSelectedCurrency] = useState<string>('');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(runtimeConfig.currency || 'USD');
+  const [hasUserSelectedCurrency, setHasUserSelectedCurrency] = useState(false);
 
   useEffect(() => {
-    setSelectedCurrency(currencyCode);
-  }, []);
+    if (!hasUserSelectedCurrency) {
+      const resolvedCurrency = runtimeConfig.currency || 'USD';
+      setSelectedCurrency(resolvedCurrency);
+      SessionGateway.setSessionValue('currencyCode', resolvedCurrency);
+      SessionGateway.setSessionValue('currencyExplicitlySelected', false);
+    }
+  }, [runtimeConfig.currency, hasUserSelectedCurrency]);
 
   const onSelectCurrency = useCallback((currencyCode: string) => {
     setSelectedCurrency(currencyCode);
+    setHasUserSelectedCurrency(true);
     SessionGateway.setSessionValue('currencyCode', currencyCode);
+    SessionGateway.setSessionValue('currencyExplicitlySelected', true);
   }, []);
 
-  const currencyCodeList = currencyCodeListUnsorted.sort();
+  const currencyCodeList = [...currencyCodeListUnsorted].sort();
 
   const value = useMemo(
-      () => ({
-        currencyCodeList,
-        selectedCurrency,
-        setSelectedCurrency: onSelectCurrency,
-      }),
-      [currencyCodeList, selectedCurrency, onSelectCurrency]
+    () => ({
+      currencyCodeList,
+      selectedCurrency,
+      setSelectedCurrency: onSelectCurrency,
+    }),
+    [currencyCodeList, selectedCurrency, onSelectCurrency]
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

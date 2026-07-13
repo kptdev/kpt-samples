@@ -5,11 +5,10 @@ import ProductCatalogGateway from '../gateways/rpc/ProductCatalog.gateway';
 import CurrencyGateway from '../gateways/rpc/Currency.gateway';
 import { Money } from '../protos/demo';
 
-const defaultCurrencyCode = 'USD';
-
 const ProductCatalogService = () => ({
   async getProductPrice(price: Money, currencyCode: string) {
-    return !!currencyCode && currencyCode !== defaultCurrencyCode
+    const sourceCurrency = price?.currencyCode || 'USD';
+    return !!currencyCode && currencyCode !== sourceCurrency
       ? await CurrencyGateway.convert(price, currencyCode)
       : price;
   },
