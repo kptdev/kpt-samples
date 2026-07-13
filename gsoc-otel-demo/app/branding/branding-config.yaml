@@ -5,4 +5,4 @@ metadata:
   annotations:
     config.kubernetes.io/local-config: "true"
 data:
-  storeType: astronomy
+  storeType: florist
