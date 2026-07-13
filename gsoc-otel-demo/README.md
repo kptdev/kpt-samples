@@ -1,6 +1,6 @@
 # Astronomy Shop for kpt
 
-A GSoC 2026 sample that packages the [OpenTelemetry Astronomy Shop](https://opentelemetry.io/docs/demo/) — a microservices e‑commerce demo — as a composable [kpt](https://kpt.dev) package and shows how the same package can be rebranded, wired up for telemetry, and updated safely using **Configuration as Data** and **KRM Functions**.
+A GSoC 2026 sample that packages the [OpenTelemetry Astronomy Shop](https://opentelemetry.io/docs/demo/) — a microservices e‑commerce demo — as a composable [kpt](https://kpt.dev) package and shows how the same package can be rebranded, regionalized, wired up for telemetry, and updated safely using **Configuration as Data** and **KRM Functions**.
 
 <!-- <p align="center">
   <!-- Project banner / architecture image / GIF — replace with your own -->
@@ -47,26 +47,29 @@ For a deeper background on the rationale behind Configuration as Data, see the [
 - **Package Composition** — The application is split into independent subpackages (`shop/`, `observability/`) that can be rendered, fetched, and upgraded individually.
 - **Configuration as Data** — All customization inputs are ConfigMaps or function configs — no imperative scripts required.
 - **KRM Function Pipelines** — `mutators` and `validators` declared in `Kptfile` run on every render.
-- **Declarative Customization** — Store branding, namespace, and telemetry endpoints are all driven by data in local‑config resources.
-- **Safe Package Updates** — Upstream `shop/` and `observability/` manifests are never edited, so `kpt pkg update` performs a clean 3‑way merge.
+- **Declarative Customization** — Store branding, regional deployment, namespace, and telemetry endpoints are all driven by data in local‑config resources.
+- **Data Derivation** — A single `region` variable drives locale, currency, tax rate, and product catalog translations across multiple services.
+- **Safe Package Updates** — Upstream `shop/` and `observability/` subpackages are never edited, so `kpt pkg update` performs a clean 3‑way merge.
 
 ---
 
 ## Architecture
 
-The package hierarchy is rooted at `app/` and is composed of three siblings:
+The package hierarchy is rooted at `app/` and is composed of four siblings:
 
 - **`shop/`** — the e‑commerce microservices (frontend, cart, checkout, payment, product catalog, image provider, ad, recommendation, LLM, load generator, telemetry sidecars, etc.).
 - **`observability/`** — the OpenTelemetry Collector, Prometheus, Grafana, Jaeger, and OpenSearch deployments.
 - **`branding/`** — a customization layer that lives **outside** `shop/` and rewires service images, the postgresql init script, and feature‑flag product IDs to switch store identity.
+- **`regional/`** — a customization layer that derives locale, currency, tax rate, and translated product catalog data from a single `region` field.
 
-Subpackages are rendered **before** the root pipeline runs, so the branding mutators at the root see the fully rendered `shop/` resources as their input.
+Subpackages are rendered **before** the root pipeline runs, so the branding and regional mutators at the root see the fully rendered `shop/` resources as their input.
 
 ```
 app/                              (ROOT PACKAGE)
 ├── shop/                         (subpackage — microservices)
 ├── observability/                (subpackage — telemetry stack)
-└── branding/                     (customization layer — see below)
+├── branding/                     (customization layer — see Branding)
+└── regional/                     (customization layer — see Regional)
 ```
 
 ---
@@ -76,21 +79,29 @@ app/                              (ROOT PACKAGE)
 ```
 .
 ├── app/                          Root kpt package (deploy this)
-│   ├── Kptfile                   Root pipeline: branding + validators
+│   ├── Kptfile                   Root pipeline: branding + regional + validators
 │   ├── shop/                     E‑commerce subpackage
 │   │   ├── Kptfile               Namespace + telemetry env wiring
 │   │   └── ...                   21 microservices (frontend, cart, …)
 │   ├── observability/            Telemetry subpackage
 │   │   ├── Kptfile               Namespace + telemetry env wiring
 │   │   └── otel-collector/       prometheus/  grafana/  jaeger/  opensearch/
-│   └── branding/                 Store branding customization layer
-│       ├── branding-config.yaml  Single source of truth (storeType)
-│       ├── setup-branding.yaml   Starlark: builds value-store + init SQL
-│       ├── replace-postgresql-init.yaml   ApplyReplacements: SQL swap
-│       ├── branding-image-provider.yaml   ApplyReplacements: image swap
-│       ├── validator-branding.yaml        Starlark: storeType validator
-│       ├── astronomy/            Upstream SQL + product ID source
-│       └── florist/              Florist SQL + product ID source
+│   ├── branding/                 Store branding customization layer
+│   │   ├── branding-config.yaml  Single source of truth (storeType)
+│   │   ├── setup-branding.yaml   Starlark: builds value-store + init SQL
+│   │   ├── replace-postgresql-init.yaml   ApplyReplacements: SQL swap
+│   │   ├── branding-image-provider.yaml   ApplyReplacements: image swap
+│   │   ├── validator-branding.yaml        Starlark: storeType validator
+│   │   ├── astronomy/            Upstream SQL + product ID source
+│   │   └── florist/              Florist SQL + product ID source
+│   └── regional/                 Regional deployment customization layer
+│       ├── region-config.yaml    Single source of truth (region)
+│       ├── setup-region.yaml     Starlark: derives locale, currency, tax
+│       ├── replace-postgresql-region.yaml  ApplyReplacements: SQL swap
+│       ├── validator-region.yaml           Starlark: region validator
+│       └── locales/              Per-brand, per-locale translated SQL
+│           ├── astronomy/        5 locales (en-US, hi-IN, cs-CZ, zh-CN, ja-JP)
+│           └── florist/          5 locales (en-US, hi-IN, cs-CZ, zh-CN, ja-JP)
 ├── opentelemetry-demo.yaml       Flat rendered output used for reference
 └── GSOC 26 KPT Project Architecture.md   Background notes from the proposal
 ```
@@ -143,7 +154,10 @@ The pipeline at the root `app/Kptfile` runs in this order:
 1. **`setup-branding`** (Starlark) — reads `branding-config` and the per‑store data folder, then materializes a `value-store` ConfigMap (images + product ID) and an `active-postgresql-init` ConfigMap (the right SQL).
 2. **`replace-postgresql-init`** (ApplyReplacements) — copies `value-store` and `active-postgresql-init` data into the corresponding resources inside `shop/`.
 3. **`branding-image-provider`** (ApplyReplacements) — propagates the image fields from `value-store` into the relevant Deployments inside `shop/`.
-4. **`validator-branding`** (Starlark validator) — fails the render with a clear error if `storeType` is not one of the supported values.
+4. **`setup-region`** (Starlark) — reads `region-config`, derives locale / currency / tax from the region matrix, materializes a `regional-value-store` ConfigMap and an `active-region-postgresql-init` ConfigMap with the translated product SQL, and injects environment variables (`NEXT_PUBLIC_LOCALE`, `DEFAULT_CURRENCY`, `TAX_RATE`, `TAX_LABEL`) into the relevant Deployments.
+5. **`replace-postgresql-region`** (ApplyReplacements) — copies the translated `init.sql` from `active-region-postgresql-init` into the `postgresql-init` ConfigMap.
+6. **`validator-branding`** (Starlark validator) — fails the render with a clear error if `storeType` is not one of the supported values.
+7. **`validator-region`** (Starlark validator) — fails the render with a clear error if `region` is not one of the supported values.
 
 Because every step is a standalone function, you can preview any one of them with `kpt fn eval --fn-config <path>` to debug a single stage without re‑rendering the whole pipeline.
 
@@ -208,17 +222,91 @@ The generic e‑commerce workflow stays identical — `cart`, `checkout`, `payme
 No changes to `app/shop/` are required.
 
 
-<!-- ### Localization -->
+### Regional
 
-<!--
-Language + Currency customization.
--->
+#### Deploy for Any Region: One Config Drives Language, Currency, Tax, and Catalog
 
-<!-- ### Regional Tax Configuration -->
+The regional layer transforms the store for a target market — Hindi product names for India, Czech for the Czech Republic, Chinese for China, Japanese for Japan — by changing a single field in one ConfigMap. Like branding, no file inside `shop/` is modified.
 
-<!--
-Region-driven tax configuration.
--->
+**The source of truth** is `app/regional/region-config.yaml`:
+
+```yaml
+data:
+  region: us           # change to "india", "czech-republic", "china", or "japan"
+```
+
+**How the pipeline works:**
+
+| Step | Function | What it does |
+| --- | --- | --- |
+| 1 | `setup-region` (Starlark) | Reads `region`, looks up the derivation matrix (see below) to compute `locale`, `currency`, `tax_rate`, and `tax_label`. Resolves the correct translated PostgreSQL init data from `locales/<store>/<store>-<locale>-postgresql-init.yaml`. Injects `NEXT_PUBLIC_LOCALE`, `DEFAULT_CURRENCY`, `TAX_RATE`, and `TAX_LABEL` as environment variables into the relevant Deployments. |
+| 2 | `replace-postgresql-region` (ApplyReplacements) | Copies `active-region-postgresql-init.data["init.sql"]` into the `postgresql-init` ConfigMap that ships with `shop/`. |
+| 3 | `validator-region` (Starlark) | Verifies `region ∈ {us, india, czech-republic, china, japan}` and aborts the render otherwise. |
+
+**Region derivation matrix — one input, four outputs:**
+
+| `region` | Derived Locale | Default Currency | Tax Rate | Tax Label |
+| --- | --- | --- | --- | --- |
+| `us` | `en-US` | `USD` | 8% | Sales Tax |
+| `india` | `hi-IN` | `INR` | 18% | GST |
+| `czech-republic` | `cs-CZ` | `CZK` | 21% | VAT |
+| `china` | `zh-CN` | `CNY` | 13% | VAT |
+| `japan` | `ja-JP` | `JPY` | 10% | Consumption Tax |
+
+A user changes **one field** and the Starlark engine automatically derives four values, which cascade across environment‑variable injections in four services (`frontend`, `ad`, `llm`, `email`) and a translated product catalog in PostgreSQL.
+
+**Services mutated by the regional layer:**
+
+| Service | What changes | Mechanism |
+| --- | --- | --- |
+| **frontend** | `NEXT_PUBLIC_LOCALE`, `DEFAULT_CURRENCY`, `TAX_RATE`, `TAX_LABEL` env vars | Starlark `set_env_value` |
+| **ad** | `NEXT_PUBLIC_LOCALE` env var | Starlark `set_env_value` |
+| **llm** | `NEXT_PUBLIC_LOCALE` env var | Starlark `set_env_value` |
+| **email** | `NEXT_PUBLIC_LOCALE` env var | Starlark `set_env_value` |
+| **postgresql-init** | `init.sql` replaced with translated product names, descriptions, and reviews | ApplyReplacements |
+
+The remaining 16 services (product-catalog, recommendation, currency, checkout, payment, shipping, quote, cart, accounting, fraud-detection, image-provider, load-generator, flagd, kafka, postgresql, frontend-proxy) are region‑agnostic and require no changes.
+
+**To deploy for India:**
+
+1. Open `app/regional/region-config.yaml` and change:
+
+   ```yaml
+   region: india
+   ```
+
+2. Re‑render the package:
+
+   ```bash
+   kpt fn render .
+   ```
+
+3. Re‑apply:
+
+   ```bash
+   kpt live apply . --reconcile-timeout=2m --output=table
+   ```
+
+**Branding × Regional independence:**
+
+Branding and regional deployment are **fully independent** customization layers. Each combination works cleanly:
+
+| Scenario | Result |
+| --- | --- |
+| Branding only (`florist` + `us`) | Florist store with default US English content. |
+| Regional only (`astronomy` + `india`) | Astronomy store deployed for India — Hindi product names, INR default, 18% GST. |
+| Both (`florist` + `japan`) | Florist store deployed for Japan — Japanese product names, JPY default, 10% Consumption Tax. |
+
+The Starlark script resolves a **2D matrix** of `(storeType × locale)` to select the correct translated SQL, so branding and regional compose naturally. When branding is absent, it defaults to `astronomy`.
+
+**Adding a new region:**
+
+1. Add the region entry to the `region_matrix` in `app/regional/setup-region.yaml` (locale, currency, tax rate, tax label).
+2. Add a `locale_data` mapping for the new locale under each store type.
+3. Create the translated PostgreSQL init YAML under `app/regional/locales/astronomy/` and `app/regional/locales/florist/`.
+4. Extend the `valid_regions` list in `app/regional/validator-region.yaml`.
+
+No changes to `app/shop/` are required.
 
 <!-- ### Deployment Profiles -->
 
@@ -234,13 +322,16 @@ The package follows a simple, declarative rendering pipeline. Everything between
 
 ```
 branding-config  ─┐
-telemetry-config ─┼─►  Kptfile pipeline
-                  │     ├─ set-namespace
-                  │     ├─ apply-telemetry  (Starlark)
-                  │     ├─ setup-branding   (Starlark)
-                  │     ├─ replace-postgresql-init  (apply-replacements)
-                  │     ├─ branding-image-provider  (apply-replacements)
-                  │     └─ validator-branding       (Starlark)
+region-config    ─┼─►  Kptfile pipeline
+telemetry-config ─┤     ├─ set-namespace
+                  │     ├─ apply-telemetry         (Starlark)
+                  │     ├─ setup-branding           (Starlark)
+                  │     ├─ replace-postgresql-init   (apply-replacements)
+                  │     ├─ branding-image-provider   (apply-replacements)
+                  │     ├─ setup-region             (Starlark)
+                  │     ├─ replace-postgresql-region  (apply-replacements)
+                  │     ├─ validator-branding        (Starlark)
+                  │     └─ validator-region          (Starlark)
                   ▼
             kpt fn render .
                   ▼
@@ -281,8 +372,7 @@ The default merge strategy is `resource-merge` (structural, associative‑list a
 - [x] Branding (Astronomy → Florist via `app/branding/`)
 - [x] Telemetry parameterization (`telemetry-config.yaml` + `apply-telemetry`)
 - [x] Namespace parameterization (`set-namespace`)
-- [ ] Localization (Language + Currency)
-- [ ] Regional Tax / VAT configuration
+- [x] Regional Deployment — Language, Currency, Tax (via `app/regional/`)
 - [ ] Deployment Profiles (Small / Medium / Large)
 - [ ] Safe upstream updates (`kpt pkg update` with 3‑way merge)
 ---
@@ -296,7 +386,7 @@ The default merge strategy is `resource-merge` (structural, associative‑list a
    git checkout -b feature/your-idea
    ```
 
-3. **Make your changes** in a feature branch. Keep `app/shop/` and `app/observability/` upstream‑clean — put any local customization under `app/branding/` or a new sibling layer instead.
+3. **Make your changes** in a feature branch. Keep `app/shop/` and `app/observability/` upstream‑clean — put any local customization under `app/branding/`, `app/regional/`, or a new sibling layer instead.
 4. **Validate locally** with `kpt fn render .` and the existing pipelines.
 5. **Commit** with a clear message and **open a Pull Request** describing the change and how you tested it.
 

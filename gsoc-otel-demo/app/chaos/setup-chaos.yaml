@@ -1,0 +1,74 @@
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: setup-chaos
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  load("krmfn.star", "krmfn")
+  load("json.star", "json")  # Import JSON library available in Kpt Starlark
+
+  def setup_chaos(resources):
+    scenario = "off"
+
+    # Read scenario from config
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "chaos-config"):
+        scenario = r.get("data", {}).get("scenario", "off")
+
+    if scenario == "":
+      fail("scenario cannot be empty in chaos-config")
+
+    # Define the chaos mapping
+    chaos_matrix = {
+      "off": {},
+      "payment-outage": {
+        "paymentFailure": "100%",
+        "paymentUnreachable": "on"
+      },
+      "high-load": {
+        "loadGeneratorFloodHomepage": "on",
+        "adHighCpu": "on",
+        "kafkaQueueProblems": "on"
+      },
+      "broken-catalog": {
+        "productCatalogFailure": "on",
+        "recommendationCacheFailure": "on"
+      },
+      "memory-leak": {
+        "emailMemoryLeak": "100x",
+        "adManualGc": "on"
+      }
+    }
+
+    if scenario not in chaos_matrix:
+      fail("Unsupported chaos scenario: " + scenario)
+
+    flags_to_enable = chaos_matrix[scenario]
+
+    # Find the flagd-config ConfigMap and mutate the JSON
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "flagd-config"):
+        raw_json = r.get("data", {}).get("demo.flagd.json", "")
+        if raw_json == "":
+          fail("demo.flagd.json not found in flagd-config")
+        
+        # Parse JSON
+        parsed = json.decode(raw_json)
+        
+        # Reset all flags to "off" first to ensure idempotency
+        for flag_name, flag_data in parsed.get("flags", {}).items():
+          flag_data["defaultVariant"] = "off"
+        
+        # Apply the chosen scenario's flags
+        for flag_name, variant in flags_to_enable.items():
+          if flag_name in parsed["flags"]:
+            parsed["flags"][flag_name]["defaultVariant"] = variant
+          else:
+            fail("Flag " + flag_name + " not found in upstream flagd-config")
+            
+        # Re-serialize JSON with indentation for readability
+        r["data"]["demo.flagd.json"] = json.encode_indent(parsed)
+        break
+
+  setup_chaos(ctx.resource_list["items"])
