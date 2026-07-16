@@ -120,6 +120,7 @@ app/                              (ROOT PACKAGE)
 ### Prerequisites
 
 - A working Kubernetes cluster (kind, minikube, or any conformant cluster).
+- Docker as container engine
 - [`kubectl`](https://kubernetes.io/docs/tasks/tools/) — for cluster interaction.
 - [`kpt`](https://kpt.dev/installation/kpt-cli) — for fetching, rendering, and applying the package.
 - Create a namespace called `otel-demo`
