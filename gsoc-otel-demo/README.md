@@ -47,29 +47,32 @@ For a deeper background on the rationale behind Configuration as Data, see the [
 - **Package Composition** — The application is split into independent subpackages (`shop/`, `observability/`) that can be rendered, fetched, and upgraded individually.
 - **Configuration as Data** — All customization inputs are ConfigMaps or function configs — no imperative scripts required.
 - **KRM Function Pipelines** — `mutators` and `validators` declared in `Kptfile` run on every render.
-- **Declarative Customization** — Store branding, regional deployment, namespace, and telemetry endpoints are all driven by data in local‑config resources.
+- **Declarative Customization** — Store branding, regional deployment, deployment profiles, namespace, and telemetry endpoints are all driven by data in local‑config resources.
 - **Data Derivation** — A single `region` variable drives locale, currency, tax rate, and product catalog translations across multiple services.
+- **Cross‑Cutting Scaling** — A single `profile` variable drives replica counts, memory limits, CPU requests, and observability component enablement across 27 workloads.
 - **Safe Package Updates** — Upstream `shop/` and `observability/` subpackages are never edited, so `kpt pkg update` performs a clean 3‑way merge.
 
 ---
 
 ## Architecture
 
-The package hierarchy is rooted at `app/` and is composed of four siblings:
+The package hierarchy is rooted at `app/` and is composed of five siblings:
 
 - **`shop/`** — the e‑commerce microservices (frontend, cart, checkout, payment, product catalog, image provider, ad, recommendation, LLM, load generator, telemetry sidecars, etc.).
 - **`observability/`** — the OpenTelemetry Collector, Prometheus, Grafana, Jaeger, and OpenSearch deployments.
-- **`branding/`** — a customization layer that lives **outside** `shop/` and rewires service images, the postgresql init script, and feature‑flag product IDs to switch store identity.
+- **`branding/`** — a customization layer that rewires service images, the postgresql init script, and feature‑flag product IDs to switch store identity.
 - **`regional/`** — a customization layer that derives locale, currency, tax rate, and translated product catalog data from a single `region` field.
+- **`profiles/`** — a customization layer that scales replicas, memory, CPU requests, and observability enablement from a single `profile` field.
 
-Subpackages are rendered **before** the root pipeline runs, so the branding and regional mutators at the root see the fully rendered `shop/` resources as their input.
+Subpackages are rendered **before** the root pipeline runs, so the branding, regional, and profiles mutators at the root see the fully rendered `shop/` resources as their input.
 
 ```
 app/                              (ROOT PACKAGE)
 ├── shop/                         (subpackage — microservices)
 ├── observability/                (subpackage — telemetry stack)
 ├── branding/                     (customization layer — see Branding)
-└── regional/                     (customization layer — see Regional)
+├── regional/                     (customization layer — see Regional)
+└── profiles/                     (customization layer — see Deployment Profiles)
 ```
 
 ---
@@ -79,7 +82,7 @@ app/                              (ROOT PACKAGE)
 ```
 .
 ├── app/                          Root kpt package (deploy this)
-│   ├── Kptfile                   Root pipeline: branding + regional + validators
+│   ├── Kptfile                   Root pipeline: branding + regional + profiles + validators
 │   ├── shop/                     E‑commerce subpackage
 │   │   ├── Kptfile               Namespace + telemetry env wiring
 │   │   └── ...                   21 microservices (frontend, cart, …)
@@ -94,14 +97,18 @@ app/                              (ROOT PACKAGE)
 │   │   ├── validator-branding.yaml        Starlark: storeType validator
 │   │   ├── astronomy/            Upstream SQL + product ID source
 │   │   └── florist/              Florist SQL + product ID source
-│   └── regional/                 Regional deployment customization layer
-│       ├── region-config.yaml    Single source of truth (region)
-│       ├── setup-region.yaml     Starlark: derives locale, currency, tax
-│       ├── replace-postgresql-region.yaml  ApplyReplacements: SQL swap
-│       ├── validator-region.yaml           Starlark: region validator
-│       └── locales/              Per-brand, per-locale translated SQL
-│           ├── astronomy/        5 locales (en-US, hi-IN, cs-CZ, zh-CN, ja-JP)
-│           └── florist/          5 locales (en-US, hi-IN, cs-CZ, zh-CN, ja-JP)
+│   ├── regional/                 Regional deployment customization layer
+│   │   ├── region-config.yaml    Single source of truth (region)
+│   │   ├── setup-region.yaml     Starlark: derives locale, currency, tax
+│   │   ├── replace-postgresql-region.yaml  ApplyReplacements: SQL swap
+│   │   ├── validator-region.yaml           Starlark: region validator
+│   │   └── locales/              Per-brand, per-locale translated SQL
+│   │       ├── astronomy/        5 locales (en-US, hi-IN, cs-CZ, zh-CN, ja-JP)
+│   │       └── florist/          5 locales (en-US, hi-IN, cs-CZ, zh-CN, ja-JP)
+│   └── profiles/                 Deployment profiles customization layer
+│       ├── profile-config.yaml   Single source of truth (profile)
+│       ├── setup-profile.yaml    Starlark: scales replicas, memory, CPU
+│       └── validator-profile.yaml         Starlark: profile validator
 ├── opentelemetry-demo.yaml       Flat rendered output used for reference
 └── GSOC 26 KPT Project Architecture.md   Background notes from the proposal
 ```
@@ -156,8 +163,10 @@ The pipeline at the root `app/Kptfile` runs in this order:
 3. **`branding-image-provider`** (ApplyReplacements) — propagates the image fields from `value-store` into the relevant Deployments inside `shop/`.
 4. **`setup-region`** (Starlark) — reads `region-config`, derives locale / currency / tax from the region matrix, materializes a `regional-value-store` ConfigMap and an `active-region-postgresql-init` ConfigMap with the translated product SQL, and injects environment variables (`NEXT_PUBLIC_LOCALE`, `DEFAULT_CURRENCY`, `TAX_RATE`, `TAX_LABEL`) into the relevant Deployments.
 5. **`replace-postgresql-region`** (ApplyReplacements) — copies the translated `init.sql` from `active-region-postgresql-init` into the `postgresql-init` ConfigMap.
-6. **`validator-branding`** (Starlark validator) — fails the render with a clear error if `storeType` is not one of the supported values.
-7. **`validator-region`** (Starlark validator) — fails the render with a clear error if `region` is not one of the supported values.
+6. **`setup-profile`** (Starlark) — reads `profile-config`, looks up the profile matrix (`small` / `medium` / `large`), and mutates `spec.replicas`, `resources.limits.memory`, and `resources.requests.cpu` across all Deployments, StatefulSets, and DaemonSets in both `shop/` and `observability/`.
+7. **`validator-branding`** (Starlark validator) — fails the render with a clear error if `storeType` is not one of the supported values.
+8. **`validator-region`** (Starlark validator) — fails the render with a clear error if `region` is not one of the supported values.
+9. **`validator-profile`** (Starlark validator) — fails the render with a clear error if `profile` is not one of the supported values.
 
 Because every step is a standalone function, you can preview any one of them with `kpt fn eval --fn-config <path>` to debug a single stage without re‑rendering the whole pipeline.
 
@@ -308,11 +317,87 @@ The Starlark script resolves a **2D matrix** of `(storeType × locale)` to selec
 
 No changes to `app/shop/` are required.
 
-<!-- ### Deployment Profiles -->
+### Deployment Profiles
 
-<!--
-Small / Medium / Large deployment examples.
--->
+#### Scale the Entire Application: One Config for Small, Medium, or Large
+
+The profiles layer scales the entire application — replicas, memory limits, CPU requests, and observability component enablement — by changing a single field in one ConfigMap. Like branding and regional, no file inside `shop/` or `observability/` is modified.
+
+**The source of truth** is `app/profiles/profile-config.yaml`:
+
+```yaml
+data:
+  profile: medium        # change to "small" or "large"
+```
+
+**How the pipeline works:**
+
+| Step | Function | What it does |
+| --- | --- | --- |
+| 1 | `setup-profile` (Starlark) | Reads `profile`, looks up the profile matrix (see below), classifies all workloads into tiers, then mutates `spec.replicas`, `resources.limits.memory`, and optionally `resources.requests.cpu` on every Deployment, StatefulSet, and DaemonSet across both `shop/` and `observability/`. |
+| 2 | `validator-profile` (Starlark) | Verifies `profile ∈ {small, medium, large}` and aborts the render otherwise. |
+
+**Profile comparison — one input, three scaling strategies:**
+
+| Aspect | `small` | `medium` | `large` |
+| --- | --- | --- | --- |
+| **Target environment** | Local dev, CI, single‑node | Staging, demos | Production, load testing |
+| **User‑facing replicas** (frontend, frontend‑proxy) | 1 | 2 | 3 |
+| **Business‑critical replicas** (checkout, cart, payment, product‑catalog) | 1 | 2 | 3 |
+| **Supporting replicas** (ad, email, recommendation, etc.) | 1 | 1 | 2 |
+| **Infrastructure replicas** (kafka, postgresql, flagd, valkey‑cart) | 1 | 2 | 2 |
+| **Memory scaling** | 0.75× upstream | 1.0× (unchanged) | 2.0× upstream |
+| **CPU requests** | None | Added for high‑traffic services | Added for all significant services |
+| **Observability** | Prometheus only — Grafana, Jaeger, OpenSearch **disabled** | Full stack enabled | Full stack enabled |
+
+**Service tier classification — why services are grouped the way they are:**
+
+| Tier | Services | Rationale |
+| --- | --- | --- |
+| **Tier‑1** (user‑facing) | `frontend`, `frontend‑proxy` | Every user request hits these. If they go down, the entire store is down. |
+| **Tier‑2** (business‑critical) | `checkout`, `cart`, `payment`, `product‑catalog` | In the purchase path. Failure means users cannot buy. |
+| **Tier‑3** (supporting) | `ad`, `recommendation`, `email`, `llm`, `shipping`, `quote`, `currency`, `accounting`, `fraud‑detection`, `image‑provider`, `load‑generator`, `product‑reviews` | Enhance the experience but are not blocking. If `ad` is down, the store still works. |
+| **Infra** | `kafka`, `postgresql`, `flagd`, `valkey‑cart` | Stateful or singleton services. |
+
+**Observability disablement:** For the `small` profile, Grafana, Jaeger, and OpenSearch are disabled by setting `replicas: 0` rather than removing their manifests. This preserves upstream compatibility — `kpt pkg update` still performs a clean 3‑way merge, and switching back to `medium` simply restores `replicas: 1`.
+
+**To scale for local development:**
+
+1. Open `app/profiles/profile-config.yaml` and change:
+
+   ```yaml
+   profile: small
+   ```
+
+2. Re‑render the package:
+
+   ```bash
+   kpt fn render .
+   ```
+
+3. Re‑apply:
+
+   ```bash
+   kpt live apply . --reconcile-timeout=2m --output=table
+   ```
+
+**Profiles × Branding × Regional independence:**
+
+All three customization layers are **fully independent** — they mutate non‑overlapping fields:
+
+| Layer | Fields mutated |
+| --- | --- |
+| Branding | `containers.[].image`, `data["init.sql"]` |
+| Regional | `containers.[].env`, `data["init.sql"]` |
+| Profiles | `spec.replicas`, `containers.[].resources` |
+
+Every combination works cleanly:
+
+| Scenario | Result |
+| --- | --- |
+| `small` + `florist` + `india` | Florist store for India, scaled down for local dev. |
+| `medium` + `astronomy` + `us` | Astronomy store for the US, balanced for staging. |
+| `large` + `florist` + `japan` | Florist store for Japan, scaled up for production. |
 
 ---
 
@@ -322,16 +407,19 @@ The package follows a simple, declarative rendering pipeline. Everything between
 
 ```
 branding-config  ─┐
-region-config    ─┼─►  Kptfile pipeline
+region-config    ─┤
+profile-config   ─┼─►  Kptfile pipeline
 telemetry-config ─┤     ├─ set-namespace
-                  │     ├─ apply-telemetry         (Starlark)
-                  │     ├─ setup-branding           (Starlark)
-                  │     ├─ replace-postgresql-init   (apply-replacements)
-                  │     ├─ branding-image-provider   (apply-replacements)
-                  │     ├─ setup-region             (Starlark)
-                  │     ├─ replace-postgresql-region  (apply-replacements)
-                  │     ├─ validator-branding        (Starlark)
-                  │     └─ validator-region          (Starlark)
+                  │     ├─ apply-telemetry          (Starlark)
+                  │     ├─ setup-branding            (Starlark)
+                  │     ├─ replace-postgresql-init    (apply-replacements)
+                  │     ├─ branding-image-provider    (apply-replacements)
+                  │     ├─ setup-region              (Starlark)
+                  │     ├─ replace-postgresql-region   (apply-replacements)
+                  │     ├─ setup-profile             (Starlark)
+                  │     ├─ validator-branding         (Starlark)
+                  │     ├─ validator-region           (Starlark)
+                  │     └─ validator-profile          (Starlark)
                   ▼
             kpt fn render .
                   ▼
@@ -357,10 +445,10 @@ kpt pkg update
 `kpt pkg update` performs a **3‑way merge** between:
 
 1. **BASE** — the version of the package you originally fetched.
-2. **LOCAL** — your customized working tree (with `branding/`, `telemetry-config`, etc.).
+2. **LOCAL** — your customized working tree (with `branding/`, `regional/`, `profiles/`, `telemetry-config`, etc.).
 3. **UPSTREAM** — the newly published upstream version.
 
-Customizations in `branding/` are preserved because they live in separate files that don't collide with upstream `shop/` manifests. The `upstream` and `upstreamLock` sections of `Kptfile` track which version you're on.
+Customizations in `branding/`, `regional/`, and `profiles/` are preserved because they live in separate files that don't collide with upstream `shop/` manifests. The `upstream` and `upstreamLock` sections of `Kptfile` track which version you're on.
 
 The default merge strategy is `resource-merge` (structural, associative‑list aware). For niche cases, kpt also supports `fast-forward` and `force-delete-replace`, but `resource-merge` is the right choice for this package.
 
@@ -373,7 +461,8 @@ The default merge strategy is `resource-merge` (structural, associative‑list a
 - [x] Telemetry parameterization (`telemetry-config.yaml` + `apply-telemetry`)
 - [x] Namespace parameterization (`set-namespace`)
 - [x] Regional Deployment — Language, Currency, Tax (via `app/regional/`)
-- [ ] Deployment Profiles (Small / Medium / Large)
+- [x] Deployment Profiles — Small / Medium / Large (via `app/profiles/`)
+- [ ] Chaos Engineering — Fault injection (via `app/chaos/`)
 - [ ] Safe upstream updates (`kpt pkg update` with 3‑way merge)
 ---
 
@@ -386,7 +475,7 @@ The default merge strategy is `resource-merge` (structural, associative‑list a
    git checkout -b feature/your-idea
    ```
 
-3. **Make your changes** in a feature branch. Keep `app/shop/` and `app/observability/` upstream‑clean — put any local customization under `app/branding/`, `app/regional/`, or a new sibling layer instead.
+3. **Make your changes** in a feature branch. Keep `app/shop/` and `app/observability/` upstream‑clean — put any local customization under `app/branding/`, `app/regional/`, `app/profiles/`, or a new sibling layer instead.
 4. **Validate locally** with `kpt fn render .` and the existing pipelines.
 5. **Commit** with a clear message and **open a Pull Request** describing the change and how you tested it.
 
