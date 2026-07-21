@@ -9,9 +9,9 @@ source: |-
     for r in ctx.resource_list["items"]:
       if r.get("kind") == "ConfigMap" and r.get("metadata", {}).get("name") == "region-config":
         region = r.get("data", {}).get("region", "")
-        valid_regions = ["us", "india", "czech-republic", "china", "japan"]
+        valid_regions = ["us", "india", "czech-republic", "china"]
         if region not in valid_regions:
-          fail("region '" + region + "' is invalid. Allowed values: us, india, czech-republic, china, japan")
+          fail("region '" + region + "' is invalid. Allowed values: us, india, czech-republic, china")
     return
 
   validate_region(ctx)

@@ -23,6 +23,9 @@ pipeline:
     # --- Phase 5: Deployment Profiles (independent, runs last) ---
     - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
       configPath: profiles/setup-profile.yaml
+    # --- Phase 6: Chaos Engineering (independent) ---
+    - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+      configPath: chaos/setup-chaos.yaml
   validators:
     - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
       configPath: branding/validator-branding.yaml
@@ -30,3 +33,5 @@ pipeline:
       configPath: regional/validator-region.yaml
     - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
       configPath: profiles/validator-profile.yaml
+    - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+      configPath: chaos/validator-chaos.yaml

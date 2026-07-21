@@ -49,35 +49,30 @@ source: |-
         "tax_rate": "13",
         "tax_label": "VAT",
       },
-      "japan": {
-        "locale": "ja-JP",
-        "currency": "JPY",
-        "tax_rate": "10",
-        "tax_label": "Consumption Tax",
-      },
+
     }
 
     if region not in region_matrix:
-      fail("Unsupported region: " + region + ". Allowed: us, india, czech-republic, china, japan")
+      fail("Unsupported region: " + region + ". Allowed: us, india, czech-republic, china")
 
     derived = region_matrix[region]
     locale = derived["locale"]
 
-    # === 2D RESOLUTION: (storeType × locale) → SQL ===
+
     locale_data = {
       "astronomy": {
         "en-US": {"init_configmap": "astronomy-en-us-postgresql-init"},
         "hi-IN": {"init_configmap": "astronomy-hi-in-postgresql-init"},
         "cs-CZ": {"init_configmap": "astronomy-cs-cz-postgresql-init"},
         "zh-CN": {"init_configmap": "astronomy-zh-cn-postgresql-init"},
-        "ja-JP": {"init_configmap": "astronomy-ja-jp-postgresql-init"},
+
       },
       "florist": {
         "en-US": {"init_configmap": "florist-en-us-postgresql-init"},
         "hi-IN": {"init_configmap": "florist-hi-in-postgresql-init"},
         "cs-CZ": {"init_configmap": "florist-cs-cz-postgresql-init"},
         "zh-CN": {"init_configmap": "florist-zh-cn-postgresql-init"},
-        "ja-JP": {"init_configmap": "florist-ja-jp-postgresql-init"},
+
       },
     }
 

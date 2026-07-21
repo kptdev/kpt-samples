@@ -429,6 +429,289 @@ You can make the profile influence package composition, tying together Composabi
 * **Small**: shop only, collector only  
 * **Large**: shop, collector, grafana, jaeger, prometheus
 
+#### **5\. Chaos Engineering (Fault Injection)**
+
+**Goal**
+
+Implement a **declarative chaos engineering layer** that allows users to seamlessly simulate complex failure scenarios across the OpenTelemetry Demo application. The chaos layer leverages the upstream `flagd` feature-flag configurations to inject faults (latency, errors, high CPU, memory leaks) without manually modifying any source code or upstream `shop/` manifests.
+
+At the end of this phase, a user must be able to:
+
+1. Edit a single `chaos-config.yaml` located in `app/chaos/`.
+2. Set `data.scenario` to one of the supported values (e.g., `payment-outage`, `high-load`, `broken-catalog`, `memory-leak`, `off`).
+3. Run `kpt fn render` at the `app/` level.
+4. See the `flagd-config` ConfigMap dynamically rewritten to enable the specific faults for the selected scenario.
+
+> **"Configuration as Data" Showcase:** This demonstrates **dynamic JSON mutation** within a YAML field. Instead of fragile string replacements, we use Kpt's embedded Starlark `json` library to safely decode the upstream `demo.flagd.json` string, mutate specific feature flag states based on the chosen scenario, and encode it back — preserving any new flags added by upstream in the future.
+
+---
+
+**Source Code Analysis: Current State of Faults**
+
+The OpenTelemetry demo includes built-in failure scenarios controlled by **feature flags** (via the `flagd` service). These flags are defined in a JSON string inside the `flagd-config` ConfigMap (`app/shop/flagd/configmap_flagd-config.yaml`).
+
+Currently, all flags default to `"off"`:
+
+```json
+"flags": {
+  "paymentFailure": {
+    "defaultVariant": "off",
+    "variants": { "100%": 1, "off": 0 }
+  },
+  "paymentUnreachable": {
+    "defaultVariant": "off",
+    "variants": { "on": true, "off": false }
+  },
+  "loadGeneratorFloodHomepage": {
+    "defaultVariant": "off",
+    "variants": { "on": 100, "off": 0 }
+  }
+  // ... and 12 more flags for memory leaks, CPU spikes, cache failures, etc.
+}
+```
+
+The downstream microservices (e.g., `payment`, `ad`, `product-catalog`) use OpenTelemetry SDKs to dynamically query `flagd` at runtime and simulate the corresponding failure if the flag is enabled.
+
+---
+
+**Scope Boundary**
+
+*In Scope:*
+
+* Create a **new `app/chaos/` sibling directory** (outside `shop/`, `observability/`, `branding/`, `regional/`, and `profiles/`).
+* Create a `chaos-config.yaml` ConfigMap with a single `scenario` field.
+* Use **Starlark (`StarlarkRun`)** to read `scenario`, parse the JSON payload inside the `flagd-config` ConfigMap, update the `defaultVariant` for the relevant flags, and re-serialize the JSON.
+* Add a **validator** to ensure `scenario` is in the allowed set.
+* Update `app/Kptfile` pipeline to invoke the chaos mutators.
+
+*Out of Scope:*
+
+* No custom code injection or new failure modes — we strictly rely on the upstream `flagd` capabilities.
+* No changes to `app/shop/` or `app/observability/` upstream manifests.
+* No interaction with `branding/`, `regional/`, or `profiles/` — chaos engineering is completely independent.
+
+---
+
+**Chaos Scenarios**
+
+We group individual feature flags into high-level **Chaos Scenarios** that tell a compelling observability story.
+
+**Scenario: `payment-outage`**
+
+Simulates a complete outage of the payment provider.
+
+* Flags changed: `paymentFailure` → `"100%"`, `paymentUnreachable` → `"on"`
+* Affected services: `payment`, `checkout` (will timeout trying to call payment).
+* Unaffected services: `frontend`, `cart`, `product-catalog` (users can still browse and add to cart, but cannot checkout).
+
+**Scenario: `high-load`**
+
+Simulates a viral traffic spike causing CPU and messaging queue bottlenecks.
+
+* Flags changed: `loadGeneratorFloodHomepage` → `"on"`, `adHighCpu` → `"on"`, `kafkaQueueProblems` → `"on"`
+* Affected services: `load-generator` (traffic spike), `frontend` (high request volume), `ad` (CPU throttling), `kafka` (queue lag), `accounting` (consumer lag).
+* Unaffected services: `email`, `currency`.
+
+**Scenario: `broken-catalog`**
+
+Simulates a degraded backend cache and catalog failure.
+
+* Flags changed: `productCatalogFailure` → `"on"`, `recommendationCacheFailure` → `"on"`
+* Affected services: `product-catalog`, `recommendation`.
+* Unaffected services: `cart`, `shipping`, `payment`.
+
+**Scenario: `memory-leak`**
+
+Simulates slow, creeping memory leaks requiring garbage collection intervention.
+
+* Flags changed: `emailMemoryLeak` → `"100x"`, `adManualGc` → `"on"`
+* Affected services: `email`, `ad`.
+* Unaffected services: `frontend`, `checkout`, `payment`.
+
+**Scenario: `off` (Default)**
+
+Normal operations. All flags remain `"off"`.
+
+---
+
+**Why Starlark for JSON Mutation?**
+
+| Approach | Fit | Reason |
+| ----- | ----- | ----- |
+| `apply-replacements` | ❌ Wrong tool | Works on YAML structural fields. The flag configuration is embedded as a raw JSON string (`data."demo.flagd.json"`). |
+| `search-replace` | ❌ Fragile | String substitution across 15 different flags using regex is highly brittle. If upstream changes spacing or order, it breaks. |
+| Starlark (`json` module) | ✅ Best fit | Kpt Starlark supports `json.decode` / `json.encode`. We safely decode the string into a dictionary, mutate the exact keys dynamically, and encode it back. |
+
+---
+
+**Directory Structure**
+
+```
+app/
+├── Kptfile                              (UPDATED — chaos pipeline added)
+├── shop/                                (UPSTREAM — untouched)
+├── observability/                       (UPSTREAM — untouched)
+├── branding/                            (Phase 3 — untouched)
+├── regional/                            (Phase 4 — untouched)
+├── profiles/                            (Phase 5 — untouched)
+└── chaos/                               (NEW — chaos engineering layer)
+    ├── chaos-config.yaml                (source of truth: scenario)
+    ├── setup-chaos.yaml                 (StarlarkRun — JSON mutation)
+    └── validator-chaos.yaml             (StarlarkRun — scenario enum check)
+```
+
+---
+
+**File Specifications**
+
+*`app/chaos/chaos-config.yaml`*
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaos-config
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  scenario: "off"
+```
+
+*`app/chaos/setup-chaos.yaml` (StarlarkRun)*
+
+```
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: setup-chaos
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  load("krmfn.star", "krmfn")
+  load("json.star", "json")
+
+  def setup_chaos(resources):
+    scenario = "off"
+
+    # Read scenario from config
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "chaos-config"):
+        scenario = r.get("data", {}).get("scenario", "off")
+
+    if scenario == "":
+      fail("scenario cannot be empty in chaos-config")
+
+    # Define the chaos mapping
+    chaos_matrix = {
+      "off": {},
+      "payment-outage": {
+        "paymentFailure": "100%",
+        "paymentUnreachable": "on"
+      },
+      "high-load": {
+        "loadGeneratorFloodHomepage": "on",
+        "adHighCpu": "on",
+        "kafkaQueueProblems": "on"
+      },
+      "broken-catalog": {
+        "productCatalogFailure": "on",
+        "recommendationCacheFailure": "on"
+      },
+      "memory-leak": {
+        "emailMemoryLeak": "100x",
+        "adManualGc": "on"
+      }
+    }
+
+    if scenario not in chaos_matrix:
+      fail("Unsupported chaos scenario: " + scenario)
+
+    flags_to_enable = chaos_matrix[scenario]
+
+    # Find the flagd-config ConfigMap and mutate the JSON
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "flagd-config"):
+        raw_json = r.get("data", {}).get("demo.flagd.json", "")
+        if raw_json == "":
+          fail("demo.flagd.json not found in flagd-config")
+
+        # Parse JSON
+        parsed = json.decode(raw_json)
+
+        # Reset all flags to "off" first to ensure idempotency
+        for flag_name, flag_data in parsed.get("flags", {}).items():
+          flag_data["defaultVariant"] = "off"
+
+        # Apply the chosen scenario's flags
+        for flag_name, variant in flags_to_enable.items():
+          if flag_name in parsed["flags"]:
+            parsed["flags"][flag_name]["defaultVariant"] = variant
+          else:
+            fail("Flag " + flag_name + " not found in upstream flagd-config")
+
+        # Re-serialize JSON with indentation for readability
+        r["data"]["demo.flagd.json"] = json.encode_indent(parsed)
+        break
+
+  setup_chaos(ctx.resource_list["items"])
+```
+
+*`app/chaos/validator-chaos.yaml` (StarlarkRun)*
+
+```
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: validator-chaos
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  def validate_chaos(ctx):
+    for r in ctx.resource_list["items"]:
+      if r.get("kind") == "ConfigMap" and r.get("metadata", {}).get("name") == "chaos-config":
+        scenario = r.get("data", {}).get("scenario", "")
+        valid_scenarios = ["off", "payment-outage", "high-load", "broken-catalog", "memory-leak"]
+        if scenario not in valid_scenarios:
+          fail("scenario '" + scenario + "' is invalid. Allowed values: " + str(valid_scenarios))
+    return
+
+  validate_chaos(ctx)
+```
+
+---
+
+**Pipeline Integration: `app/Kptfile`**
+
+Add the chaos steps to the mutator and validator lists. It operates exclusively on the `flagd-config` ConfigMap, so order relative to `branding`, `regional`, or `profiles` does not matter.
+
+```
+pipeline:
+  mutators:
+    # [ ... branding, regional, profiles mutators ... ]
+    - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+      configPath: chaos/setup-chaos.yaml
+  validators:
+    # [ ... existing validators ... ]
+    - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+      configPath: chaos/validator-chaos.yaml
+```
+
+---
+
+**Testing Strategy**
+
+1. **Idempotency Test:** Set `scenario: off`, run `kpt fn render .`, and ensure the `flagd-config` ConfigMap remains unchanged (all `defaultVariant: "off"`).
+2. **Payment Outage Test:** Set `scenario: payment-outage`, run `kpt fn render .`. Verify `demo.flagd.json` now contains `"defaultVariant": "100%"` for `paymentFailure` and `"on"` for `paymentUnreachable`.
+3. **High Load Test:** Set `scenario: high-load`, run `kpt fn render .`. Verify `loadGeneratorFloodHomepage`, `adHighCpu`, and `kafkaQueueProblems` are activated.
+4. **Validation Test:** Set `scenario: invalid-scenario`, run render, and verify it fails with the expected error message.
+5. **Upstream Resilience:** Verify that `kpt pkg update` still works cleanly because we are not replacing the entire ConfigMap file, only parsing and modifying specific keys within the JSON tree.
+
+| What the user does | What Kpt does |
+| ----- | ----- |
+| Sets `scenario: payment-outage` | Starlark decodes the JSON, rewrites the `paymentFailure` and `paymentUnreachable` variants to `100%` and `on`, and encodes the JSON back into the ConfigMap. |
+
+---
+
 ### **Summary Table**
 
 | Requirement | Best Mutator |
@@ -437,6 +720,7 @@ You can make the profile influence package composition, tying together Composabi
 | Localization | apply-replacements |
 | Tax Localization | Starlark (derive from region) |
 | Deployment Profiles | Starlark (best fit) |
+| Chaos Engineering (Fault Injection) | Starlark (JSON mutation via flagd) |
 
 ---
 
@@ -532,10 +816,19 @@ Updated Application
 	  
 	Implement : 
 
-* Pipeline for “Deployment configuration:  
+* Pipeline for "Deployment configuration"  
 * Demo,docs,cleanup
 
-**Phase 6 (Aug 6 \- Aug 12\)**  
+**Phase 7 (Aug 6 \- Aug 18\)**  
+	  
+	Implement : 
+
+* Chaos Engineering (Fault Injection) — declarative chaos layer via Starlark JSON mutation of flagd feature flags  
+* Scenario definitions: `payment-outage`, `high-load`, `broken-catalog`, `memory-leak`, `off`  
+* Pipeline integration, validators, testing  
+* Demo,docs,cleanup
+
+**Phase 8 (Aug 19 \- Aug 25\)**  
 	  
 	Implement : 
 

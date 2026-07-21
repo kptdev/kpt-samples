@@ -14,14 +14,13 @@ A GSoC 2026 sample that packages the [OpenTelemetry Astronomy Shop](https://open
 
 This repository contains a complete kpt package for the OpenTelemetry Astronomy Shop, a polyglot microservices application whose real purpose is to generate rich traces, metrics, and logs for OpenTelemetry instrumentation demos.
 
-Instead of shipping hand‑rendered YAML or a templating tool like Helm, every service manifest lives in a plain, WYSIWYG, KRM‑native package. Local customizations — namespace, telemetry endpoints, store branding — are layered on top by kpt's function pipeline rather than by editing the upstream manifests directly.
-
 By walking through this repository you will learn how to:
 
 - Model a multi‑service application as a composable kpt package hierarchy.
-- Use catalog KRM functions (`set-namespace`, `apply-replacements`, `search-replace`) and a small Starlark script to declaratively mutate resources.
+- Use catalog KRM functions (`set-namespace`, `apply-replacements`) and a Starlark script to declaratively mutate resources.
 - Keep upstream subpackages untouched so that `kpt pkg update` can perform a safe 3‑way merge.
 - Customize the same package for different audiences — for example, turning the Astronomy Shop into a Florist store — by editing a single ConfigMap.
+- Inject faults for resilience testing using declarative Chaos Engineering configuration.
 
 ---
 
@@ -47,9 +46,10 @@ For a deeper background on the rationale behind Configuration as Data, see the [
 - **Package Composition** — The application is split into independent subpackages (`shop/`, `observability/`) that can be rendered, fetched, and upgraded individually.
 - **Configuration as Data** — All customization inputs are ConfigMaps or function configs — no imperative scripts required.
 - **KRM Function Pipelines** — `mutators` and `validators` declared in `Kptfile` run on every render.
-- **Declarative Customization** — Store branding, regional deployment, deployment profiles, namespace, and telemetry endpoints are all driven by data in local‑config resources.
+- **Declarative Customization** — Store branding, regional deployment, deployment profiles, chaos engineering, and telemetry endpoints are all driven by data in local‑config resources.
 - **Data Derivation** — A single `region` variable drives locale, currency, tax rate, and product catalog translations across multiple services.
 - **Cross‑Cutting Scaling** — A single `profile` variable drives replica counts, memory limits, CPU requests, and observability component enablement across 27 workloads.
+- **Chaos Engineering** — Application-level fault injection (latency, errors, memory leaks) via OpenFeature `flagd` toggles, controlled by a declarative scenario configuration.
 - **Safe Package Updates** — Upstream `shop/` and `observability/` subpackages are never edited, so `kpt pkg update` performs a clean 3‑way merge.
 
 ---
@@ -63,8 +63,9 @@ The package hierarchy is rooted at `app/` and is composed of five siblings:
 - **`branding/`** — a customization layer that rewires service images, the postgresql init script, and feature‑flag product IDs to switch store identity.
 - **`regional/`** — a customization layer that derives locale, currency, tax rate, and translated product catalog data from a single `region` field.
 - **`profiles/`** — a customization layer that scales replicas, memory, CPU requests, and observability enablement from a single `profile` field.
+- **`chaos/`** — a customization layer that injects faults (latency, errors, memory leaks) by manipulating `flagd` feature flags based on a single `scenario` field.
 
-Subpackages are rendered **before** the root pipeline runs, so the branding, regional, and profiles mutators at the root see the fully rendered `shop/` resources as their input.
+Subpackages are rendered **before** the root pipeline runs, so the branding, regional, profiles, and chaos mutators at the root see the fully rendered `shop/` resources as their input.
 
 ```
 app/                              (ROOT PACKAGE)
@@ -72,48 +73,12 @@ app/                              (ROOT PACKAGE)
 ├── observability/                (subpackage — telemetry stack)
 ├── branding/                     (customization layer — see Branding)
 ├── regional/                     (customization layer — see Regional)
-└── profiles/                     (customization layer — see Deployment Profiles)
+├── profiles/                     (customization layer — see Deployment Profiles)
+└── chaos/                        (customization layer — see Chaos Engineering)
 ```
 
 ---
 
-## Repository Structure
-
-```
-.
-├── app/                          Root kpt package (deploy this)
-│   ├── Kptfile                   Root pipeline: branding + regional + profiles + validators
-│   ├── shop/                     E‑commerce subpackage
-│   │   ├── Kptfile               Namespace + telemetry env wiring
-│   │   └── ...                   21 microservices (frontend, cart, …)
-│   ├── observability/            Telemetry subpackage
-│   │   ├── Kptfile               Namespace + telemetry env wiring
-│   │   └── otel-collector/       prometheus/  grafana/  jaeger/  opensearch/
-│   ├── branding/                 Store branding customization layer
-│   │   ├── branding-config.yaml  Single source of truth (storeType)
-│   │   ├── setup-branding.yaml   Starlark: builds value-store + init SQL
-│   │   ├── replace-postgresql-init.yaml   ApplyReplacements: SQL swap
-│   │   ├── branding-image-provider.yaml   ApplyReplacements: image swap
-│   │   ├── validator-branding.yaml        Starlark: storeType validator
-│   │   ├── astronomy/            Upstream SQL + product ID source
-│   │   └── florist/              Florist SQL + product ID source
-│   ├── regional/                 Regional deployment customization layer
-│   │   ├── region-config.yaml    Single source of truth (region)
-│   │   ├── setup-region.yaml     Starlark: derives locale, currency, tax
-│   │   ├── replace-postgresql-region.yaml  ApplyReplacements: SQL swap
-│   │   ├── validator-region.yaml           Starlark: region validator
-│   │   └── locales/              Per-brand, per-locale translated SQL
-│   │       ├── astronomy/        5 locales (en-US, hi-IN, cs-CZ, zh-CN, ja-JP)
-│   │       └── florist/          5 locales (en-US, hi-IN, cs-CZ, zh-CN, ja-JP)
-│   └── profiles/                 Deployment profiles customization layer
-│       ├── profile-config.yaml   Single source of truth (profile)
-│       ├── setup-profile.yaml    Starlark: scales replicas, memory, CPU
-│       └── validator-profile.yaml         Starlark: profile validator
-├── opentelemetry-demo.yaml       Flat rendered output used for reference
-└── GSOC 26 KPT Project Architecture.md   Background notes from the proposal
-```
-
----
 
 ## Getting Started
 
@@ -146,7 +111,7 @@ kpt fn render .
 kpt live init .
 
 # Apply and continuously reconcile
-kpt live apply . --reconcile-timeout=2m --output=table
+kpt live apply . 
 ```
 
 > Tip: you can render only one subpackage (e.g. `kpt fn render shop/`) if you want to iterate without the root pipeline.
@@ -160,14 +125,16 @@ Every customization in this repository is driven by **Configuration as Data**: a
 The pipeline at the root `app/Kptfile` runs in this order:
 
 1. **`setup-branding`** (Starlark) — reads `branding-config` and the per‑store data folder, then materializes a `value-store` ConfigMap (images + product ID) and an `active-postgresql-init` ConfigMap (the right SQL).
-2. **`replace-postgresql-init`** (ApplyReplacements) — copies `value-store` and `active-postgresql-init` data into the corresponding resources inside `shop/`.
+2. **`replace-postgresql-init`** (ApplyReplacements) — copies the `init.sql` from `active-postgresql-init` into the `postgresql-init` ConfigMap inside `shop/`.
 3. **`branding-image-provider`** (ApplyReplacements) — propagates the image fields from `value-store` into the relevant Deployments inside `shop/`.
 4. **`setup-region`** (Starlark) — reads `region-config`, derives locale / currency / tax from the region matrix, materializes a `regional-value-store` ConfigMap and an `active-region-postgresql-init` ConfigMap with the translated product SQL, and injects environment variables (`NEXT_PUBLIC_LOCALE`, `DEFAULT_CURRENCY`, `TAX_RATE`, `TAX_LABEL`) into the relevant Deployments.
 5. **`replace-postgresql-region`** (ApplyReplacements) — copies the translated `init.sql` from `active-region-postgresql-init` into the `postgresql-init` ConfigMap.
 6. **`setup-profile`** (Starlark) — reads `profile-config`, looks up the profile matrix (`small` / `medium` / `large`), and mutates `spec.replicas`, `resources.limits.memory`, and `resources.requests.cpu` across all Deployments, StatefulSets, and DaemonSets in both `shop/` and `observability/`.
-7. **`validator-branding`** (Starlark validator) — fails the render with a clear error if `storeType` is not one of the supported values.
-8. **`validator-region`** (Starlark validator) — fails the render with a clear error if `region` is not one of the supported values.
-9. **`validator-profile`** (Starlark validator) — fails the render with a clear error if `profile` is not one of the supported values.
+7. **`setup-chaos`** (Starlark) — reads `chaos-config` and mutates the `demo.flagd.json` payload inside `flagd-config` to enable specific failure variants for the chosen chaos scenario.
+8. **`validator-branding`** (Starlark validator) — fails the render with a clear error if `storeType` is not one of the supported values.
+9. **`validator-region`** (Starlark validator) — fails the render with a clear error if `region` is not one of the supported values.
+10. **`validator-profile`** (Starlark validator) — fails the render with a clear error if `profile` is not one of the supported values.
+11. **`validator-chaos`** (Starlark validator) — fails the render with a clear error if `scenario` is not one of the supported values (`off`, `payment-outage`, etc.).
 
 Because every step is a standalone function, you can preview any one of them with `kpt fn eval --fn-config <path>` to debug a single stage without re‑rendering the whole pipeline.
 
@@ -236,13 +203,13 @@ No changes to `app/shop/` are required.
 
 #### Deploy for Any Region: One Config Drives Language, Currency, Tax, and Catalog
 
-The regional layer transforms the store for a target market — Hindi product names for India, Czech for the Czech Republic, Chinese for China, Japanese for Japan — by changing a single field in one ConfigMap. Like branding, no file inside `shop/` is modified.
+The regional layer transforms the store for a target market — Hindi product names for India, Czech for the Czech Republic, Chinese for China — by changing a single field in one ConfigMap. Like branding, no file inside `shop/` is modified.
 
 **The source of truth** is `app/regional/region-config.yaml`:
 
 ```yaml
 data:
-  region: us           # change to "india", "czech-republic", "china", or "japan"
+  region: us           # change to "india", "czech-republic", or "china"
 ```
 
 **How the pipeline works:**
@@ -251,7 +218,7 @@ data:
 | --- | --- | --- |
 | 1 | `setup-region` (Starlark) | Reads `region`, looks up the derivation matrix (see below) to compute `locale`, `currency`, `tax_rate`, and `tax_label`. Resolves the correct translated PostgreSQL init data from `locales/<store>/<store>-<locale>-postgresql-init.yaml`. Injects `NEXT_PUBLIC_LOCALE`, `DEFAULT_CURRENCY`, `TAX_RATE`, and `TAX_LABEL` as environment variables into the relevant Deployments. |
 | 2 | `replace-postgresql-region` (ApplyReplacements) | Copies `active-region-postgresql-init.data["init.sql"]` into the `postgresql-init` ConfigMap that ships with `shop/`. |
-| 3 | `validator-region` (Starlark) | Verifies `region ∈ {us, india, czech-republic, china, japan}` and aborts the render otherwise. |
+| 3 | `validator-region` (Starlark) | Verifies `region ∈ {us, india, czech-republic, china}` and aborts the render otherwise. |
 
 **Region derivation matrix — one input, four outputs:**
 
@@ -261,7 +228,7 @@ data:
 | `india` | `hi-IN` | `INR` | 18% | GST |
 | `czech-republic` | `cs-CZ` | `CZK` | 21% | VAT |
 | `china` | `zh-CN` | `CNY` | 13% | VAT |
-| `japan` | `ja-JP` | `JPY` | 10% | Consumption Tax |
+
 
 A user changes **one field** and the Starlark engine automatically derives four values, which cascade across environment‑variable injections in four services (`frontend`, `ad`, `llm`, `email`) and a translated product catalog in PostgreSQL.
 
@@ -297,17 +264,6 @@ The remaining 16 services (product-catalog, recommendation, currency, checkout, 
    kpt live apply . --reconcile-timeout=2m --output=table
    ```
 
-**Branding × Regional independence:**
-
-Branding and regional deployment are **fully independent** customization layers. Each combination works cleanly:
-
-| Scenario | Result |
-| --- | --- |
-| Branding only (`florist` + `us`) | Florist store with default US English content. |
-| Regional only (`astronomy` + `india`) | Astronomy store deployed for India — Hindi product names, INR default, 18% GST. |
-| Both (`florist` + `japan`) | Florist store deployed for Japan — Japanese product names, JPY default, 10% Consumption Tax. |
-
-The Starlark script resolves a **2D matrix** of `(storeType × locale)` to select the correct translated SQL, so branding and regional compose naturally. When branding is absent, it defaults to `astronomy`.
 
 **Adding a new region:**
 
@@ -382,23 +338,49 @@ data:
    kpt live apply . --reconcile-timeout=2m --output=table
    ```
 
-**Profiles × Branding × Regional independence:**
 
-All three customization layers are **fully independent** — they mutate non‑overlapping fields:
 
-| Layer | Fields mutated |
-| --- | --- |
-| Branding | `containers.[].image`, `data["init.sql"]` |
-| Regional | `containers.[].env`, `data["init.sql"]` |
-| Profiles | `spec.replicas`, `containers.[].resources` |
+### Chaos Engineering
 
-Every combination works cleanly:
+#### Inject Faults for Resilience Testing: One Config for Scenarios
 
-| Scenario | Result |
-| --- | --- |
-| `small` + `florist` + `india` | Florist store for India, scaled down for local dev. |
-| `medium` + `astronomy` + `us` | Astronomy store for the US, balanced for staging. |
-| `large` + `florist` + `japan` | Florist store for Japan, scaled up for production. |
+The chaos layer injects application-level faults (latency, errors, memory leaks) by manipulating OpenFeature [flagd](https://flagd.dev/) configurations. This allows you to verify observability dashboards and test system resilience. By changing a single field in one ConfigMap, chaos scenarios are dynamically applied.
+
+**The source of truth** is `app/chaos/chaos-config.yaml`:
+
+```yaml
+data:
+  scenario: payment-outage    # change to "high-load", "broken-catalog", "memory-leak", or "off"
+```
+
+**How the pipeline works:**
+
+| Step | Function | What it does |
+| --- | --- | --- |
+| 1 | `setup-chaos` (Starlark) | Reads the `scenario` field. It finds the `flagd-config` ConfigMap inside the `shop` subpackage and mutates the `demo.flagd.json` payload inline to enable the specific failure variants mapped to that scenario. |
+| 2 | `validator-chaos` (Starlark) | Verifies `scenario ∈ {off, payment-outage, high-load, broken-catalog, memory-leak}` and aborts the render otherwise. |
+
+**To enable a chaos scenario:**
+
+1. Open `app/chaos/chaos-config.yaml` and change:
+
+   ```yaml
+   scenario: high-load
+   ```
+
+2. Re‑render the package:
+
+   ```bash
+   kpt fn render .
+   ```
+
+3. Re‑apply:
+
+   ```bash
+   kpt live apply . --reconcile-timeout=2m --output=table
+   ```
+
+
 
 ---
 
@@ -407,20 +389,21 @@ Every combination works cleanly:
 The package follows a simple, declarative rendering pipeline. Everything between the source of truth and the running cluster is a function over YAML data.
 
 ```
-branding-config  ─┐
-region-config    ─┤
-profile-config   ─┼─►  Kptfile pipeline
-telemetry-config ─┤     ├─ set-namespace
-                  │     ├─ apply-telemetry          (Starlark)
-                  │     ├─ setup-branding            (Starlark)
-                  │     ├─ replace-postgresql-init    (apply-replacements)
-                  │     ├─ branding-image-provider    (apply-replacements)
-                  │     ├─ setup-region              (Starlark)
-                  │     ├─ replace-postgresql-region   (apply-replacements)
-                  │     ├─ setup-profile             (Starlark)
-                  │     ├─ validator-branding         (Starlark)
-                  │     ├─ validator-region           (Starlark)
-                  │     └─ validator-profile          (Starlark)
+telemetry-config ─► shop/ & observability/ pipelines (set-namespace, apply-telemetry)
+                    │
+branding-config  ─┐ ▼
+region-config    ─┼─►  Root Kptfile pipeline
+profile-config   ─┤     ├─ setup-branding            (Starlark)
+chaos-config     ─┘     ├─ replace-postgresql-init    (apply-replacements)
+                        ├─ branding-image-provider    (apply-replacements)
+                        ├─ setup-region              (Starlark)
+                        ├─ replace-postgresql-region   (apply-replacements)
+                        ├─ setup-profile             (Starlark)
+                        ├─ setup-chaos               (Starlark)
+                        ├─ validator-branding         (Starlark)
+                        ├─ validator-region           (Starlark)
+                        ├─ validator-profile          (Starlark)
+                        └─ validator-chaos            (Starlark)
                   ▼
             kpt fn render .
                   ▼
@@ -437,17 +420,214 @@ telemetry-config ─┤     ├─ set-namespace
 
 ## Package Updates
 
-Because the upstream `shop/` and `observability/` subpackages are never edited by hand, you can pull in upstream changes with a single command:
 
 ```bash
 kpt pkg update
 ```
 
-`kpt pkg update` performs a **3‑way merge** between:
+`kpt pkg update` performs a **3-way merge** between:
 
 1. **BASE** — the version of the package you originally fetched.
 2. **LOCAL** — your customized working tree (with `branding/`, `regional/`, `profiles/`, `telemetry-config`, etc.).
 3. **UPSTREAM** — the newly published upstream version.
+
+### Updating the Package: `kpt pkg update` and Structural 3-Way Merge
+
+This section demonstrates how **`kpt pkg update`** incorporates upstream changes into a customized local package. Unlike text-based diffs, `kpt` performs a **Kubernetes-aware, structural 3-way merge**, ensuring that local configurations are preserved alongside upstream improvements.
+
+#### Prerequisites: Simulating the Environments
+
+To demonstrate the update workflow, create a simulated upstream repository and a local consumer clone.
+
+```bash
+### 1. Create a simulated upstream repository
+mkdir /tmp/otel-demo-upstream && cd /tmp/otel-demo-upstream
+git init
+cp -r <path-to-your-repo>/app/ .
+git add . && git commit -m "v1.0.0: Initial upstream release"
+git tag v1.0.0
+### Push it to github and note the url
+
+### 2. Create the local consumer package
+mkdir /tmp/otel-demo-local && cd /tmp/otel-demo-local
+git init
+kpt pkg get <github_url> demo #github url of the upstream package
+```
+
+#### Step 1: Apply Local Customizations (Consumer)
+
+As the consumer, customize the OpenTelemetry Demo for your environment.
+
+##### Configure the Region
+
+Deploy the package for the Japanese market by modifying `app/regional/region-config.yaml`:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: region-config
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  region: china # Changed locally
+```
+
+##### Customize the Frontend Deployment
+
+Modify `app/shop/frontend/deployment_frontend.yaml` to add debug logging, increase memory, and add a team label:
+
+```yaml
+metadata:
+  labels:
+    team: frontend-squad # ADDED
+spec:
+  template:
+    spec:
+      containers:
+        - name: frontend
+          env:
+            - name: NEXT_PUBLIC_LOCALE
+              value: zh-CN
+            - name: LOG_LEVEL
+              value: debug # ADDED
+          resources:
+            limits:
+              memory: 512Mi # CHANGED from 250Mi
+```
+
+##### Customize the Recommendation Deployment
+
+Add a readiness probe to `app/shop/recommendation/deployment_recommendation.yaml`:
+
+```yaml
+          readinessProbe: # ADDED
+            grpc:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+```
+
+Commit the local changes:
+
+```bash
+cd /tmp/otel-demo-local
+git add .
+git commit -m "consumer: configure Japan region and custom resource settings"
+```
+
+#### Step 2: Publish an Upstream Update (Maintainer)
+
+Switching roles, publish a new upstream release containing architectural updates and new regional support (Japan).
+
+```bash
+cd /tmp/otel-demo-upstream/app
+```
+
+##### Update Deployments
+
+Apply the following improvements to the upstream manifests:
+
+1. **Frontend (`shop/frontend/deployment_frontend.yaml`)**:
+   ```yaml
+   metadata:
+     labels:
+       app.kubernetes.io/version: 2.3.0 # UPSTREAM BUMP
+   spec:
+     template:
+       spec:
+         containers:
+           - name: frontend
+             env:
+               - name: OTEL_TRACES_SAMPLER # UPSTREAM ADD
+                 value: parentbased_traceidratio
+               - name: OTEL_TRACES_SAMPLER_ARG
+                 value: "0.25"
+             resources:
+               requests:
+                 cpu: 100m # UPSTREAM ADD
+   ```
+2. **Recommendation (`shop/recommendation/deployment_recommendation.yaml`)**:
+   ```yaml
+             livenessProbe: # UPSTREAM ADD
+               grpc:
+                 port: 8080
+               initialDelaySeconds: 15
+               periodSeconds: 10
+   ```
+
+##### Add Japan Region Support
+
+Extend the regional configurations to support Japan.
+
+1. **Update `regional/setup-region.yaml`** to include Japan in the `region_matrix`:
+   ```python
+         "japan": {
+           "locale": "ja-JP",
+           "currency": "JPY",
+           "tax_rate": "10",
+           "tax_label": "Consumption Tax",
+         },
+   ```
+2. **Update `regional/validator-region.yaml`** to add `"japan"` to `valid_regions`.
+3. Add the `ja-JP` PostgreSQL initialization files (`astronomy-ja-JP-postgresql-init.yaml` and `florist-ja-JP-postgresql-init.yaml`) into their respective `regional/locales/` directories. *(Note: For this demonstration, these translated YAML files have already been added to the repository for you.)*
+
+Commit and tag the release:
+
+```bash
+cd /tmp/otel-demo-upstream
+git add .
+git commit -m "v2.0.0: Add trace sampling, CPU requests, liveness probes, Japan region, bump version"
+git tag v2.0.0
+git push origin main
+```
+
+#### Step 3: Update the Local Package (Consumer)
+
+Pull the new upstream changes into your customized local package:
+
+```bash
+cd /tmp/otel-demo-local
+kpt pkg update demo@v2.0.0
+```
+
+`kpt` executes a **structural 3-way merge** using the original baseline (`v1.0.0`), your local customizations, and the incoming upstream changes (`v2.0.0`).
+
+#### Step 4: Render and Verify
+
+Render the updated package to re-apply all pipeline mutators:
+
+```bash
+cd /tmp/otel-demo-local/app
+kpt fn render .
+```
+
+Inspect the `frontend` Deployment to verify the deterministic merge behavior:
+
+- **Local Customizations Retained**: The `china` region, `512Mi` memory limit, `debug` logging, and `team` label persist.
+- **Upstream Additions Applied**: The trace sampling environment variables, `100m` CPU request, and `2.3.0` version bump are successfully integrated.
+- **Regional Mutators Activated**: Based on `region: japan`, the Starlark pipeline dynamically injected the Japanese tax rate (10%) and locale (`ja-JP`).
+
+Additionally, check the `recommendation` Deployment to see that both the consumer's `readinessProbe` and the upstream's `livenessProbe` gracefully coexist.
+
+#### Understanding the Structural Merge
+
+Traditional text-based merge tools such as standard `git merge` perform a three-way merge over **plain text**. They compare line changes without understanding Kubernetes resource structure. As a result, updates involving locally customized manifests may require manual conflict resolution or careful review whenever edits overlap.
+
+Similarly, tools such as **Kustomize** focus on applying overlays and patches to a base configuration. When the upstream base evolves, users typically update the base and verify that existing overlays and patches continue to apply correctly. By contrast, **`kpt`** treats the package itself as the unit of evolution and provides a built-in package update workflow with structural merging.
+
+**`kpt pkg update`** performs a Kubernetes-aware, three-way structural merge between the original upstream package, the updated upstream package, and your locally customized package. Rather than reasoning about line numbers, it understands the structure of Kubernetes resources:
+
+- It recognizes that the `env` array is an associative list keyed by the `name` field, rather than simply an ordered YAML sequence.
+- It understands that `resources.limits` and `resources.requests` are independent map fields that can be merged without relying on line positions.
+- It distinguishes between fields such as `livenessProbe` and `readinessProbe`, treating them as separate parts of the resource specification.
+
+This allows compatible upstream changes and local customizations to be merged using Kubernetes resource structure instead of plain text. By default, `kpt pkg update` uses the **`resource-merge`** strategy, which performs an OpenAPI schema-aware structural comparison during the three-way merge.
+
+For more information, see the [kpt Package Update documentation](https://kpt.dev/book/03-packages/#updating-a-package).
+
+
+
 
 Customizations in `branding/`, `regional/`, and `profiles/` are preserved because they live in separate files that don't collide with upstream `shop/` manifests. The `upstream` and `upstreamLock` sections of `Kptfile` track which version you're on.
 
@@ -455,17 +635,7 @@ The default merge strategy is `resource-merge` (structural, associative‑list a
 
 ---
 
-## Roadmap
 
-- [x] Package Composition (`shop/` + `observability/`)
-- [x] Branding (Astronomy → Florist via `app/branding/`)
-- [x] Telemetry parameterization (`telemetry-config.yaml` + `apply-telemetry`)
-- [x] Namespace parameterization (`set-namespace`)
-- [x] Regional Deployment — Language, Currency, Tax (via `app/regional/`)
-- [x] Deployment Profiles — Small / Medium / Large (via `app/profiles/`)
-- [ ] Chaos Engineering — Fault injection (via `app/chaos/`)
-- [ ] Safe upstream updates (`kpt pkg update` with 3‑way merge)
----
 
 ## Contributing
 
@@ -480,7 +650,7 @@ The default merge strategy is `resource-merge` (structural, associative‑list a
 4. **Validate locally** with `kpt fn render .` and the existing pipelines.
 5. **Commit** with a clear message and **open a Pull Request** describing the change and how you tested it.
 
-For larger changes (new customization layers, new stores), please open an issue first to discuss the design before submitting code.
+For larger changes please open an issue first to discuss the design before submitting code.
 
 ---
 
