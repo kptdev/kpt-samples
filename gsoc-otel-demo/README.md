@@ -89,6 +89,9 @@ app/                              (ROOT PACKAGE)
 - [`kubectl`](https://kubernetes.io/docs/tasks/tools/) — for cluster interaction.
 - [`kpt`](https://kpt.dev/installation/kpt-cli) — for fetching, rendering, and applying the package.
 - Create a namespace called `otel-demo`
+```bash
+kubectl create namespace otel-demo
+```
 
 ### Installation
 
@@ -122,19 +125,6 @@ kpt live apply .
 
 Every customization in this repository is driven by **Configuration as Data**: a local‑config ConfigMap holds the desired values, and a pipeline of KRM functions reads that data and rewrites the rendered resources accordingly.
 
-The pipeline at the root `app/Kptfile` runs in this order:
-
-1. **`setup-branding`** (Starlark) — reads `branding-config` and the per‑store data folder, then materializes a `value-store` ConfigMap (images + product ID) and an `active-postgresql-init` ConfigMap (the right SQL).
-2. **`replace-postgresql-init`** (ApplyReplacements) — copies the `init.sql` from `active-postgresql-init` into the `postgresql-init` ConfigMap inside `shop/`.
-3. **`branding-image-provider`** (ApplyReplacements) — propagates the image fields from `value-store` into the relevant Deployments inside `shop/`.
-4. **`setup-region`** (Starlark) — reads `region-config`, derives locale / currency / tax from the region matrix, materializes a `regional-value-store` ConfigMap and an `active-region-postgresql-init` ConfigMap with the translated product SQL, and injects environment variables (`NEXT_PUBLIC_LOCALE`, `DEFAULT_CURRENCY`, `TAX_RATE`, `TAX_LABEL`) into the relevant Deployments.
-5. **`replace-postgresql-region`** (ApplyReplacements) — copies the translated `init.sql` from `active-region-postgresql-init` into the `postgresql-init` ConfigMap.
-6. **`setup-profile`** (Starlark) — reads `profile-config`, looks up the profile matrix (`small` / `medium` / `large`), and mutates `spec.replicas`, `resources.limits.memory`, and `resources.requests.cpu` across all Deployments, StatefulSets, and DaemonSets in both `shop/` and `observability/`.
-7. **`setup-chaos`** (Starlark) — reads `chaos-config` and mutates the `demo.flagd.json` payload inside `flagd-config` to enable specific failure variants for the chosen chaos scenario.
-8. **`validator-branding`** (Starlark validator) — fails the render with a clear error if `storeType` is not one of the supported values.
-9. **`validator-region`** (Starlark validator) — fails the render with a clear error if `region` is not one of the supported values.
-10. **`validator-profile`** (Starlark validator) — fails the render with a clear error if `profile` is not one of the supported values.
-11. **`validator-chaos`** (Starlark validator) — fails the render with a clear error if `scenario` is not one of the supported values (`off`, `payment-outage`, etc.).
 
 Because every step is a standalone function, you can preview any one of them with `kpt fn eval --fn-config <path>` to debug a single stage without re‑rendering the whole pipeline.
 
@@ -184,11 +174,11 @@ data:
    kpt live apply . --reconcile-timeout=2m --output=table
    ```
 
-The product ID used by flagd (`FLR001` for Florist, the upstream ID for Astronomy) is also rewritten during render so that the right feature flags light up for each store. The search/replace is scoped to the package so it never touches the per‑store source data under `app/branding/`.
+<!-- The product ID used by flagd (`FLR001` for Florist, the upstream ID for Astronomy) is also rewritten during render so that the right feature flags light up for each store. The search/replace is scoped to the package so it never touches the per‑store source data under `app/branding/`. -->
 
-**What does NOT change when switching stores:**
+<!-- **What does NOT change when switching stores:**
 
-The generic e‑commerce workflow stays identical — `cart`, `checkout`, `payment`, `shipping`, `currency`, `quote`, `email`, `accounting`, `fraud-detection`, plus all of `kafka`, `postgresql`, and `valkey-cart`. Only the brand‑specific resources (images, product ID, catalog SQL) are mutated.
+The generic e‑commerce workflow stays identical — `cart`, `checkout`, `payment`, `shipping`, `currency`, `quote`, `email`, `accounting`, `fraud-detection`, plus all of `kafka`, `postgresql`, and `valkey-cart`. Only the brand‑specific resources (images, product ID, catalog SQL) are mutated. -->
 
 **Adding a new store:**
 
@@ -230,9 +220,9 @@ data:
 | `china` | `zh-CN` | `CNY` | 13% | VAT |
 
 
-A user changes **one field** and the Starlark engine automatically derives four values, which cascade across environment‑variable injections in four services (`frontend`, `ad`, `llm`, `email`) and a translated product catalog in PostgreSQL.
+**One field** is changed and the Starlark engine automatically derives four values, which cascade across environment‑variable injections in four services (`frontend`, `ad`, `llm`, `email`) and a translated product catalog in PostgreSQL.
 
-**Services mutated by the regional layer:**
+<!-- **Services mutated by the regional layer:**
 
 | Service | What changes | Mechanism |
 | --- | --- | --- |
@@ -242,7 +232,7 @@ A user changes **one field** and the Starlark engine automatically derives four 
 | **email** | `NEXT_PUBLIC_LOCALE` env var | Starlark `set_env_value` |
 | **postgresql-init** | `init.sql` replaced with translated product names, descriptions, and reviews | ApplyReplacements |
 
-The remaining 16 services (product-catalog, recommendation, currency, checkout, payment, shipping, quote, cart, accounting, fraud-detection, image-provider, load-generator, flagd, kafka, postgresql, frontend-proxy) are region‑agnostic and require no changes.
+The remaining 16 services (product-catalog, recommendation, currency, checkout, payment, shipping, quote, cart, accounting, fraud-detection, image-provider, load-generator, flagd, kafka, postgresql, frontend-proxy) are region‑agnostic and require no changes. -->
 
 **To deploy for India:**
 
@@ -261,7 +251,7 @@ The remaining 16 services (product-catalog, recommendation, currency, checkout, 
 3. Re‑apply:
 
    ```bash
-   kpt live apply . --reconcile-timeout=2m --output=table
+   kpt live apply . --reconcile-timeout=2m 
    ```
 
 
@@ -384,7 +374,7 @@ data:
 
 ---
 
-## How It Works
+## The complete flow
 
 The package follows a simple, declarative rendering pipeline. Everything between the source of truth and the running cluster is a function over YAML data.
 
@@ -440,18 +430,23 @@ This section demonstrates how **`kpt pkg update`** incorporates upstream changes
 To demonstrate the update workflow, create a simulated upstream repository and a local consumer clone.
 
 ```bash
-### 1. Create a simulated upstream repository
+# 1. Create a simulated upstream repository
 mkdir /tmp/otel-demo-upstream && cd /tmp/otel-demo-upstream
 git init
 cp -r <path-to-your-repo>/app/ .
-git add . && git commit -m "v1.0.0: Initial upstream release"
+git add .
+git commit -m "v1.0.0: Initial upstream release"
 git tag v1.0.0
-### Push it to github and note the url
+git branch -M main
+git remote add origin <github_repo>
+git push -u origin main --tags
 
-### 2. Create the local consumer package
+# Push the repository to GitHub and note its URL.
+
+# 2. Create the local consumer package
 mkdir /tmp/otel-demo-local && cd /tmp/otel-demo-local
 git init
-kpt pkg get <github_url> demo #github url of the upstream package
+kpt pkg get <github_url>@v1.0.0 demo
 ```
 
 #### Step 1: Apply Local Customizations (Consumer)
@@ -579,7 +574,7 @@ cd /tmp/otel-demo-upstream
 git add .
 git commit -m "v2.0.0: Add trace sampling, CPU requests, liveness probes, Japan region, bump version"
 git tag v2.0.0
-git push origin main
+git push origin main --tags
 ```
 
 #### Step 3: Update the Local Package (Consumer)
