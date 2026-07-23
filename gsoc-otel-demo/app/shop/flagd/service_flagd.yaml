@@ -1,0 +1,28 @@
+# Source: opentelemetry-demo/templates/component.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: flagd
+  labels:
+    helm.sh/chart: opentelemetry-demo-0.40.9
+    opentelemetry.io/name: flagd
+    app.kubernetes.io/version: 2.2.0
+    app.kubernetes.io/component: flagd
+    app.kubernetes.io/name: flagd
+    app.kubernetes.io/part-of: opentelemetry-demo
+    app.kubernetes.io/managed-by: Helm
+  namespace: otel-demo
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8013
+      name: rpc
+      targetPort: 8013
+    - port: 8016
+      name: ofrep
+      targetPort: 8016
+    - port: 4000
+      name: tcp-service-0
+      targetPort: 4000
+  selector:
+    opentelemetry.io/name: flagd

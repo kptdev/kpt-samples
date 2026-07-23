@@ -1,0 +1,70 @@
+# Source: opentelemetry-demo/templates/component.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounting
+  labels:
+    helm.sh/chart: opentelemetry-demo-0.40.9
+    opentelemetry.io/name: accounting
+    app.kubernetes.io/version: 2.2.0
+    app.kubernetes.io/component: accounting
+    app.kubernetes.io/name: accounting
+    app.kubernetes.io/part-of: opentelemetry-demo
+    app.kubernetes.io/managed-by: Helm
+  namespace: otel-demo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      opentelemetry.io/name: accounting
+  template:
+    metadata:
+      labels:
+        opentelemetry.io/name: accounting
+        app.kubernetes.io/version: 2.2.0
+        app.kubernetes.io/component: accounting
+        app.kubernetes.io/name: accounting
+      annotations: {}
+    spec:
+      serviceAccountName: opentelemetry-demo
+      containers:
+        - name: accounting
+          image: ghcr.io/open-telemetry/demo:2.2.0-accounting
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['app.kubernetes.io/component']
+            - name: OTEL_COLLECTOR_NAME
+              value: otel-collector
+            - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+              value: cumulative
+            - name: KAFKA_ADDR
+              value: kafka:9092
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector:4318
+            - name: DB_CONNECTION_STRING
+              value: Host=postgresql;Username=otelu;Password=otelp;Database=otel
+            - name: OTEL_DOTNET_AUTO_TRACES_ENTITYFRAMEWORKCORE_INSTRUMENTATION_ENABLED
+              value: "false"
+            - name: OTEL_COLLECTOR_HOST
+              value: otel-collector
+            - name: GRAFANA_HOST
+              value: grafana
+            - name: JAEGER_HOST
+              value: jaeger
+          resources:
+            limits:
+              memory: 120Mi
+          volumeMounts: null
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - until nc -z -v -w30 kafka 9092; do echo waiting for kafka; sleep 2; done;
+          image: busybox:latest
+          name: wait-for-kafka
+      volumes: null

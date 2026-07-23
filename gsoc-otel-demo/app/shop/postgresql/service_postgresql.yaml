@@ -1,0 +1,22 @@
+# Source: opentelemetry-demo/templates/component.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  labels:
+    helm.sh/chart: opentelemetry-demo-0.40.9
+    opentelemetry.io/name: postgresql
+    app.kubernetes.io/version: 2.2.0
+    app.kubernetes.io/component: postgresql
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/part-of: opentelemetry-demo
+    app.kubernetes.io/managed-by: Helm
+  namespace: otel-demo
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      name: tcp-service
+      targetPort: 5432
+  selector:
+    opentelemetry.io/name: postgresql

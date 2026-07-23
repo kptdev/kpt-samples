@@ -1,0 +1,11 @@
+# Hindi (hi-IN). Selected when NEXT_PUBLIC_LOCALE=hi-IN or unset.
+email:
+  subject: आपका पुष्टि ईमेल
+  title: आपके ऑर्डर की पुष्टि
+  thanks: हमारे साथ खरीदारी करने के लिए धन्यवाद!
+  order_id: ऑर्डर आईडी
+  shipping: शिपिंग
+  items: वस्तुएँ
+  item_no: वस्तु संख्या
+  quantity: मात्रा
+  price: मूल्य

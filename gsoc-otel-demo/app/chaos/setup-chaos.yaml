@@ -1,0 +1,93 @@
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: setup-chaos
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  load("krmfn.star", "krmfn")
+
+  def setup_chaos(resources):
+    scenario = "off"
+
+    # Read scenario from config
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "chaos-config"):
+        scenario = r.get("data", {}).get("scenario", "off")
+
+    if scenario == "":
+      fail("scenario cannot be empty in chaos-config")
+
+    # Define the chaos mapping
+    chaos_matrix = {
+      "off": {},
+      "payment-outage": {
+        "paymentFailure": "100%",
+        "paymentUnreachable": "on"
+      },
+      "high-load": {
+        "loadGeneratorFloodHomepage": "on",
+        "adHighCpu": "on",
+        "kafkaQueueProblems": "on"
+      },
+      "broken-catalog": {
+        "productCatalogFailure": "on",
+        "recommendationCacheFailure": "on"
+      },
+      "memory-leak": {
+        "emailMemoryLeak": "100x",
+        "adManualGc": "on"
+      }
+    }
+
+    if scenario not in chaos_matrix:
+      fail("Unsupported chaos scenario: " + scenario)
+
+    flags_to_enable = chaos_matrix[scenario]
+
+    # Gather all chaos flags we know about
+    all_chaos_flags = []
+    for scenario_name, scenario_flags in chaos_matrix.items():
+      for f in scenario_flags:
+        if f not in all_chaos_flags:
+          all_chaos_flags.append(f)
+
+    # Find the flagd-config ConfigMap and mutate the JSON string
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "flagd-config"):
+        raw_json = r.get("data", {}).get("demo.flagd.json", "")
+        if raw_json == "":
+          fail("demo.flagd.json not found in flagd-config")
+
+        # We don't have a json parser in this starlark environment, so we will use
+        # line-by-line string replacement. We assume the JSON format is consistent.
+        lines = raw_json.split("\n")
+        new_lines = []
+        current_flag = ""
+
+        for line in lines:
+          # Track the current flag context
+          for flag in all_chaos_flags:
+            if '"' + flag + '": {' in line:
+              current_flag = flag
+              break
+
+          # If we are in a known flag's context and hit defaultVariant
+          if current_flag != "" and '"defaultVariant":' in line:
+            variant = flags_to_enable.get(current_flag, "off")
+
+            # Reconstruct the line preserving leading whitespace
+            colon_idx = line.find(":")
+            if colon_idx != -1:
+              prefix = line[:colon_idx+1]
+              suffix = "," if line.strip().endswith(",") else ""
+              line = prefix + ' "' + variant + '"' + suffix
+
+            current_flag = "" # Reset context after updating
+
+          new_lines.append(line)
+
+        r["data"]["demo.flagd.json"] = "\n".join(new_lines)
+        break
+
+  setup_chaos(ctx.resource_list["items"])

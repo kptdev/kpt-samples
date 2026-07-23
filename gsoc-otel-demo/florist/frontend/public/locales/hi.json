@@ -1,0 +1,112 @@
+{
+  "page_titles": {
+    "home": "फ्लोरिस्ट शॉप",
+    "cart": "फ्लोरिस्ट शॉप - कार्ट",
+    "product": "फ्लोरिस्ट शॉप - उत्पाद",
+    "checkout": "फ्लोरिस्ट शॉप - चेकआउट"
+  },
+  "home": {
+    "banner_title": "हर अवसर के लिए ताज़े फूल",
+    "banner_cta": "गुलदस्ते देखें",
+    "hot_products": "नई वस्तुएँ"
+  },
+  "footer": {
+    "demo_notice": "यह वेबसाइट केवल डेमो उद्देश्य के लिए होस्ट की गई है। यह वास्तविक दुकान नहीं है।"
+  },
+  "common": {
+    "continue_shopping": "खरीदारी जारी रखें",
+    "recommendations": "आपको यह भी पसंद आ सकता है"
+  },
+  "empty_cart": {
+    "title": "आपकी शॉपिंग कार्ट खाली है!",
+    "subtitle": "आपकी शॉपिंग कार्ट में जो आइटम जोड़ेंगे, वे यहाँ दिखेंगे।"
+  },
+  "cart": {
+    "title": "आपकी कार्ट",
+    "empty": "आपकी कार्ट खाली है",
+    "checkout": "चेकआउट",
+    "subtotal": "उप-योग",
+    "remove": "हटाएं",
+    "empty_button": "कार्ट खाली करें",
+    "shopping_cart": "खरीदारी कार्ट",
+    "close": "बंद करें",
+    "empty_dropdown": "आपकी खरीदारी कार्ट खाली है",
+    "go_to_cart": "खरीदारी कार्ट पर जाएं"
+  },
+  "cart_table": {
+    "product": "उत्पाद",
+    "quantity": "मात्रा",
+    "price": "मूल्य"
+  },
+  "product": {
+    "add_to_cart": "\u0915\u093e\u0930\u094d\u091f \u092e\u0947\u0902 \u091c\u094b\u0921\u093c\u0947\u0902",
+    "quantity": "\u092e\u093e\u0924\u094d\u0930\u093e",
+    "reviews": "\u0917\u094d\u0930\u093e\u0939\u0915 \u0938\u092e\u0940\u0915\u094d\u0937\u093e\u090f\u0902",
+    "loading": "\u0932\u094b\u0921 \u0939\u094b \u0930\u0939\u093e \u0939\u0948...",
+    "reviews_error": "\u0909\u0924\u094d\u092a\u093e\u0926 \u0938\u092e\u0940\u0915\u094d\u0937\u093e\u090f\u0902 \u0932\u094b\u0921 \u0928\u0939\u0940\u0902 \u0915\u0940 \u091c\u093e \u0938\u0915\u0940\u0902\u0964",
+    "no_reviews": "\u0905\u092d\u0940 \u0924\u0915 \u0915\u094b\u0908 \u0938\u092e\u0940\u0915\u094d\u0937\u093e \u0928\u0939\u0940\u0902\u0964",
+    "no_description": "\u0915\u094b\u0908 \u0935\u093f\u0935\u0930\u0923 \u092a\u094d\u0930\u0926\u093e\u0928 \u0928\u0939\u0940\u0902 \u0915\u093f\u092f\u093e \u0917\u092f\u093e\u0964",
+    "review_count": "\u0938\u092e\u0940\u0915\u094d\u0937\u093e\u090f\u0902",
+    "star": "\u0924\u093e\u0930\u093e",
+    "stars": "\u0924\u093e\u0930\u0947",
+    "ai_response": "AI \u092a\u094d\u0930\u0924\u093f\u0915\u094d\u0930\u093f\u092f\u093e:",
+    "ai_error": "\u0915\u094d\u0937\u092e\u093e \u0915\u0930\u0947\u0902, AI \u0938\u0947 \u092a\u0942\u091b\u0924\u0947 \u0938\u092e\u092f \u0915\u0941\u091b \u0917\u0932\u0924 \u0939\u094b \u0917\u092f\u093e\u0964",
+    "ask_assistant": "AI \u0938\u0939\u093e\u092f\u0915 \u0938\u0947 \u0915\u094b\u0908 \u092a\u094d\u0930\u0936\u094d\u0928 \u092a\u0942\u091b\u0947\u0902",
+    "ai_placeholder": "\u0905\u092a\u0928\u093e \u092a\u094d\u0930\u0936\u094d\u0928 \u092f\u0939\u093e\u0902 \u0926\u0930\u094d\u091c \u0915\u0930\u0947\u0902...",
+    "ask": "\u092a\u0942\u091b\u0947\u0902",
+    "ai_loading": "AI \u0938\u0947 \u092a\u0942\u091b \u0930\u0939\u093e \u0939\u0948...",
+    "quick_prompt_summarize": "\u0915\u094d\u092f\u093e \u0906\u092a \u0909\u0924\u094d\u092a\u093e\u0926 \u0938\u092e\u0940\u0915\u094d\u0937\u093e\u0913\u0902 \u0915\u093e \u0938\u093e\u0930\u093e\u0902\u0936 \u0926\u0947 \u0938\u0915\u0924\u0947 \u0939\u0948\u0902?",
+    "quick_prompt_ages": "\u092f\u0939 \u0915\u093f\u0938 \u0909\u092e\u094d\u0930 \u0915\u0947 \u0932\u093f\u090f \u0905\u0928\u0941\u0936\u0902\u0938\u093f\u0924 \u0939\u0948?",
+    "quick_prompt_negative": "\u0915\u094d\u092f\u093e \u0915\u094b\u0908 \u0928\u0915\u093e\u0930\u093e\u0924\u094d\u092e\u0915 \u0938\u092e\u0940\u0915\u094d\u0937\u093e \u0925\u0940?"
+  },
+  "checkout_item": {
+    "shipping_data": "शिपिंग विवरण",
+    "street": "सड़क",
+    "city": "शहर",
+    "state": "राज्य",
+    "zip_code": "पिन कोड",
+    "country": "देश",
+    "see_more": "और देखें",
+    "done": "पूर्ण"
+  },
+  "checkout_form": {
+    "shipping_address": "शिपिंग पता",
+    "email_address": "ई-मेल पता",
+    "street_address": "सड़क का पता",
+    "zip_code": "पिन कोड",
+    "city": "शहर",
+    "state": "राज्य",
+    "country": "देश",
+    "country_placeholder": "देश का नाम",
+    "payment_method": "भुगतान विधि",
+    "credit_card_number": "क्रेडिट कार्ड नंबर",
+    "credit_card_number_placeholder": "0000-0000-0000-0000",
+    "month": "महीना",
+    "year": "वर्ष",
+    "cvv": "CVV",
+    "place_order": "ऑर्डर दें"
+  },
+  "checkout_summary": {
+    "complete": "आपका ऑर्डर पूरा हो गया है!",
+    "sent_email": "हमने आपको एक पुष्टि ईमेल भेज दी है।",
+    "order_id": "ऑर्डर आईडी",
+    "shipping_address": "शिपिंग पता",
+    "order_items": "ऑर्डर आइटम",
+    "quantity": "मात्रा",
+    "shipping": "शिपिंग",
+    "total": "कुल"
+  },
+  "currency": {
+    "switcher_label": "मुद्रा"
+  },
+  "products": {
+    "add_to_cart": "कार्ट में डालें",
+    "out_of_stock": "स्टॉक में नहीं",
+    "in_stock": "स्टॉक में"
+  },
+  "layout": {
+    "store_name": "फ्लोरिस्ट शॉप",
+    "home": "होम",
+    "cart": "कार्ट"
+  }
+}

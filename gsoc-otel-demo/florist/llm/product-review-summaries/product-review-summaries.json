@@ -1,0 +1,29 @@
+{
+  "product-review-summaries": [
+    {
+      "product_id": "FLR001",
+      "average_score": 4.5,
+      "product_review_summary": "This Red Roses Bouquet is beloved by customers for its stunning, velvety blooms and long-lasting freshness. Reviewers praise the elegant presentation and the romantic touch it brings to any occasion, though a few mention wishing for more color variety."
+    },
+    {
+      "product_id": "FLR002",
+      "average_score": 4.7,
+      "product_review_summary": "The White Lilies Arrangement exudes sophistication and grace. Customers consistently highlight the delicate fragrance and pristine beauty of the lilies, making it a top choice for weddings and sympathy arrangements."
+    },
+    {
+      "product_id": "FLR003",
+      "average_score": 4.4,
+      "product_review_summary": "This Spring Tulip Mix brings a burst of joyful color to any space. Buyers love the vibrant variety and the way the buds unfurl into full blooms, though some note the mixed colors can vary slightly from the photos."
+    },
+    {
+      "product_id": "FLR004",
+      "average_score": 4.8,
+      "product_review_summary": "The Orchid Elegance Pot is praised as a luxurious centerpiece that lasts for months with minimal care. Customers appreciate the premium ceramic pot and the sophisticated beauty of the phalaenopsis orchid, deeming it exceptional value."
+    },
+    {
+      "product_id": "FLR005",
+      "average_score": 4.6,
+      "product_review_summary": "The Sunflower Sunshine Box is a customer favorite for its cheerful, radiant energy. Reviewers love how the bold sunflowers brighten any room, with many noting the excellent longevity and charming packaging."
+    }
+  ]
+}

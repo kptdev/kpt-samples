@@ -1,0 +1,11 @@
+# Mandarin Chinese (zh-CN). Selected when NEXT_PUBLIC_LOCALE=zh-CN or unset.
+email:
+  subject: 您的确认邮件
+  title: 您的订单确认
+  thanks: 感谢您与我们购物！
+  order_id: 订单编号
+  shipping: 配送
+  items: 商品
+  item_no: 商品编号
+  quantity: 数量
+  price: 价格

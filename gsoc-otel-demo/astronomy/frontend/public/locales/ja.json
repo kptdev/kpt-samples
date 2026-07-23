@@ -1,0 +1,104 @@
+{
+  "page_titles": {
+    "home": "Otel Demo - \u30db\u30fc\u30e0",
+    "cart": "Otel Demo - \u30ab\u30fc\u30c8",
+    "checkout": "Otel Demo - \u30c1\u30a7\u30c3\u30af\u30a2\u30a6\u30c8",
+    "product": "Otel Demo - \u88fd\u54c1"
+  },
+  "home": {
+    "banner_title": "\u4e16\u754c\u3092\u3088\u308a\u8fd1\u304f\u3067\u898b\u308b\u305f\u3081\u306e\u6700\u9ad8\u306e\u671b\u9060\u93e1",
+    "banner_cta": "\u8cb7\u3044\u7269\u306b\u884c\u304f",
+    "hot_products": "\u4eba\u6c17\u5546\u54c1"
+  },
+  "cart": {
+    "empty": "\u30b7\u30e7\u30c3\u30d4\u30f3\u30b0\u30ab\u30fc\u30c8\u306f\u7a7a\u3067\u3059",
+    "item": "\u30a2\u30a4\u30c6\u30e0",
+    "quantity": "\u6570\u91cf",
+    "price": "\u4fa1\u683c",
+    "empty_cart": "\u30ab\u30fc\u30c8\u3092\u7a7a\u306b\u3059\u308b",
+    "place_order": "\u6ce8\u6587\u3092\u78ba\u5b9a\u3059\u308b",
+    "subtotal": "\u5c0f\u8a08",
+    "shopping_cart": "\u30b7\u30e7\u30c3\u30d4\u30f3\u30b0\u30ab\u30fc\u30c8",
+    "close": "\u9589\u3058\u308b",
+    "empty_dropdown": "\u30b7\u30e7\u30c3\u30d4\u30f3\u30b0\u30ab\u30fc\u30c8\u306f\u7a7a\u3067\u3059",
+    "go_to_cart": "\u30b7\u30e7\u30c3\u30d4\u30f3\u30b0\u30ab\u30fc\u30c8\u3078",
+    "empty_cart_subtitle": "\u30ab\u30fc\u30c8\u306b\u8ffd\u52a0\u3057\u305f\u5546\u54c1\u304c\u3053\u3053\u306b\u8868\u793a\u3055\u308c\u307e\u3059\u3002"
+  },
+  "checkout_item": {
+    "shipping_data": "\u914d\u9001\u60c5\u5831",
+    "street": "\u4f4f\u6240",
+    "city": "\u5e02\u533a\u753a\u6751",
+    "state": "\u90fd\u9053\u5e9c\u770c",
+    "zip_code": "\u90f5\u4fbf\u756a\u53f7",
+    "country": "\u56fd",
+    "see_more": "\u3082\u3063\u3068\u898b\u308b",
+    "done": "\u5b8c\u4e86",
+    "total": "\u5408\u8a08"
+  },
+  "checkout_summary": {
+    "complete": "\u6ce8\u6587\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f\uff01",
+    "sent_email": "\u78ba\u8a8d\u30e1\u30fc\u30eb\u3092\u9001\u4fe1\u3057\u307e\u3057\u305f\u3002",
+    "order_id": "\u6ce8\u6587 ID",
+    "shipping_address": "\u304a\u5c4a\u3051\u5148\u4f4f\u6240",
+    "order_items": "\u6ce8\u6587\u30a2\u30a4\u30c6\u30e0",
+    "quantity": "\u6570\u91cf",
+    "shipping": "\u914d\u9001",
+    "total": "\u5408\u8a08"
+  },
+  "common": {
+    "continue_shopping": "\u8cb7\u3044\u7269\u3092\u7d9a\u3051\u308b",
+    "recommendations": "\u3053\u3061\u3089\u3082\u304a\u3059\u3059\u3081"
+  },
+  "checkout_form": {
+    "email": "\u30e1\u30fc\u30eb",
+    "email_placeholder": "you@example.com",
+    "street": "\u4f4f\u6240",
+    "street_placeholder": "1600 Amphitheatre Parkway",
+    "zip_code": "\u90f5\u4fbf\u756a\u53f7",
+    "zip_code_placeholder": "94043",
+    "city": "\u5e02\u533a\u753a\u6751",
+    "city_placeholder": "Mountain View",
+    "state": "\u90fd\u9053\u5e9c\u770c",
+    "state_placeholder": "CA",
+    "country": "\u56fd",
+    "country_placeholder": "United States",
+    "card_number": "\u30af\u30ec\u30b8\u30c3\u30c8\u30ab\u30fc\u30c8\u3099\u756a\u53f7",
+    "payment_method": "\u304a\u652f\u6255\u3044\u65b9\u6cd5",
+    "month": "\u6708",
+    "year": "\u5e74",
+    "expiration_month": "\u6709\u52b9\u671f\u9650\uff08\u6708\uff09",
+    "expiration_year": "\u6709\u52b9\u671f\u9650\uff08\u5e74\uff09",
+    "cvv": "CVV"
+  },
+  "footer": {
+    "built_with": "Built with",
+    "open_telemetry": "OpenTelemetry",
+    "this_project": "This project is",
+    "open_source": "open source",
+    "disclaimer": "このサイトはデモ目的で公開されています。実際のショップではありません。"
+  },
+  "header": {
+    "cart": "\u30ab\u30fc\u30c8"
+  },
+  "product": {
+    "add_to_cart": "\u30ab\u30fc\u30c8\u306b\u8ffd\u52a0",
+    "quantity": "\u6570\u91cf",
+    "reviews": "\u30ab\u30b9\u30bf\u30de\u30fc\u30ec\u30d3\u30e5\u30fc",
+    "loading": "\u8aad\u307f\u8fbc\u307f\u4e2d...",
+    "reviews_error": "\u88fd\u54c1\u30ec\u30d3\u30e5\u30fc\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3067\u3057\u305f\u3002",
+    "no_reviews": "\u30ec\u30d3\u30e5\u30fc\u306f\u307e\u3060\u3042\u308a\u307e\u305b\u3093\u3002",
+    "no_description": "\u8aac\u660e\u304c\u3042\u308a\u307e\u305b\u3093\u3002",
+    "review_count": "\u4ef6\u306e\u30ec\u30d3\u30e5\u30fc",
+    "star": "\u661f",
+    "stars": "\u661f",
+    "ai_response": "AI\u306e\u56de\u7b54:",
+    "ai_error": "AI\u306b\u8cea\u554f\u4e2d\u306b\u30a8\u30e9\u30fc\u304c\u767a\u751f\u3057\u307e\u3057\u305f\u3002",
+    "ask_assistant": "AI \u30a2\u30b7\u30b9\u30bf\u30f3\u30c8\u306b\u8cea\u554f\u3059\u308b",
+    "ai_placeholder": "\u3053\u3053\u306b\u8cea\u554f\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044...",
+    "ask": "\u8cea\u554f\u3059\u308b",
+    "ai_loading": "AI\u306b\u8cea\u554f\u4e2d...",
+    "quick_prompt_summarize": "\u88fd\u54c1\u30ec\u30d3\u30e5\u30fc\u3092\u8981\u7d04\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+    "quick_prompt_ages": "\u3053\u308c\u306f\u4f55\u6b73\u5411\u3051\u3067\u3059\u304b\uff1f",
+    "quick_prompt_negative": "\u5426\u5b9a\u7684\u306a\u30ec\u30d3\u30e5\u30fc\u306f\u3042\u308a\u307e\u3057\u305f\u304b\uff1f"
+  }
+}

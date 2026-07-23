@@ -1,0 +1,94 @@
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: apply-telemetry
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  def set_env(env, name, value):
+    if value == None:
+      fail(name + " value not found in telemetry-config")
+
+    for entry in env:
+      if entry.get("name") == name:
+        entry["value"] = value
+        return
+
+    env.append({"name": name, "value": value})
+
+  def replace_many(text, replacements):
+    for pair in replacements:
+      text = text.replace(pair[0], pair[1])
+    return text
+
+  def apply_observability(ctx):
+    resources = ctx.resource_list["items"]
+    telemetry_config = None
+
+    for r in resources:
+      if r.get("kind") == "ConfigMap" and r.get("metadata", {}).get("name") == "telemetry-config":
+        telemetry_config = r.get("data", {})
+        break
+
+    if telemetry_config == None:
+      fail("telemetry-config ConfigMap not found")
+
+    opensearch_endpoint = telemetry_config.get("opensearch-endpoint")
+    prometheus_otlp_endpoint = telemetry_config.get("prometheus-otlp-endpoint")
+    jaeger_otlp_endpoint = telemetry_config.get("jaeger-otlp-endpoint")
+    collector_self_otlp_endpoint = telemetry_config.get("collector-self-otlp-endpoint")
+    prometheus_addr = telemetry_config.get("prometheus-addr")
+    otel_collector_host = telemetry_config.get("otel-collector-host")
+    otel_collector_port_http = telemetry_config.get("otel-collector-port-http")
+    jaeger_host = telemetry_config.get("jaeger-host")
+    jaeger_grpc_port = telemetry_config.get("jaeger-grpc-port")
+    grafana_prometheus_url = telemetry_config.get("grafana-prometheus-url")
+    grafana_jaeger_url = telemetry_config.get("grafana-jaeger-url")
+    grafana_opensearch_url = telemetry_config.get("grafana-opensearch-url")
+
+    for r in resources:
+      if r.get("kind") == "ConfigMap" and r.get("metadata", {}).get("name") == "otel-collector-agent":
+        relay = r.get("data", {}).get("relay")
+        if relay != None:
+          r["data"]["relay"] = replace_many(relay, [
+            ("http://opensearch:9200", opensearch_endpoint),
+            ("jaeger:4317", jaeger_otlp_endpoint),
+            ("http://prometheus:9090/api/v1/otlp", prometheus_otlp_endpoint),
+            ("http://otel-collector:4318", collector_self_otlp_endpoint),
+          ])
+
+      if r.get("kind") == "ConfigMap" and r.get("metadata", {}).get("name") == "grafana-datasources":
+        default_yaml = r.get("data", {}).get("default.yaml")
+        jaeger_yaml = r.get("data", {}).get("jaeger.yaml")
+        opensearch_yaml = r.get("data", {}).get("opensearch.yaml")
+
+        if default_yaml != None:
+          r["data"]["default.yaml"] = replace_many(default_yaml, [
+            ("http://prometheus:9090", grafana_prometheus_url),
+          ])
+
+        if jaeger_yaml != None:
+          r["data"]["jaeger.yaml"] = replace_many(jaeger_yaml, [
+            ("http://jaeger:16686/jaeger/ui", grafana_jaeger_url),
+          ])
+
+        if opensearch_yaml != None:
+          r["data"]["opensearch.yaml"] = replace_many(opensearch_yaml, [
+            ("http://opensearch:9200/", grafana_opensearch_url),
+          ])
+
+      if r.get("kind") == "Deployment" and r.get("metadata", {}).get("name") == "jaeger":
+        containers = r.get("spec", {}).get("template", {}).get("spec", {}).get("containers", [])
+        for container in containers:
+          env = container.get("env")
+          if env == None:
+            continue
+          set_env(env, "PROMETHEUS_ADDR", prometheus_addr)
+          set_env(env, "OTEL_COLLECTOR_HOST", otel_collector_host)
+          set_env(env, "OTEL_COLLECTOR_PORT_HTTP", otel_collector_port_http)
+          set_env(env, "JAEGER_HOST", jaeger_host)
+          set_env(env, "JAEGER_GRPC_PORT", jaeger_grpc_port)
+
+    ctx.resource_list["items"] = resources
+
+  apply_observability(ctx)

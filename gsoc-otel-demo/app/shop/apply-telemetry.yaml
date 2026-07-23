@@ -1,0 +1,77 @@
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: apply-telemetry
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  # apply-telemetry.star - Starlark mutator to parameterize telemetry service names
+  # Reads telemetry-config ConfigMap, then applies those values to workload env lists.
+
+  def set_env(env, name, value):
+    if value == None:
+      fail(name + " value not found in telemetry-config")
+
+    for entry in env:
+      if entry.get("name") == name:
+        entry["value"] = value
+        return
+
+    env.append({"name": name, "value": value})
+
+  def select_otlp_endpoint(existing_value, http_endpoint, grpc_endpoint):
+    if existing_value == None:
+      fail("OTEL_EXPORTER_OTLP_ENDPOINT value not found")
+
+    if "4318" in existing_value:
+      return http_endpoint
+
+    if "4317" in existing_value:
+      return grpc_endpoint
+
+    fail("Unable to determine OTLP endpoint type from " + existing_value)
+
+  def apply_telemetry(ctx):
+    resources = ctx.resource_list["items"]
+    telemetry_config = None
+
+    for r in resources:
+      if r.get("kind") == "ConfigMap" and r.get("metadata", {}).get("name") == "telemetry-config":
+        telemetry_config = r.get("data", {})
+        break
+
+    if telemetry_config == None:
+      fail("telemetry-config ConfigMap not found")
+
+    otel_collector_name = telemetry_config.get("otel-collector-name")
+    otel_exporter_otlp_endpoint_http = telemetry_config.get("otel-exporter-otlp-endpoint-http")
+    otel_exporter_otlp_endpoint_grpc = telemetry_config.get("otel-exporter-otlp-endpoint-grpc")
+    flagd_otel_collector_uri = telemetry_config.get("flagd-otel-collector-uri")
+    grafana_host = telemetry_config.get("grafana-host")
+    jaeger_host = telemetry_config.get("jaeger-host")
+
+    for r in resources:
+      kind = r.get("kind")
+      if kind not in ("Deployment", "DaemonSet", "StatefulSet"):
+        continue
+
+      containers = r.get("spec", {}).get("template", {}).get("spec", {}).get("containers", [])
+      for container in containers:
+        env = container.get("env")
+        if env == None:
+          continue
+
+        set_env(env, "OTEL_COLLECTOR_NAME", otel_collector_name)
+        set_env(env, "OTEL_COLLECTOR_HOST", otel_collector_name)
+        set_env(env, "GRAFANA_HOST", grafana_host)
+        set_env(env, "JAEGER_HOST", jaeger_host)
+
+        for entry in env:
+          if entry.get("name") == "OTEL_EXPORTER_OTLP_ENDPOINT":
+            entry["value"] = select_otlp_endpoint(entry.get("value"), otel_exporter_otlp_endpoint_http, otel_exporter_otlp_endpoint_grpc)
+          if entry.get("name") == "FLAGD_OTEL_COLLECTOR_URI":
+            entry["value"] = flagd_otel_collector_uri
+
+    ctx.resource_list["items"] = resources
+
+  apply_telemetry(ctx)

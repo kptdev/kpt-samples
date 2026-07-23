@@ -1,0 +1,11 @@
+# Czech (cs-CZ). Selected when LOCALE=cs-CZ.
+email:
+  subject: Váš potvrzovací e-mail
+  title: Potvrzení objednávky
+  thanks: Děkujeme za váš nákup!
+  order_id: Číslo objednávky
+  shipping: Doprava
+  items: Položky
+  item_no: Č. položky
+  quantity: Množství
+  price: Cena

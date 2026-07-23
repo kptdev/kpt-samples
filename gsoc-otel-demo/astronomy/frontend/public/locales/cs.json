@@ -1,0 +1,104 @@
+{
+  "page_titles": {
+    "home": "Otel Demo - Dom\u016f",
+    "cart": "Otel Demo - Ko\u0161\u00edk",
+    "checkout": "Otel Demo - Pokladna",
+    "product": "Otel Demo - Produkt"
+  },
+  "home": {
+    "banner_title": "Nejlep\u0161\u00ed dalekohledy k pozorov\u00e1n\u00ed sv\u011bta zbl\u00edzka",
+    "banner_cta": "J\u00edt nakupovat",
+    "hot_products": "Hork\u00e9 produkty"
+  },
+  "cart": {
+    "empty": "V\u00e1\u0161 n\u00e1kupn\u00ed ko\u0161\u00edk je pr\u00e1zdn\u00fd",
+    "item": "Polo\u017eka",
+    "quantity": "Mno\u017estv\u00ed",
+    "price": "Cena",
+    "empty_cart": "Vypr\u00e1zdnit ko\u0161\u00edk",
+    "place_order": "Zadat objedn\u00e1vku",
+    "subtotal": "Mezisou\u010det",
+    "shopping_cart": "N\u00e1kupn\u00ed ko\u0161\u00edk",
+    "close": "Zav\u0159\u00edt",
+    "empty_dropdown": "V\u00e1\u0161 n\u00e1kupn\u00ed ko\u0161\u00edk je pr\u00e1zdn\u00fd",
+    "go_to_cart": "P\u0159ej\u00edt do ko\u0161\u00edku",
+    "empty_cart_subtitle": "Polo\u017eky p\u0159idan\u00e9 do ko\u0161\u00edku se zobraz\u00ed zde."
+  },
+  "checkout_item": {
+    "shipping_data": "Dodac\u00ed \u00fadaje",
+    "street": "Ulice",
+    "city": "M\u011bsto",
+    "state": "St\u00e1t",
+    "zip_code": "PS\u010c",
+    "country": "Zem\u011b",
+    "see_more": "Zobrazit v\u00edce",
+    "done": "Hotovo",
+    "total": "Celkem"
+  },
+  "checkout_summary": {
+    "complete": "Va\u0161e objedn\u00e1vka je kompletn\u00ed!",
+    "sent_email": "Odeslali jsme v\u00e1m potvrzovac\u00ed e-mail.",
+    "order_id": "ID objedn\u00e1vky",
+    "shipping_address": "Dodac\u00ed adresa",
+    "order_items": "Polo\u017eky objedn\u00e1vky",
+    "quantity": "Mno\u017estv\u00ed",
+    "shipping": "Doprava",
+    "total": "Celkem"
+  },
+  "common": {
+    "continue_shopping": "Pokra\u010dovat v n\u00e1kupu",
+    "recommendations": "Mohlo by se v\u00e1m tak\u00e9 l\u00edbit"
+  },
+  "checkout_form": {
+    "email": "E-mail",
+    "email_placeholder": "vy@example.com",
+    "street": "Ulice",
+    "street_placeholder": "1600 Amphitheatre Parkway",
+    "zip_code": "PS\u010c",
+    "zip_code_placeholder": "94043",
+    "city": "M\u011bsto",
+    "city_placeholder": "Mountain View",
+    "state": "St\u00e1t",
+    "state_placeholder": "CA",
+    "country": "Zem\u011b",
+    "country_placeholder": "Spojen\u00e9 st\u00e1ty",
+    "card_number": "\u010c\u00edslo kreditn\u00ed karty",
+    "payment_method": "Zp\u016fsob platby",
+    "month": "M\u011bs\u00edc",
+    "year": "Rok",
+    "expiration_month": "M\u011bs\u00edc expirace",
+    "expiration_year": "Rok expirace",
+    "cvv": "CVV"
+  },
+  "footer": {
+    "built_with": "Vytvo\u0159eno s",
+    "open_telemetry": "OpenTelemetry",
+    "this_project": "Tento projekt je",
+    "open_source": "open source",
+    "disclaimer": "Tato webová stránka je hostována pouze pro ukázkové účely. Nejde o skutečný obchod."
+  },
+  "header": {
+    "cart": "Ko\u0161\u00edk"
+  },
+  "product": {
+    "add_to_cart": "P\u0159idat do ko\u0161\u00edku",
+    "quantity": "Mno\u017estv\u00ed",
+    "reviews": "Hodnocen\u00ed z\u00e1kazn\u00edk\u016f",
+    "loading": "Na\u010d\u00edt\u00e1n\u00ed...",
+    "reviews_error": "Nepoda\u0159ilo se na\u010d\u00edst recenze produkt\u016f.",
+    "no_reviews": "Zat\u00edm \u017e\u00e1dn\u00e9 recenze.",
+    "no_description": "Nebyl poskytnut \u017e\u00e1dn\u00fd popis.",
+    "review_count": "recenze",
+    "star": "hv\u011bzda",
+    "stars": "hv\u011bzdi\u010dky",
+    "ai_response": "Odpov\u011b\u010f AI:",
+    "ai_error": "P\u0159i dotazov\u00e1n\u00ed AI do\u0161lo k chyb\u011b.",
+    "ask_assistant": "Zeptejte se asistenta s um\u011blou inteligenc\u00ed",
+    "ai_placeholder": "Zadejte sv\u016fj dotaz zde...",
+    "ask": "Zeptat se",
+    "ai_loading": "Dotazov\u00e1n\u00ed AI...",
+    "quick_prompt_summarize": "M\u016f\u017eete shrnout recenze produkt\u016f?",
+    "quick_prompt_ages": "Pro jak\u00fd v\u011bk je to doporu\u010deno?",
+    "quick_prompt_negative": "Byly n\u011bjak\u00e9 negativn\u00ed recenze?"
+  }
+}

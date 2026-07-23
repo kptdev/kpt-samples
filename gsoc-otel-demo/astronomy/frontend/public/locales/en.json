@@ -1,0 +1,103 @@
+{
+  "page_titles": {
+    "home": "Otel Demo - Home",
+    "cart": "Otel Demo - Cart",
+    "checkout": "Otel Demo - Checkout",
+    "product": "Otel Demo - Product"
+  },
+  "home": {
+    "banner_title": "The best telescopes to see the world closer",
+    "banner_cta": "Go Shopping",
+    "hot_products": "Hot Products"
+  },
+  "cart": {
+    "empty": "Your shopping cart is empty",
+    "item": "Item",
+    "quantity": "Quantity",
+    "price": "Price",
+    "empty_cart": "Empty Cart",
+    "place_order": "Place Order",
+    "subtotal": "Subtotal",
+    "shopping_cart": "Shopping Cart",
+    "close": "Close",
+    "empty_dropdown": "Your shopping cart is empty",
+    "go_to_cart": "Go to Shopping Cart",
+    "empty_cart_subtitle": "Items you add to your shopping cart will appear here."
+  },
+  "checkout_item": {
+    "shipping_data": "Shipping Data",
+    "street": "Street",
+    "city": "City",
+    "state": "State",
+    "zip_code": "Zip Code",
+    "country": "Country",
+    "see_more": "See More",
+    "done": "Done",
+    "total": "Total"
+  },
+  "checkout_summary": {
+    "complete": "Your order is complete!",
+    "sent_email": "We've sent you a confirmation email.",
+    "order_id": "Order ID",
+    "shipping_address": "Shipping Address",
+    "order_items": "Order Items",
+    "quantity": "Quantity",
+    "shipping": "Shipping",
+    "total": "Total"
+  },
+  "common": {
+    "continue_shopping": "Continue Shopping",
+    "recommendations": "You May Also Like"
+  },
+  "checkout_form": {
+    "email": "Email",
+    "email_placeholder": "you@example.com",
+    "street": "Street Address",
+    "street_placeholder": "1600 Amphitheatre Parkway",
+    "zip_code": "Zip Code",
+    "zip_code_placeholder": "94043",
+    "city": "City",
+    "city_placeholder": "Mountain View",
+    "state": "State",
+    "state_placeholder": "CA",
+    "country": "Country",
+    "country_placeholder": "United States",
+    "card_number": "Credit Card Number",
+    "payment_method": "Payment Method",
+    "month": "Month",
+    "year": "Year",
+    "expiration_month": "Expiration Month",
+    "expiration_year": "Expiration Year",
+    "cvv": "CVV"
+  },
+  "footer": {
+    "built_with": "Built with",
+    "open_telemetry": "OpenTelemetry",
+    "this_project": "This project is",
+    "open_source": "open source",
+    "disclaimer": "This website is hosted for demo purpose only. It is not an actual shop."
+  },
+  "header": {
+    "cart": "Cart"
+  },
+  "product": {
+    "add_to_cart": "Add To Cart",
+    "reviews": "Customer Reviews",
+    "ask_assistant": "Ask the AI Assistant a question",
+    "ai_placeholder": "Enter your question here...",
+    "ask": "Ask",
+    "loading": "Loading...",
+    "reviews_error": "Could not load product reviews.",
+    "no_reviews": "No reviews yet.",
+    "no_description": "No description provided.",
+    "review_count": "reviews",
+    "star": "star",
+    "stars": "stars",
+    "ai_response": "AI Response:",
+    "ai_error": "Sorry, something went wrong while asking AI.",
+    "ai_loading": "Asking AI...",
+    "quick_prompt_summarize": "Can you summarize the product reviews?",
+    "quick_prompt_ages": "What age(s) is this recommended for?",
+    "quick_prompt_negative": "Were there any negative reviews?"
+  }
+}

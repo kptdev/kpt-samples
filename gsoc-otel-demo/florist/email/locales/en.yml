@@ -1,0 +1,11 @@
+# Default locale (English). Selected when LOCALE=en-US or unset.
+email:
+  subject: Your confirmation email
+  title: Your Order Confirmation
+  thanks: Thanks for shopping with us!
+  order_id: Order ID
+  shipping: Shipping
+  items: Items
+  item_no: Item No.
+  quantity: Quantity
+  price: Price

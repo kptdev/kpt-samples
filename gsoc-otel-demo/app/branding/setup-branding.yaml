@@ -1,0 +1,137 @@
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: setup-branding
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  load("krmfn.star", "krmfn")
+
+  def setup_branding(resources):
+    store_type = ""
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "branding-config"):
+        store_type = r.get("data", {}).get("storeType", "")
+        break
+
+    if store_type == "":
+      fail("storeType not found in branding-config")
+
+    store_data = {
+      "florist": {
+        "init_configmap": "florist-postgresql-init",
+        "image_provider": "florist-image-provider:v1",
+        "frontend_image": "florist-frontend:v1",
+        "ad_image": "florist-ad:v1",
+        "llm_image": "florist-llm:v1",
+        "load_generator_image": "florist-load-generator:v1",
+        "llm_product_id": "FLR001",
+        "email_image":"email:v1"
+      },
+      "astronomy": {
+        "init_configmap": "astronomy-postgresql-init",
+        "image_provider": "ghcr.io/open-telemetry/demo:2.2.0-image-provider",
+        "frontend_image": "astronomy-frontend:v1",
+        "ad_image": "astronomy-ad:v1",
+        "llm_image": "astronomy-llm:v1",
+        "load_generator_image": "ghcr.io/open-telemetry/demo:2.2.0-load-generator",
+        "llm_product_id": "L9ECAV7KIM",
+        "email_image":"astronomy-email:v1"
+      },
+    }
+
+    if store_type not in store_data:
+      fail("Unsupported storeType: " + store_type)
+
+    data = store_data[store_type]
+
+    # Find source postgresql init ConfigMap and copy its SQL
+    init_sql = ""
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, data["init_configmap"]):
+        init_sql = r.get("data", {}).get("init.sql", "")
+        break
+
+    if init_sql == "":
+      fail("init.sql not found in " + data["init_configmap"])
+
+    # Create or update active-postgresql-init ConfigMap
+    active_found = False
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "active-postgresql-init"):
+        r["data"] = {"init.sql": init_sql}
+        active_found = True
+        break
+
+    if not active_found:
+      resources.append({
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "active-postgresql-init",
+          "annotations": {"config.kubernetes.io/local-config": "true"}
+        },
+        "data": {"init.sql": init_sql}
+      })
+
+    # Create or update value-store ConfigMap
+    store_found = False
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "value-store"):
+        r["data"] = {
+          "imageProviderImage": data["image_provider"],
+          "frontendImage": data["frontend_image"],
+          "adImage": data["ad_image"],
+          "llmImage": data["llm_image"],
+          "loadGeneratorImage": data["load_generator_image"],
+          "llmProductId": data["llm_product_id"],
+          "emailImage":data["email_image"]
+        }
+        store_found = True
+        break
+
+    if not store_found:
+      resources.append({
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "value-store",
+          "annotations": {"config.kubernetes.io/local-config": "true"}
+        },
+        "data": {
+          "imageProviderImage": data["image_provider"],
+          "frontendImage": data["frontend_image"],
+          "adImage": data["ad_image"],
+          "llmImage": data["llm_image"],
+          "loadGeneratorImage": data["load_generator_image"],
+          "llmProductId": data["llm_product_id"],
+          "emailImage":data["email_image"]
+        }
+      })
+
+    # Global search-replace for LLM product ID across all resources.
+    # Replace every known product ID (from all stores) with the target store's ID
+    # so switching between stores works bidirectionally.
+    def replace_value(obj, old, new):
+      if type(obj) == "string":
+        return obj.replace(old, new)
+      if type(obj) == "list":
+        return [replace_value(item, old, new) for item in obj]
+      if type(obj) == "dict":
+        return {k: replace_value(v, old, new) for k, v in obj.items()}
+      return obj
+
+    all_product_ids = [store_data[k]["llm_product_id"] for k in store_data]
+    for i in range(len(resources)):
+      # Only touch resources that live inside the shop folder.
+      # All other directories (branding/, observability/, regional/, etc.)
+      # must be left untouched by the search-replace.
+      path = resources[i].get("metadata", {}).get("annotations", {}).get("internal.config.kubernetes.io/path", "")
+      if not path.startswith("shop/"):
+        continue
+      for old_id in all_product_ids:
+        if old_id != data["llm_product_id"]:
+          resources[i] = replace_value(resources[i], old_id, data["llm_product_id"])
+          break
+
+  setup_branding(ctx.resource_list["items"])

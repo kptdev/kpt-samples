@@ -1,0 +1,67 @@
+apiVersion: fn.kpt.dev/v1alpha1
+kind: ApplyReplacements
+metadata:
+  name: branding-image-provider
+  annotations:
+    config.kubernetes.io/local-config: "true"
+replacements:
+  - source:
+      kind: ConfigMap
+      name: value-store
+      fieldPath: data.imageProviderImage
+    targets:
+      - select:
+          kind: Deployment
+          name: image-provider
+        fieldPaths:
+          - spec.template.spec.containers.[name=image-provider].image
+  - source:
+      kind: ConfigMap
+      name: value-store
+      fieldPath: data.frontendImage
+    targets:
+      - select:
+          kind: Deployment
+          name: frontend
+        fieldPaths:
+          - spec.template.spec.containers.[name=frontend].image
+  - source:
+      kind: ConfigMap
+      name: value-store
+      fieldPath: data.adImage
+    targets:
+      - select:
+          kind: Deployment
+          name: ad
+        fieldPaths:
+          - spec.template.spec.containers.[name=ad].image
+  - source:
+      kind: ConfigMap
+      name: value-store
+      fieldPath: data.llmImage
+    targets:
+      - select:
+          kind: Deployment
+          name: llm
+        fieldPaths:
+          - spec.template.spec.containers.[name=llm].image
+  - source:
+      kind: ConfigMap
+      name: value-store
+      fieldPath: data.loadGeneratorImage
+    targets:
+      - select:
+          kind: Deployment
+          name: load-generator
+        fieldPaths:
+          - spec.template.spec.containers.[name=load-generator].image
+  - source:
+      kind: ConfigMap
+      name: value-store
+      fieldPath: data.emailImage
+    targets:
+      - select:
+          kind: Deployment
+          name: email
+        fieldPaths:
+          - spec.template.spec.containers.[name=email].image

@@ -1,0 +1,29 @@
+{
+  "product-review-summaries": [
+    {
+      "product_id": "FLR001",
+      "average_score": 4.5,
+      "product_review_summary": "Tato kytice červených růží je zákazníky oblíbena pro své úchvatné, sametové květy a dlouhotrvající čerstvost. Recenzenti chválí elegantní aranžmá a romantický nádech, který dodá každé příležitosti, ačkoli několik z nich zmiňuje, že by uvítali větší barevnou rozmanitost."
+    },
+    {
+      "product_id": "FLR002",
+      "average_score": 4.7,
+      "product_review_summary": "Aranžmá bílých lilií vyzařuje sofistikovanost a půvab. Zákazníci soustavně vyzdvihují jemnou vůni a nedotčenou krásu lilií, což z něj činí první volbu pro svatby a smuteční květinové vazby."
+    },
+    {
+      "product_id": "FLR003",
+      "average_score": 4.4,
+      "product_review_summary": "Tato jarní směs tulipánů vnáší do každého prostoru záplavu radostných barev. Kupující milují zářivou rozmanitost a způsob, jakým se pupeny rozvinou v plné květy, ačkoli někteří poznamenávají, že smíšené barvy se mohou mírně lišit od fotografií."
+    },
+    {
+      "product_id": "FLR004",
+      "average_score": 4.8,
+      "product_review_summary": "Elegantní květináč s orchidejí je chválen jako luxusní středobod, který vydrží měsíce s minimální péčí. Zákazníci oceňují prvotřídní keramický květináč a sofistikovanou krásu orchideje phalaenopsis a považují ji za výjimečnou hodnotu."
+    },
+    {
+      "product_id": "FLR005",
+      "average_score": 4.6,
+      "product_review_summary": "Slunečnice v zářivém boxu je u zákazníků oblíbená pro svou veselou, zářivou energii. Recenzenti milují, jak odvážné slunečnice rozzáří každou místnost, a mnozí zmiňují vynikající trvanlivost a okouzlující balení."
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "page_titles": {
+    "home": "Bloom & Petal Florist",
+    "cart": "Bloom & Petal Florist - Cart",
+    "product": "Bloom & Petal Florist - Product",
+    "checkout": "Bloom & Petal Florist - Checkout"
+  },
+  "home": {
+    "banner_title": "Fresh flowers for every occasion",
+    "banner_cta": "Shop Bouquets",
+    "hot_products": "Fresh Arrivals"
+  },
+  "footer": {
+    "demo_notice": "This website is hosted for demo purpose only. It is not an actual shop."
+  },
+  "common": {
+    "continue_shopping": "Continue Shopping",
+    "recommendations": "You May Also Like"
+  },
+  "empty_cart": {
+    "title": "Your shopping cart is empty!",
+    "subtitle": "Items you add to your shopping cart will appear here."
+  },
+  "cart": {
+    "title": "Your Cart",
+    "empty": "Your cart is empty",
+    "checkout": "Checkout",
+    "subtotal": "Subtotal",
+    "remove": "Remove",
+    "empty_button": "Empty Cart",
+    "shopping_cart": "Shopping Cart",
+    "close": "Close",
+    "empty_dropdown": "Your shopping cart is empty",
+    "go_to_cart": "Go to Shopping Cart"
+  },
+  "cart_table": {
+    "product": "Product",
+    "quantity": "Quantity",
+    "price": "Price"
+  },
+  "product": {
+    "quantity": "Quantity",
+    "reviews": "Customer Reviews",
+    "loading": "Loading product reviews\u2026",
+    "reviews_error": "Could not load product reviews.",
+    "no_reviews": "No reviews yet.",
+    "no_description": "No description provided.",
+    "review_count": "reviews",
+    "star": "star",
+    "stars": "stars",
+    "ai_response": "AI Response:",
+    "ai_error": "Sorry, something went wrong while asking AI.",
+    "ask_assistant": "Ask AI About This Product",
+    "ai_placeholder": "Type a question about the product\u2026",
+    "ask": "Ask",
+    "ai_loading": "Asking AI\u2026",
+    "quick_prompt_summarize": "Can you summarize the product reviews?",
+    "quick_prompt_ages": "What age(s) is this recommended for?",
+    "quick_prompt_negative": "Were there any negative reviews?"
+  },
+  "checkout_item": {
+    "shipping_data": "Shipping Data",
+    "street": "Street",
+    "city": "City",
+    "state": "State",
+    "zip_code": "Zip Code",
+    "country": "Country",
+    "see_more": "See More",
+    "done": "Done"
+  },
+  "checkout_form": {
+    "shipping_address": "Shipping Address",
+    "email_address": "E-mail Address",
+    "street_address": "Street Address",
+    "zip_code": "Zip Code",
+    "city": "City",
+    "state": "State",
+    "country": "Country",
+    "country_placeholder": "Country Name",
+    "payment_method": "Payment Method",
+    "credit_card_number": "Credit Card Number",
+    "credit_card_number_placeholder": "0000-0000-0000-0000",
+    "month": "Month",
+    "year": "Year",
+    "cvv": "CVV",
+    "place_order": "Place Order"
+  },
+  "checkout_summary": {
+    "complete": "Your order is complete!",
+    "sent_email": "We've sent you a confirmation email.",
+    "order_id": "Order ID",
+    "shipping_address": "Shipping Address",
+    "order_items": "Order Items",
+    "quantity": "Quantity",
+    "shipping": "Shipping",
+    "total": "Total"
+  },
+  "currency": {
+    "switcher_label": "Currency"
+  },
+  "products": {
+    "add_to_cart": "Add to Cart",
+    "out_of_stock": "Out of stock",
+    "in_stock": "In stock"
+  },
+  "layout": {
+    "store_name": "Florist Shop",
+    "home": "Home",
+    "cart": "Cart"
+  }
+}

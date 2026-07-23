@@ -1,0 +1,29 @@
+{
+  "product-review-summaries": [
+    {
+      "product_id": "FLR001",
+      "average_score": 4.5,
+      "product_review_summary": "这款红玫瑰花束以其惊艳的天鹅绒般花朵和持久的鲜活度深受顾客喜爱。评论者称赞其优雅的呈现以及为任何场合带来的浪漫气息，不过有几位提到希望能有更丰富的色彩选择。"
+    },
+    {
+      "product_id": "FLR002",
+      "average_score": 4.7,
+      "product_review_summary": "白色百合花艺散发出精致与优雅的气息。顾客们一致强调百合花淡雅的香气和纯净之美，使其成为婚礼和慰问花艺的首选。"
+    },
+    {
+      "product_id": "FLR003",
+      "average_score": 4.4,
+      "product_review_summary": "这款春季郁金香混搭为任何空间带来一抹愉悦的色彩。买家喜爱其活泼的多样性以及花苞绽放成完整花朵的过程，不过有些人注意到混搭的颜色与照片略有不同。"
+    },
+    {
+      "product_id": "FLR004",
+      "average_score": 4.8,
+      "product_review_summary": "兰花雅致盆栽被誉为奢华的桌面装饰，养护极少却能持续数月。顾客赞赏其高端陶瓷花盆以及蝴蝶兰的精致之美，认为它物超所值。"
+    },
+    {
+      "product_id": "FLR005",
+      "average_score": 4.6,
+      "product_review_summary": "向日葵阳光礼盒因其欢快、灿烂的活力而备受顾客青睐。评论者喜爱大胆的向日葵如何点亮任何房间，许多人称赞其出色的耐久性和迷人的包装。"
+    }
+  ]
+}
