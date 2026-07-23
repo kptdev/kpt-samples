@@ -2,10 +2,7 @@
 
 A GSoC 2026 sample that packages the [OpenTelemetry Astronomy Shop](https://opentelemetry.io/docs/demo/) — a microservices e‑commerce demo — as a composable [kpt](https://kpt.dev) package and shows how the same package can be rebranded, regionalized, wired up for telemetry, and updated safely using **Configuration as Data** and **KRM Functions**.
 
-<!-- <p align="center">
-  <!-- Project banner / architecture image / GIF — replace with your own -->
-  <!-- ![banner](./docs/images/banner.png) -->
-<!-- </p> --> 
+
 
 
 ---
@@ -85,7 +82,12 @@ app/                              (ROOT PACKAGE)
 ### Prerequisites
 
 - A working Kubernetes cluster (kind, minikube, or any conformant cluster).
-- Docker as container engine
+- Docker as container engine.
+- If you want to build the images, you may run the provided script (this is for a kind cluster):
+  ```bash
+  ./scripts/build_and_load.sh <cluster_name>
+  ```
+
 - [`kubectl`](https://kubernetes.io/docs/tasks/tools/) — for cluster interaction.
 - [`kpt`](https://kpt.dev/installation/kpt-cli) — for fetching, rendering, and applying the package.
 - Create a namespace called `otel-demo`
