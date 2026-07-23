@@ -88,7 +88,7 @@ const ProductReviews = () => {
                             handleAskAI();
                         }
                     }}
-                    aria-label="Question to AI"
+                    aria-label={t('product.ai_placeholder')}
                     data-cy="AskAIInput"
                 />
                 <S.AskAIButton
@@ -105,38 +105,38 @@ const ProductReviews = () => {
             <S.AskAIControls>
                 <S.QuickPromptButton
                     type="button"
-                    onClick={() => handleQuickPrompt('Can you summarize the product reviews?')}
+                    onClick={() => handleQuickPrompt(t('product.quick_prompt_summarize'))}
                     data-cy="QuickPromptSummarize"
                 >
-                    Can you summarize the product reviews?
+                    {t('product.quick_prompt_summarize')}
                 </S.QuickPromptButton>
 
                 <S.QuickPromptButton
                     type="button"
-                    onClick={() => handleQuickPrompt('What age(s) is this recommended for?')}
+                    onClick={() => handleQuickPrompt(t('product.quick_prompt_ages'))}
                     data-cy="QuickPromptAges"
                 >
-                    What age(s) is this recommended for?
+                    {t('product.quick_prompt_ages')}
                 </S.QuickPromptButton>
 
                 <S.QuickPromptButton
                     type="button"
-                    onClick={() => handleQuickPrompt('Were there any negative reviews?')}
+                    onClick={() => handleQuickPrompt(t('product.quick_prompt_negative'))}
                     data-cy="QuickPromptNegative"
                 >
-                    Were there any negative reviews?
+                    {t('product.quick_prompt_negative')}
                 </S.QuickPromptButton>
             </S.AskAIControls>
 
             {aiError && (
                 <S.AIMessage role="alert" data-cy="AIError">
-                    {aiError.message ?? 'Sorry, something went wrong while asking AI.'}
+                    {aiError.message ?? t('product.ai_error')}
                 </S.AIMessage>
             )}
 
             {aiResponse && (
                 <S.AIMessage aria-live="polite" data-cy="AIAnswer">
-                    <strong>AI Response:</strong>{' '}
+                    <strong>{t('product.ai_response')}</strong>{' '}
                     {typeof aiResponse === 'string' ? aiResponse : aiResponse.text}
                 </S.AIMessage>
             )}
@@ -149,10 +149,10 @@ const ProductReviews = () => {
 
         {loading && <p>{t('product.loading')}</p>}
 
-        {!loading && error && <p>Could not load product reviews.</p>}
+        {!loading && error && <p>{t('product.reviews_error')}</p>}
 
         {!loading && !error && Array.isArray(productReviews) && productReviews.length === 0 && (
-        <p>No reviews yet.</p>
+        <p>{t('product.no_reviews')}</p>
         )}
 
         {!loading && !error && (
@@ -165,7 +165,7 @@ const ProductReviews = () => {
                                     <S.AverageScoreBadge>{average.toFixed(1)}</S.AverageScoreBadge>
                                     <StarRating value={average} />
                                     <S.ScoreCount>
-                                        {Array.isArray(productReviews) ? `${productReviews.length} reviews` : ''}
+                                        {Array.isArray(productReviews) ? `${productReviews.length} ${t('product.review_count')}` : ''}
                                     </S.ScoreCount>
                                 </S.AverageBlock>
 
@@ -176,7 +176,7 @@ const ProductReviews = () => {
                                             return (
                                                 <S.ScoreRow key={`score-${score}`}>
                                                     <S.ScoreLabel>
-                                                        {score} star{score > 1 ? 's' : ''}
+                                                        {score} {score > 1 ? t('product.stars') : t('product.star')}
                                                     </S.ScoreLabel>
                                                     <S.ScoreBar aria-label={`${score} stars: ${pct}%`}>
                                                         <S.ScoreBarFill style={{ width: `${pct}%` }} />
@@ -201,7 +201,7 @@ const ProductReviews = () => {
                     <StarRating value={Number(review.score) || 0} />
                   </S.ReviewHeader>
                   <S.ReviewBody>
-                    {review.description || 'No description provided.'}
+                    {review.description || t('product.no_description')}
                   </S.ReviewBody>
                 </S.ReviewCard>
               ))}

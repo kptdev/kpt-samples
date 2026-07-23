@@ -75,35 +75,65 @@ data:
     -- Product Review Service:  add product review data
     INSERT INTO reviews.productreviews (product_id, username, description, score)
     VALUES
-        ('FLR001', 'flower_lover', '这些红玫瑰太惊艳了!送达时新鲜鲜艳,花束保持了一个多星期。非常适合周年纪念。', '5.0'),
-        ('FLR001', 'romantic_guy', '情人节订的,伴侣欣喜若狂。香气充满整个房间。强烈推荐用于任何浪漫场合。', '4.5'),
-        ('FLR001', 'gift_giver', '包装精美,玫瑰盛开中。是很棒的生日礼物。一定会再下单。', '4.5'),
-        ('FLR001', 'home_decorator', '深红色和图片上完全一样。为我的客厅增添了优雅。新鲜度保证是真的。', '4.0'),
-        ('FLR001', 'repeat_buyer', '第三次订购这个花束。每次品质如一。玫瑰总是长茎且华丽。', '5.0'),
+        ('OLJCESPC7Z', 'stargazer_mike', 'Great entry-level telescope! Easy to set up and provides clear views of the moon and brighter planets. Highly recommend for new astronomers.', '4.5'),
+        ('OLJCESPC7Z', 'nightskylover', 'For the price, this Explorascope delivers excellent performance. I was able to see Jupiter''s moons clearly. A fantastic purchase for casual viewing.', '4.0'),
+        ('OLJCESPC7Z', 'beginner_astro', 'A bit tricky to get used to the manual controls, but once you do, it''s very rewarding. Saw the Orion Nebula for the first time! Good value.', '3.5'),
+        ('OLJCESPC7Z', 'celestial_explorer', 'Perfect for camping trips. It''s lightweight and portable, making it easy to take anywhere. The views are surprisingly good for its size.', '4.0'),
+        ('OLJCESPC7Z', 'telescope_fan', 'Not the most powerful scope, but it''s great for kids and beginners. My children love looking at the moon with it. A solid choice for family fun.', '3.0'),
 
-        ('FLR002', 'minimalist_fan', '白百合纯净优雅。淡淡的香味如天堂般美好而不过于浓郁。非常适合现代装饰。', '5.0'),
-        ('FLR002', 'sympathy_sender', '送给一位悲伤的朋友。纯净的白百合带来了安慰与平和。布置精致而庄重。', '4.5'),
-        ('FLR002', 'scent_enthusiast', '如果你喜爱天然花香,这些百合是梦想。多天来为我的走廊充满神圣的芬芳。', '4.5'),
-        ('FLR002', 'wedding_planner', '用于新娘送礼会的中心装饰。每个人都在问我是从哪里买的。百合在当晚美丽地绽放。', '5.0'),
-        ('FLR002', 'office_buyer', '为我们的前台订购。专业、优雅且持久。物超所值。', '4.0'),
+        ('66VCHSJNUP', 'tech_astro', 'The StarSense app is revolutionary! It made finding celestial objects incredibly easy. This telescope is a game-changer for beginners.', '5.0'),
+        ('66VCHSJNUP', 'app_user', 'Amazing technology, the smartphone integration works flawlessly. I''ve never had so much fun exploring the night sky. Worth every penny.', '4.5'),
+        ('66VCHSJNUP', 'innovator_john', 'Setup was a breeze, and the tutorials in the app are very helpful. The views are crisp and clear. My only minor gripe is battery drain on the phone.', '4.0'),
+        ('66VCHSJNUP', 'clear_skies', 'Finally, a telescope that takes the guesswork out of stargazing. The real-time positioning is incredibly accurate. Highly recommended for anyone new to astronomy.', '5.0'),
+        ('66VCHSJNUP', 'gadget_geek', 'Fantastic product, the app truly guides you. It''s like having a personal astronomer with you. The optical quality is also very good.', '4.5'),
 
-        ('FLR003', 'spring_fan', '这些郁金香充满春意!明亮欢快的色彩立即提振我的心情。搭配非常多样。', '5.0'),
-        ('FLR003', 'budget_buyer', '性价比超高。郁金香很新鲜,持续了近10天。是给自己的一份可爱实惠的小礼物。', '4.0'),
-        ('FLR003', 'color_lover', '喜爱粉色、黄色和紫色郁金香的组合。营造出如此欢乐的中心装饰。与网站上展示的一模一样。', '4.5'),
-        ('FLR003', 'garden_newbie', '第一次在网上购买郁金香,印象很好。送达时紧闭,两天内美丽绽放。', '4.5'),
-        ('FLR003', 'weekly_flower', '我每周都买这些。从不让人失望。多样性让一切保持新鲜,总是充满季节感。', '5.0'),
+        ('1YMWWN1N4O', 'solar_viewer', 'Perfect for solar observations! The Solar Safe filter gives peace of mind. I used it for the last partial eclipse and it was fantastic.', '5.0'),
+        ('1YMWWN1N4O', 'eclipse_chaser', 'Compact and easy to carry, this telescope is ideal for eclipse events. The included backpack is a nice touch. Views of the sun are incredibly clear and safe.', '4.5'),
+        ('1YMWWN1N4O', 'travel_astro', 'Excellent travel scope for solar viewing. The magnification is much better than binoculars for the sun. A must-have for any solar enthusiast.', '4.0'),
+        ('1YMWWN1N4O', 'sun_gazer', 'Very impressed with the safety features and clarity. Sharing the sun with family has never been easier or safer. Great value for a dedicated solar scope.', '5.0'),
+        ('1YMWWN1N4O', 'safe_viewer', 'The ISO compliant filter is reassuring. It''s a well-designed product for safe solar observation. Highly recommend for educational purposes too.', '4.5'),
 
-        ('FLR004', 'luxury_buyer', '这个兰花布置是纯粹的奢华。陶瓷盆很漂亮,兰花看起来像一幅画。物有所值。', '5.0'),
-        ('FLR004', 'plant_parent', '这个兰花盆我已经养了三个月,仍在绽放!极其坚韧优雅。说明很有帮助。', '4.5'),
-        ('FLR004', 'corporate_gift', '送给一位VIP客户,他们深受打动。展示是高级的,兰花精美绝伦。', '5.0'),
-        ('FLR004', 'home_office', '为我的家庭办公室增添如此精致感。白兰花与花盆相映生辉。也非常易于打理。', '4.5'),
-        ('FLR004', 'special_occasion', '为我母亲的60岁生日购买。她一直在谈论它。兰花一个月后仍然生机勃勃。', '5.0'),
+        ('L9ECAV7KIM', 'clean_optics', 'This kit is a lifesaver for all my optics. The brush and wipes work perfectly without leaving any residue. My lenses have never been cleaner.', '5.0'),
+        ('L9ECAV7KIM', 'photog_pro', 'Essential for any photographer or telescope owner. It safely removes dust and fingerprints. A high-quality cleaning solution.', '4.5'),
+        ('L9ECAV7KIM', 'daily_cleaner', 'I use this on my binoculars, camera lenses, and even my phone screen. It''s very effective and gentle. A versatile cleaning kit.', '4.0'),
+        ('L9ECAV7KIM', 'tech_maintenance', 'Great value for money. The different cleaning options cover all needs. Keeps my expensive equipment in pristine condition.', '5.0'),
+        ('L9ECAV7KIM', 'sharp_view', 'Works as advertised, my telescope views are much clearer after using this. The fluid and cloth are excellent. Definitely recommend.', '4.5'),
 
-        ('FLR005', 'sunshine_seeker', '这些向日葵就是纯粹的阳光!立即点亮任何房间。送货完美,送达时已经开放。', '5.0'),
-        ('FLR005', 'kid_approved', '给我女儿的房间买的,她非常喜欢。如此欢快有趣。是青少年的好礼物。', '4.5'),
-        ('FLR005', 'summer_party', '用于夏季烧烤装饰。每个人都评论它们多么华丽。非常喜庆且乡村时尚。', '4.0'),
-        ('FLR005', 'mood_booster', '每当我感到沮丧,我就订购这个盒子。向日葵如此欢快,瞬间提升心情。送货也很快。', '5.0'),
-        ('FLR005', 'dried_flower_fan', '即使干燥后,这些向日葵看起来仍然很美。我把它们作为干花装饰保留了好几个月。令人难以置信的耐久性。', '4.5');
+        ('2ZYFJ3GM2N', 'bird_watcher', 'Incredible clarity and brightness, perfect for bird watching. The ED glass really makes a difference. I can spot the subtlest markings.', '5.0'),
+        ('2ZYFJ3GM2N', 'nature_lover', 'These binoculars are fantastic for nature observation. The close focus is a huge advantage for viewing nearby wildlife. Very comfortable to hold.', '4.5'),
+        ('2ZYFJ3GM2N', 'hiker_guy', 'Lightweight and durable, these are my go-to binoculars for hiking. The wide field of view is excellent. Highly recommend for outdoor enthusiasts.', '4.0'),
+        ('2ZYFJ3GM2N', 'stadium_fan', 'Took these to a game and had an amazing view of the action. They perform great in various lighting conditions. A solid all-around binocular.', '4.0'),
+        ('2ZYFJ3GM2N', 'outdoor_adventurer', 'Excellent build quality and optical performance. They feel robust and provide sharp images. A great investment for any outdoor activity.', '4.5'),
+
+        ('0PUK6V6EV0', 'astro_photog', 'This imager is a fantastic step up for planetary photography. The color quality is superb. Easy to use with my existing telescope setup.', '5.0'),
+        ('0PUK6V6EV0', 'planet_shooter', 'Finally capturing stunning images of Saturn and Jupiter! The NexImage 10 makes it so accessible. Great for beginners in astrophotography.', '4.5'),
+        ('0PUK6V6EV0', 'imager_pro', 'Excellent resolution and color rendition for its price point. It''s a perfect solution for those looking to start imaging planets. Highly satisfied.', '4.0'),
+        ('0PUK6V6EV0', 'space_artist', 'The detail I can capture with this imager is incredible. It integrates well with various software. A must-have for serious planetary observers.', '5.0'),
+        ('0PUK6V6EV0', 'digital_sky', 'A solid choice for getting into solar system imaging. The setup was straightforward. Produces beautiful, vibrant planetary images.', '4.5'),
+
+        ('LS4PSXUNUM', 'night_walker', 'The red light is perfect for preserving night vision during astronomy sessions. The hand warmer is an unexpected bonus. Very practical device.', '5.0'),
+        ('LS4PSXUNUM', 'star_party_goer', 'This flashlight is indispensable for star parties. The red mode is gentle on the eyes, and the power bank feature is super handy. Love it!', '4.5'),
+        ('LS4PSXUNUM', 'camper_chris', 'Rugged and versatile, this flashlight is great for camping and night walks. The hand warmer function is a game-changer on cold nights. Highly recommend.', '4.5'),
+        ('LS4PSXUNUM', 'emergency_kit', 'A fantastic multi-tool for my emergency kit. The red light is useful, and the power bank means I can charge my phone. Great design.', '4.0'),
+        ('LS4PSXUNUM', 'astro_accessory', 'Every astronomer needs one of these. The red light is essential, and the hand warmer and power bank make it incredibly useful. A top-tier accessory.', '5.0'),
+
+        ('9SIQT8TOJO', 'deep_sky_master', 'The RASA V2 is a dream come true for deep-sky imaging. The f/2.2 speed drastically cuts down exposure times. My best astrophotography investment yet.', '5.0'),
+        ('9SIQT8TOJO', 'pro_astro', 'Unbelievable performance for wide-field astrophotography. The short focal length makes guiding less critical. Produces stunning, detailed images.', '5.0'),
+        ('9SIQT8TOJO', 'imaging_guru', 'This OTA is a beast! The fast optics mean more data in less time. If you''re serious about deep-sky imaging, this is the one.', '4.5'),
+        ('9SIQT8TOJO', 'advanced_scope', 'Worth every penny for the quality and speed it offers. My images have never been sharper or more vibrant. A truly professional piece of equipment.', '5.0'),
+        ('9SIQT8TOJO', 'precision_optics', 'The engineering behind this RASA is exceptional. It''s incredibly efficient for capturing faint objects. A high-end choice for dedicated imagers.', '4.5'),
+
+        ('6E92ZMYYFZ', 'solar_safety', 'Essential for safe solar viewing with my 8-inch telescope. The Velcro straps ensure it stays securely in place. Peace of mind during solar observations.', '5.0'),
+        ('6E92ZMYYFZ', 'telescope_upgrade', 'This EclipSmart filter is a perfect addition to my setup. The ISO compliance is crucial. Highly recommend for anyone looking to view the sun safely.', '4.5'),
+        ('6E92ZMYYFZ', 'safe_sun_gazer', 'Easy to attach and provides crystal clear, safe views of the sun. The build quality is excellent. A must-have accessory for solar enthusiasts.', '5.0'),
+        ('6E92ZMYYFZ', 'filter_fan', 'Works perfectly with my 8-inch scope. No more worries about accidental dislodgement. Great product for protecting your eyes and equipment.', '4.5'),
+        ('6E92ZMYYFZ', 'eclipse_ready', 'Bought this for the upcoming eclipse, and it fits perfectly. Tested it out, and the views are fantastic and safe. Very happy with this purchase.', '5.0'),
+
+        ('HQTGWGPNH4', 'history_buff', 'A fascinating glimpse into historical astronomical thought. The content is incredibly insightful. A must-read for anyone interested in the history of science.', '5.0'),
+        ('HQTGWGPNH4', 'bookworm_astro', 'Beautifully presented historical document. It''s amazing to see how comets were understood centuries ago. A valuable addition to any astronomy library.', '4.5'),
+        ('HQTGWGPNH4', 'ancient_texts', 'Such a unique and intriguing read. The historical context is captivating. It offers a different perspective on celestial events.', '4.0'),
+        ('HQTGWGPNH4', 'celestial_history', 'I love historical astronomy, and this book delivers. It''s well-researched and provides a window into past beliefs. Highly recommended for scholars.', '5.0'),
+        ('HQTGWGPNH4', 'rare_find', 'A truly special book for enthusiasts of astronomical history. The details about ancient astrologers are very interesting. Great for a deeper understanding.', '4.5');
 
     -- Product Catalog Service: create a schema
     CREATE SCHEMA catalog;
@@ -127,8 +157,13 @@ data:
     -- Product Catalog Service: add product data
     INSERT INTO catalog.products (id, name, description, picture, price_currency_code, price_units, price_nanos, categories)
     VALUES
-        ('FLR001', '红玫瑰花束', '一打优质长茎红玫瑰,手工搭配桉树叶和满天星扎束。非常适合浪漫场合、周年纪念或仅仅表达"我爱你"。每朵玫瑰都经过精心挑选,拥有丝绒般的花瓣和深红色的色调,然后以我们标志性的包装布置。', 'RedRosesBouquet.jpg', 'CNY', 199, 900000000, 'flowers'),
-        ('FLR002', '白百合布置', '一束纯白东方百合,安置在优雅的玻璃花瓶中。它们细腻的香气为任何房间注入宁静。非常适合婚礼、慰问或精致的家居装饰。每根花茎有3-5朵大型喇叭形花朵。', 'WhiteLiliesArrangement.png', 'CNY', 239, 0, 'flowers'),
-        ('FLR003', '春季郁金香混合', '一束充满活力的季节性郁金香,有粉色、黄色和柔和的紫色。这些欢快的花朵非常适合庆祝新的开始、生日或照亮你的工作空间。以花蕾形式送达,让你可以观赏它们绽放成完整的美丽。', 'SpringTulipMix.png', 'CNY', 139, 0, 'flowers'),
-        ('FLR004', '优雅兰花盆栽', '一株惊艳的蝴蝶兰展示于优质白色陶瓷盆中。这种持久的美丽只需极少照料便可绽放数月。每盆含有两株成熟的兰花茎,有8-12朵花,创造出引人注目的中心装饰,散发着精致感。', 'OrchidElegancePot.jpg', 'CNY', 359, 0, 'flowers,premium'),
-        ('FLR005', '向日葵阳光盒', '五朵醒目的向日葵与我们标志性的阳光盒中的绿叶和纽扣花搭配布置。这些光芒四射的花朵保证带来微笑。欢快的金色花瓣和深色花心为任何场合创造即时的情绪提升。', 'SunflowerSunshineBox.jpg', 'CNY', 169, 0, 'flowers');
+        ('OLJCESPC7Z', 'National Park Foundation Explorascope', 'The National Park Foundation''s (NPF) Explorascope 60AZ is a manual alt-azimuth, refractor telescope perfect for celestial viewing on the go. The NPF Explorascope 60 can view the planets, moon, star clusters and brighter deep sky objects like the Orion Nebula and Andromeda Galaxy.', 'NationalParkFoundationExplorascope.jpg', 'USD', 101, 960000000, 'telescopes'),
+        ('66VCHSJNUP', 'Starsense Explorer Refractor Telescope', 'The first telescope that uses your smartphone to analyze the night sky and calculate its position in real time. StarSense Explorer is ideal for beginners thanks to the app''s user-friendly interface and detailed tutorials. It''s like having your own personal tour guide of the night sky', 'StarsenseExplorer.jpg', 'USD', 349, 950000000, 'telescopes'),
+        ('1YMWWN1N4O', 'Eclipsmart Travel Refractor Telescope', 'Dedicated white-light solar scope for the observer on the go. The 50mm refracting solar scope uses Solar Safe, ISO compliant, full-aperture glass filter material to ensure the safest view of solar events.  The kit comes complete with everything you need, including the dedicated travel solar scope, a Solar Safe finderscope, tripod, a high quality 20mm (18x) Kellner eyepiece and a nylon backpack to carry everything in.  This Travel Solar Scope makes it easy to share the Sun as well as partial and total solar eclipses with the whole family and offers much higher magnifications than you would otherwise get using handheld solar viewers or binoculars.', 'EclipsmartTravelRefractorTelescope.jpg', 'USD', 129, 950000000, 'telescopes,travel'),
+        ('L9ECAV7KIM', 'Lens Cleaning Kit', 'Wipe away dust, dirt, fingerprints and other particles on your lenses to see clearly with the Lens Cleaning Kit. This cleaning kit works on all glass and optical surfaces, including telescopes, binoculars, spotting scopes, monoculars, microscopes, and even your camera lenses, computer screens, and mobile devices.  The kit comes complete with a retractable lens brush to remove dust particles and dirt and two options to clean smudges and fingerprints off of your optics, pre-moistened lens wipes and a bottled lens cleaning fluid with soft cloth.', 'LensCleaningKit.jpg', 'USD', 21, 950000000, 'accessories'),
+        ('2ZYFJ3GM2N', 'Roof Binoculars', 'This versatile, all-around binocular is a great choice for the trail, the stadium, the arena, or just about anywhere you want a close-up view of the action without sacrificing brightness or detail. It''s an especially great companion for nature observation and bird watching, with ED glass that helps you spot the subtlest field markings and a close focus of just 6.5 feet.', 'RoofBinoculars.jpg', 'USD', 209, 950000000, 'binoculars'),
+        ('0PUK6V6EV0', 'Solar System Color Imager', 'You have your new telescope and have observed Saturn and Jupiter. Now you''re ready to take the next step and start imaging them. But where do you begin? The NexImage 10 Solar System Imager is the perfect solution.', 'SolarSystemColorImager.jpg', 'USD', 175, 0, 'accessories,telescopes'),
+        ('LS4PSXUNUM', 'Red Flashlight', 'This 3-in-1 device features a 3-mode red flashlight, a hand warmer, and a portable power bank for recharging your personal electronics on the go. Whether you use it to light the way at an astronomy star party, a night walk, or wildlife research, ThermoTorch 3 Astro Red''s rugged, IPX4-rated design will withstand your everyday activities.', 'RedFlashlight.jpg', 'USD', 57, 80000000, 'accessories,flashlights'),
+        ('9SIQT8TOJO', 'Optical Tube Assembly', 'Capturing impressive deep-sky astroimages is easier than ever with Rowe-Ackermann Schmidt Astrograph (RASA) V2, the perfect companion to today''s top DSLR or astronomical CCD cameras. This fast, wide-field f/2.2 system allows for shorter exposure times compared to traditional f/10 astroimaging, without sacrificing resolution. Because shorter sub-exposure times are possible, your equatorial mount won''t need to accurately track over extended periods. The short focal length also lessens equatorial tracking demands. In many cases, autoguiding will not be required.', 'OpticalTubeAssembly.jpg', 'USD', 3599, 0, 'accessories,telescopes,assembly'),
+        ('6E92ZMYYFZ', 'Solar Filter', 'Enhance your viewing experience with EclipSmart Solar Filter for 8" telescopes. With two Velcro straps and four self-adhesive Velcro pads for added safety, you can be assured that the solar filter cannot be accidentally knocked off and will provide Solar Safe, ISO compliant viewing.', 'SolarFilter.jpg', 'USD', 69, 950000000, 'accessories,telescopes'),
+        ('HQTGWGPNH4', 'The Comet Book', 'A 16th-century treatise on comets, created anonymously in Flanders (now northern France) and now held at the Universitätsbibliothek Kassel. Commonly known as The Comet Book (or Kometenbuch in German), its full title translates as "Comets and their General and Particular Meanings, According to Ptolomeé, Albumasar, Haly, Aliquind and other Astrologers". The image is from https://publicdomainreview.org/collection/the-comet-book, made available by the Universitätsbibliothek Kassel under a CC-BY SA 4.0 license (https://creativecommons.org/licenses/by-sa/4.0/)', 'TheCometBook.jpg', 'USD', 0, 990000000, 'books');

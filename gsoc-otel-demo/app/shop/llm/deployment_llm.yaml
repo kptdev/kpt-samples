@@ -30,7 +30,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: llm
-          image: florist-llm:v1
+          image: astronomy-llm:v1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -58,7 +58,8 @@ spec:
             - name: LOCALE
               value: hi-IN
             - name: NEXT_PUBLIC_LOCALE
-              value: zh-CN
-          resources: null
+              value: en-US
+          resources:
+            requests: {}
           volumeMounts: null
       volumes: null

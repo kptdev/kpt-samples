@@ -30,7 +30,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: load-generator
-          image: florist-load-generator:v1
+          image: ghcr.io/open-telemetry/demo:2.2.0-load-generator
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8089
@@ -80,5 +80,6 @@ spec:
           resources:
             limits:
               memory: 1500Mi
+            requests: {}
           volumeMounts: null
       volumes: null

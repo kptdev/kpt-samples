@@ -5,9 +5,11 @@ import { CypressFields } from '../../utils/enums/CypressFields';
 import { useAd } from '../../providers/Ad.provider';
 import ProductCard from '../ProductCard';
 import * as S from './Recommendations.styled';
+import { useTranslation } from '../../utils/i18n';
 
 const Recommendations = () => {
   const { recommendedProductList } = useAd();
+  const { t } = useTranslation();
 
   if (!recommendedProductList || recommendedProductList.length === 0) {
     return null;
@@ -16,7 +18,7 @@ const Recommendations = () => {
   return (
     <S.Recommendations data-cy={CypressFields.RecommendationList}>
       <S.TitleContainer>
-        <S.Title>You May Also Like</S.Title>
+        <S.Title>{t('common.recommendations')}</S.Title>
       </S.TitleContainer>
       <S.ProductList>
         {recommendedProductList.map(product => (

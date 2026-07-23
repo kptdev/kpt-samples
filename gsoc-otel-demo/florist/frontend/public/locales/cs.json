@@ -14,7 +14,8 @@
     "demo_notice": "Tento web je hostovaný pouze pro demo účely. Nejde o skutečný obchod."
   },
   "common": {
-    "continue_shopping": "Pokračovat v nákupu"
+    "continue_shopping": "Pokračovat v nákupu",
+    "recommendations": "Mohlo by se vám také líbit"
   },
   "empty_cart": {
     "title": "Váš nákupní košík je prázdný!",
@@ -38,7 +39,25 @@
     "price": "Cena"
   },
   "product": {
-    "quantity": "Množství"
+    "add_to_cart": "Přidat do košíku",
+    "quantity": "Množství",
+    "reviews": "Hodnocení zákazníků",
+    "loading": "Načítání...",
+    "reviews_error": "Nepodařilo se načíst recenze produktů.",
+    "no_reviews": "Zatím žádné recenze.",
+    "no_description": "Nebyl poskytnut žádný popis.",
+    "review_count": "recenze",
+    "star": "hvězda",
+    "stars": "hvězdičky",
+    "ai_response": "Odpověď AI:",
+    "ai_error": "Při dotazování AI došlo k chybě.",
+    "ask_assistant": "Zeptejte se asistenta s umělou inteligencí",
+    "ai_placeholder": "Zadejte svůj dotaz zde...",
+    "ask": "Zeptat se",
+    "ai_loading": "Dotazování AI...",
+    "quick_prompt_summarize": "Můžete shrnout recenze produktů?",
+    "quick_prompt_ages": "Pro jaký věk je to doporučeno?",
+    "quick_prompt_negative": "Byly nějaké negativní recenze?"
   },
   "checkout_item": {
     "shipping_data": "Dodací údaje",

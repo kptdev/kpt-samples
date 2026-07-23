@@ -125,9 +125,8 @@ spec:
             failureThreshold: 3
           resources:
             limits:
-              memory: 1Gi
+              memory: 200Mi
             requests:
-              memory: 500Mi
               cpu: 250m
           volumeMounts:
             - mountPath: /conf

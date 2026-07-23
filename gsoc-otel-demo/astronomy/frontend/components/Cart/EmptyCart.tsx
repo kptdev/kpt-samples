@@ -11,7 +11,7 @@ const EmptyCart = () => {
   return (
     <S.EmptyCartContainer>
       <S.Title>{t('cart.empty')}</S.Title>
-      <S.Subtitle>Items you add to your shopping cart will appear here.</S.Subtitle>
+      <S.Subtitle>{t('cart.empty_cart_subtitle')}</S.Subtitle>
 
       <S.ButtonContainer>
         <Link href="/">

@@ -17,7 +17,23 @@
     "price": "\u4ef7\u683c",
     "empty_cart": "\u6e05\u7a7a\u8d2d\u7269\u8f66",
     "place_order": "\u4e0b\u8ba2\u5355",
-    "subtotal": "\u5c0f\u8ba1"
+    "subtotal": "\u5c0f\u8ba1",
+    "shopping_cart": "\u8d2d\u7269\u8f66",
+    "close": "\u5173\u95ed",
+    "empty_dropdown": "\u60a8\u7684\u8d2d\u7269\u8f66\u662f\u7a7a\u7684",
+    "go_to_cart": "\u524d\u5f80\u8d2d\u7269\u8f66",
+    "empty_cart_subtitle": "\u60a8\u6dfb\u52a0\u5230\u8d2d\u7269\u8f66\u7684\u5546\u54c1\u5c06\u663e\u793a\u5728\u8fd9\u91cc\u3002"
+  },
+  "checkout_item": {
+    "shipping_data": "\u914d\u9001\u4fe1\u606f",
+    "street": "\u8857\u9053",
+    "city": "\u57ce\u5e02",
+    "state": "\u5dde/\u7701",
+    "zip_code": "\u90ae\u653f\u7f16\u7801",
+    "country": "\u56fd\u5bb6",
+    "see_more": "\u67e5\u770b\u66f4\u591a",
+    "done": "\u5b8c\u6210",
+    "total": "\u603b\u8ba1"
   },
   "checkout_summary": {
     "complete": "\u60a8\u7684\u8ba2\u5355\u5df2\u5b8c\u6210\uff01",
@@ -47,6 +63,9 @@
     "country": "\u56fd\u5bb6",
     "country_placeholder": "United States",
     "card_number": "\u4fe1\u7528\u5361\u53f7",
+    "payment_method": "\u652f\u4ed8\u65b9\u5f0f",
+    "month": "\u6708",
+    "year": "\u5e74",
     "expiration_month": "\u8fc7\u671f\u6708\u4efd",
     "expiration_year": "\u8fc7\u671f\u5e74\u4efd",
     "cvv": "CVV"
@@ -63,10 +82,23 @@
   },
   "product": {
     "add_to_cart": "\u52a0\u5165\u8d2d\u7269\u8f66",
+    "quantity": "\u6570\u91cf",
     "reviews": "\u5ba2\u6237\u8bc4\u4ef7",
+    "loading": "\u52a0\u8f7d\u4e2d...",
+    "reviews_error": "\u65e0\u6cd5\u52a0\u8f7d\u4ea7\u54c1\u8bc4\u4ef7\u3002",
+    "no_reviews": "\u6682\u65e0\u8bc4\u4ef7\u3002",
+    "no_description": "\u672a\u63d0\u4f9b\u63cf\u8ff0\u3002",
+    "review_count": "\u6761\u8bc4\u4ef7",
+    "star": "\u661f",
+    "stars": "\u661f",
+    "ai_response": "AI \u56de\u590d:",
+    "ai_error": "\u62b1\u6b49\uff0c\u5411 AI \u63d0\u95ee\u65f6\u51fa\u9519\u3002",
     "ask_assistant": "\u5411 AI \u52a9\u624b\u63d0\u95ee",
     "ai_placeholder": "\u5728\u6b64\u8f93\u5165\u60a8\u7684\u95ee\u9898...",
     "ask": "\u63d0\u95ee",
-    "loading": "\u52a0\u8f7d\u4e2d..."
+    "ai_loading": "\u6b63\u5728\u8be2\u95ee AI...",
+    "quick_prompt_summarize": "\u60a8\u80fd\u603b\u7ed3\u4e00\u4e0b\u4ea7\u54c1\u8bc4\u4ef7\u5417\uff1f",
+    "quick_prompt_ages": "\u8fd9\u4e2a\u63a8\u8350\u7ed9\u591a\u5927\u5e74\u9f84\u7684\u4eba\uff1f",
+    "quick_prompt_negative": "\u6709\u4ec0\u4e48\u8d1f\u9762\u8bc4\u4ef7\u5417\uff1f"
   }
 }

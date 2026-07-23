@@ -14,7 +14,8 @@
     "demo_notice": "本网站仅用于演示目的，不是实际商店。"
   },
   "common": {
-    "continue_shopping": "继续购物"
+    "continue_shopping": "继续购物",
+    "recommendations": "您可能还会喜欢"
   },
   "empty_cart": {
     "title": "您的购物车是空的！",
@@ -38,7 +39,25 @@
     "price": "价格"
   },
   "product": {
-    "quantity": "数量"
+    "add_to_cart": "加入购物车",
+    "quantity": "数量",
+    "reviews": "客户评价",
+    "loading": "加载中...",
+    "reviews_error": "无法加载产品评价。",
+    "no_reviews": "暂无评价。",
+    "no_description": "未提供描述。",
+    "review_count": "条评价",
+    "star": "星",
+    "stars": "星",
+    "ai_response": "AI 回复:",
+    "ai_error": "抱歉，向 AI 提问时出错。",
+    "ask_assistant": "向 AI 助手提问",
+    "ai_placeholder": "在此输入您的问题...",
+    "ask": "提问",
+    "ai_loading": "正在询问 AI...",
+    "quick_prompt_summarize": "您能总结一下产品评价吗？",
+    "quick_prompt_ages": "这个推荐给多大年龄的人？",
+    "quick_prompt_negative": "有什么负面评价吗？"
   },
   "checkout_item": {
     "shipping_data": "配送信息",

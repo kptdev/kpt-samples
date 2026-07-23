@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Link from 'next/link';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { CypressFields } from '../../utils/enums/CypressFields';
 import Input from '../Input';
 import * as S from './CheckoutForm.styled';
-import { useTranslation } from '../../utils/i18n';
+import { useRuntimeConfig, useTranslation } from '../../utils/i18n';
 
 const currentYear = new Date().getFullYear();
 const yearList = Array.from(new Array(20), (v, i) => i + currentYear);
@@ -30,6 +30,7 @@ interface IProps {
 
 const CheckoutForm = ({ onSubmit }: IProps) => {
   const { t } = useTranslation();
+  const { locale } = useRuntimeConfig();
   const [
     {
       email,
@@ -63,6 +64,8 @@ const CheckoutForm = ({ onSubmit }: IProps) => {
       [e.target.name]: e.target.value,
     }));
   }, []);
+
+  const monthLabels = useMemo(() => Array.from({ length: 12 }, (_, index) => new Intl.DateTimeFormat(locale || 'en-US', { month: 'long' }).format(new Date(2020, index, 1))), [locale]);
 
   return (
     <S.CheckoutForm
@@ -131,7 +134,7 @@ const CheckoutForm = ({ onSubmit }: IProps) => {
       </S.StateRow>
 
       <div>
-        <S.Title>Payment Method</S.Title>
+        <S.Title>{t('checkout_form.payment_method')}</S.Title>
       </div>
 
       <Input
@@ -148,28 +151,21 @@ const CheckoutForm = ({ onSubmit }: IProps) => {
 
       <S.CardRow>
         <Input
-          label="Month"
+          label={t('checkout_form.month')}
           name="creditCardExpirationMonth"
           id="credit_card_expiration_month"
           value={creditCardExpirationMonth}
           onChange={handleChange}
           type="select"
         >
-          <option value="1">January</option>
-          <option value="2">February</option>
-          <option value="3">March</option>
-          <option value="4">April</option>
-          <option value="5">May</option>
-          <option value="6">June</option>
-          <option value="7">July</option>
-          <option value="8">August</option>
-          <option value="9">September</option>
-          <option value="10">October</option>
-          <option value="11">November</option>
-          <option value="12">January</option>
+          {monthLabels.map((monthLabel, index) => (
+            <option value={index + 1} key={monthLabel}>
+              {monthLabel}
+            </option>
+          ))}
         </Input>
         <Input
-          label="Year"
+          label={t('checkout_form.year')}
           name="creditCardExpirationYear"
           id="credit_card_expiration_year"
           value={creditCardExpirationYear}
@@ -183,7 +179,7 @@ const CheckoutForm = ({ onSubmit }: IProps) => {
           ))}
         </Input>
         <Input
-          label="CVV"
+          label={t('checkout_form.cvv')}
           type="password"
           id="credit_card_cvv"
           name="creditCardCvv"

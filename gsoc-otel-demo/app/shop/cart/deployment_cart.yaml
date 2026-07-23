@@ -66,6 +66,7 @@ spec:
           resources:
             limits:
               memory: 160Mi
+            requests: {}
           volumeMounts: null
       initContainers:
         - command:

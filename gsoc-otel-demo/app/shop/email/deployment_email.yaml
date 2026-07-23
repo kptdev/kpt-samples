@@ -30,7 +30,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: email
-          image: email:v1
+          image: astronomy-email:v1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -64,7 +64,7 @@ spec:
             - name: LOCALE
               value: hi-IN
             - name: NEXT_PUBLIC_LOCALE
-              value: zh-CN
+              value: en-US
           resources:
             limits:
               memory: 100Mi

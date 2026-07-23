@@ -77,7 +77,8 @@ spec:
               value: jaeger
           resources:
             limits:
-              memory: 128Mi
+              memory: 100Mi
+            requests: {}
           volumeMounts: null
       initContainers:
         - command:

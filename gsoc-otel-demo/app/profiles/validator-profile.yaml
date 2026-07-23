@@ -9,9 +9,9 @@ source: |-
     for r in ctx.resource_list["items"]:
       if r.get("kind") == "ConfigMap" and r.get("metadata", {}).get("name") == "profile-config":
         profile = r.get("data", {}).get("profile", "")
-        valid_profiles = ["small", "medium", "large"]
+        valid_profiles = ["default", "small", "medium", "large"]
         if profile not in valid_profiles:
-          fail("profile '" + profile + "' is invalid. Allowed values: small, medium, large")
+          fail("profile '" + profile + "' is invalid. Allowed values: default, small, medium, large")
     return
 
   validate_profile(ctx)

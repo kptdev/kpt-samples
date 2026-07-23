@@ -14,7 +14,8 @@
     "demo_notice": "This website is hosted for demo purpose only. It is not an actual shop."
   },
   "common": {
-    "continue_shopping": "Continue Shopping"
+    "continue_shopping": "Continue Shopping",
+    "recommendations": "You May Also Like"
   },
   "empty_cart": {
     "title": "Your shopping cart is empty!",
@@ -38,7 +39,24 @@
     "price": "Price"
   },
   "product": {
-    "quantity": "Quantity"
+    "quantity": "Quantity",
+    "reviews": "Customer Reviews",
+    "loading": "Loading product reviews\u2026",
+    "reviews_error": "Could not load product reviews.",
+    "no_reviews": "No reviews yet.",
+    "no_description": "No description provided.",
+    "review_count": "reviews",
+    "star": "star",
+    "stars": "stars",
+    "ai_response": "AI Response:",
+    "ai_error": "Sorry, something went wrong while asking AI.",
+    "ask_assistant": "Ask AI About This Product",
+    "ai_placeholder": "Type a question about the product\u2026",
+    "ask": "Ask",
+    "ai_loading": "Asking AI\u2026",
+    "quick_prompt_summarize": "Can you summarize the product reviews?",
+    "quick_prompt_ages": "What age(s) is this recommended for?",
+    "quick_prompt_negative": "Were there any negative reviews?"
   },
   "checkout_item": {
     "shipping_data": "Shipping Data",

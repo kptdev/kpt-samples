@@ -250,7 +250,8 @@ spec:
               port: grafana
           resources:
             limits:
-              memory: 300Mi
+              memory: 256Mi
+              cpu: 150m
       volumes:
         - name: config
           configMap:

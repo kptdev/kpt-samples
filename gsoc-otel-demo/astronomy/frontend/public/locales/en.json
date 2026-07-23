@@ -17,7 +17,23 @@
     "price": "Price",
     "empty_cart": "Empty Cart",
     "place_order": "Place Order",
-    "subtotal": "Subtotal"
+    "subtotal": "Subtotal",
+    "shopping_cart": "Shopping Cart",
+    "close": "Close",
+    "empty_dropdown": "Your shopping cart is empty",
+    "go_to_cart": "Go to Shopping Cart",
+    "empty_cart_subtitle": "Items you add to your shopping cart will appear here."
+  },
+  "checkout_item": {
+    "shipping_data": "Shipping Data",
+    "street": "Street",
+    "city": "City",
+    "state": "State",
+    "zip_code": "Zip Code",
+    "country": "Country",
+    "see_more": "See More",
+    "done": "Done",
+    "total": "Total"
   },
   "checkout_summary": {
     "complete": "Your order is complete!",
@@ -47,6 +63,9 @@
     "country": "Country",
     "country_placeholder": "United States",
     "card_number": "Credit Card Number",
+    "payment_method": "Payment Method",
+    "month": "Month",
+    "year": "Year",
     "expiration_month": "Expiration Month",
     "expiration_year": "Expiration Year",
     "cvv": "CVV"
@@ -67,6 +86,18 @@
     "ask_assistant": "Ask the AI Assistant a question",
     "ai_placeholder": "Enter your question here...",
     "ask": "Ask",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "reviews_error": "Could not load product reviews.",
+    "no_reviews": "No reviews yet.",
+    "no_description": "No description provided.",
+    "review_count": "reviews",
+    "star": "star",
+    "stars": "stars",
+    "ai_response": "AI Response:",
+    "ai_error": "Sorry, something went wrong while asking AI.",
+    "ai_loading": "Asking AI...",
+    "quick_prompt_summarize": "Can you summarize the product reviews?",
+    "quick_prompt_ages": "What age(s) is this recommended for?",
+    "quick_prompt_negative": "Were there any negative reviews?"
   }
 }

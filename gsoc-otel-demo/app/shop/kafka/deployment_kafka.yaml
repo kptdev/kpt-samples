@@ -68,6 +68,7 @@ spec:
           resources:
             limits:
               memory: 700Mi
+            requests: {}
           securityContext:
             runAsGroup: 1000
             runAsNonRoot: true

@@ -29,7 +29,7 @@ const Footer = () => {
         </p>
       </div>
       <p>
-        @ {currentYear} OpenTelemetry (<a href="https://github.com/open-telemetry/opentelemetry-demo">Source Code</a>)
+        @ {currentYear} {t('footer.open_telemetry')} (<a href="https://github.com/open-telemetry/opentelemetry-demo">{t('footer.open_source')}</a>)
       </p>
       <PlatformFlag />
     </S.Footer>

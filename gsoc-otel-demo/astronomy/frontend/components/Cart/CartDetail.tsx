@@ -68,7 +68,7 @@ const CartDetail = () => {
     <S.Container>
       <div>
         <S.Header>
-          <S.CarTitle>Shopping Cart</S.CarTitle>
+          <S.CarTitle>{t('cart.shopping_cart')}</S.CarTitle>
           <S.EmptyCartButton onClick={emptyCart} $type="link">
             {t('cart.empty_cart')}
           </S.EmptyCartButton>

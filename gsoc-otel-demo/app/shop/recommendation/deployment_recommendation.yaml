@@ -68,5 +68,6 @@ spec:
           resources:
             limits:
               memory: 500Mi
+            requests: {}
           volumeMounts: null
       volumes: null

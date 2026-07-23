@@ -14,7 +14,8 @@
     "demo_notice": "このサイトはデモ目的で公開されています。実際の店舗ではありません。"
   },
   "common": {
-    "continue_shopping": "買い物を続ける"
+    "continue_shopping": "買い物を続ける",
+    "recommendations": "こちらもおおすすめ"
   },
   "empty_cart": {
     "title": "ショッピングカートは空です！",
@@ -38,7 +39,25 @@
     "price": "価格"
   },
   "product": {
-    "quantity": "数量"
+    "add_to_cart": "カートに追加",
+    "quantity": "数量",
+    "reviews": "カスタマーレビュー",
+    "loading": "読み込み中...",
+    "reviews_error": "製品レビューを読み込めませんでした。",
+    "no_reviews": "レビューはまだありません。",
+    "no_description": "説明がありません。",
+    "review_count": "件のレビュー",
+    "star": "星",
+    "stars": "星",
+    "ai_response": "AIの回答:",
+    "ai_error": "AIに質問中にエラーが発生しました。",
+    "ask_assistant": "AI アシスタントに質問する",
+    "ai_placeholder": "ここに質問を入力してください...",
+    "ask": "質問する",
+    "ai_loading": "AIに質問中...",
+    "quick_prompt_summarize": "製品レビューを要約してください。",
+    "quick_prompt_ages": "これは何歳向けですか？",
+    "quick_prompt_negative": "否定的なレビューはありましたか？"
   },
   "checkout_item": {
     "shipping_data": "配送情報",
