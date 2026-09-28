@@ -30,7 +30,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: llm
-          image: astronomy-llm:v1
+          image: "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/astronomy-llm:v1"
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000

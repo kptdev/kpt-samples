@@ -20,23 +20,23 @@ source: |-
     store_data = {
       "florist": {
         "init_configmap": "florist-postgresql-init",
-        "image_provider": "florist-image-provider:v1",
-        "frontend_image": "florist-frontend:v1",
-        "ad_image": "florist-ad:v1",
-        "llm_image": "florist-llm:v1",
-        "load_generator_image": "florist-load-generator:v1",
+        "image_provider": "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/florist-image-provider:v1",
+        "frontend_image": "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/florist-frontend:v1",
+        "ad_image": "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/florist-ad:v1",
+        "llm_image": "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/florist-llm:v1",
+        "load_generator_image": "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/florist-load-generator:v1",
         "llm_product_id": "FLR001",
-        "email_image":"email:v1"
+        "email_image":"ghcr.io/nordix/kpt-samples/gsoc-otel-demo/email:v1"
       },
       "astronomy": {
         "init_configmap": "astronomy-postgresql-init",
         "image_provider": "ghcr.io/open-telemetry/demo:2.2.0-image-provider",
-        "frontend_image": "astronomy-frontend:v1",
-        "ad_image": "astronomy-ad:v1",
-        "llm_image": "astronomy-llm:v1",
+        "frontend_image": "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/astronomy-frontend:v1",
+        "ad_image": "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/"ghcr.io/nordix/kpt-samples/gsoc-otel-demo/astronomy-ad:v1":v1",
+        "llm_image": "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/astronomy-llm:v1",
         "load_generator_image": "ghcr.io/open-telemetry/demo:2.2.0-load-generator",
         "llm_product_id": "L9ECAV7KIM",
-        "email_image":"astronomy-email:v1"
+        "email_image":"ghcr.io/nordix/kpt-samples/gsoc-otel-demo/astronomy-email:v1"
       },
     }
 

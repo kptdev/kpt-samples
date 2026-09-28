@@ -30,7 +30,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: ad
-          image: astronomy-ad:v1
+          image: "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/astronomy-ad:v1"
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

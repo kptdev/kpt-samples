@@ -36,11 +36,11 @@ check_image() {
   fi
 }
 
-check_image frontend          "florist-frontend:v1"
-check_image ad                "florist-ad:v1"
-check_image image-provider    "florist-image-provider:v1"
-check_image llm               "florist-llm:v1"
-check_image load-generator    "florist-load-generator:v1"
+check_image frontend          "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/florist-frontend:v1"
+check_image ad                "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/florist-ad:v1"
+check_image image-provider    "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/florist-image-provider:v1"
+check_image llm               "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/florist-llm:v1"
+check_image load-generator    "ghcr.io/nordix/kpt-samples/gsoc-otel-demo/florist-load-generator:v1"
 
 # --- Product ID substitution ---------------------------------------------
 info "asserting florist product ID (FLR001) reached shop/flagd/"
