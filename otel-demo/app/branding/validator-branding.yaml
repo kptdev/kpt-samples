@@ -12,6 +12,11 @@ source: |-
         valid_types = ["astronomy", "florist"]
         if store_type not in valid_types:
           fail("storeType '" + store_type + "' is invalid. Allowed values: astronomy, florist, car-accessories")
+
+        image_source = r.get("data", {}).get("imageSource", "upstream")
+        valid_sources = ["upstream", "local"]
+        if image_source not in valid_sources:
+          fail("imageSource '" + image_source + "' is invalid. Allowed values: upstream, local")
     return
 
   validate_branding(ctx)

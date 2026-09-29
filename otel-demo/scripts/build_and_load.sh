@@ -11,15 +11,15 @@ build_and_load() {
     local app=$1
     local service=$2
     local dir="$app/$service"
-    local image_name="${app}-${service}:v1"
+    local image_name="ghcr.io/kptdev/kpt-samples/otel-demo/${app}-${service}:v1"
     
     if [ -f "$dir/Dockerfile" ]; then
         echo "--------------------------------------------------------"
         echo "🏗️ Building image $image_name from $dir..."
         if [ "$service" = "ad" ]; then
-            docker build --build-arg OTEL_JAVA_AGENT_VERSION=2.8.0 -t "$image_name" "$dir"
+            docker buildx build --platform linux/arm64,linux/amd64 --build-arg OTEL_JAVA_AGENT_VERSION=2.8.0 -t "$image_name" "$dir"
         else
-            docker build -t "$image_name" "$dir"
+            docker buildx build --platform linux/arm64,linux/amd64 -t "$image_name" "$dir"
         fi
         
         echo "🚢 Loading image $image_name into kind cluster '$KIND_CLUSTER_NAME'..."

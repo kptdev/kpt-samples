@@ -6,3 +6,5 @@ metadata:
     config.kubernetes.io/local-config: "true"
 data:
   storeType: astronomy
+  # imageSource selects which image references setup-branding uses: upstream (default) / local
+  imageSource: upstream
