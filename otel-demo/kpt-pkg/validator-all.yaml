@@ -1,0 +1,68 @@
+# validator-all.yaml
+# Generic, schema-driven validator. Instead of hardcoding allowed values, it
+# reads the app-config-schema resource (kind: JsonSchema) and validates the
+# app-config ConfigMap's data fields against it:
+#   - required : every listed key must be present and non-empty
+#   - enum     : value must be one of the allowed values
+#   - minLength: string length floor
+# To change what's allowed, edit app-config-schema.yaml — no change to this
+# validator needed.
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: validator-all
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  def find_by_kind_name(items, kind, name):
+    for r in items:
+      if r.get("kind") == kind and r.get("metadata", {}).get("name") == name:
+        return r
+    return None
+
+  def validate_against_schema(ctx):
+    items = ctx.resource_list["items"]
+
+    schema = find_by_kind_name(items, "JsonSchema", "app-config-schema")
+    if schema == None:
+      fail("app-config-schema (kind: JsonSchema) not found in the package")
+
+    cfg = find_by_kind_name(items, "ConfigMap", "app-config")
+    if cfg == None:
+      fail("app-config ConfigMap not found in the package")
+
+    data = cfg.get("data", {})
+    spec = schema.get("spec", {})
+    required = spec.get("required", [])
+    properties = spec.get("properties", {})
+
+    # Normalize a data value to a string ("" for missing/null) so all the checks
+    # below are safe even when a key is absent or present-but-null in YAML.
+    def sval(key):
+      v = data.get(key, "")
+      if v == None:
+        return ""
+      return str(v)
+
+    # required: present and non-empty
+    for key in required:
+      if sval(key) == "":
+        fail("app-config: required field '" + key + "' is missing or empty")
+
+    # per-field constraints from the schema
+    for key in properties:
+      # Skip fields that are absent/null and not required — nothing to check.
+      if key not in data or data.get(key, None) == None:
+        continue
+      value = sval(key)
+      rules = properties[key]
+
+      allowed = rules.get("enum", None)
+      if allowed != None and value not in allowed:
+        fail("app-config: '" + key + "' = '" + value + "' is invalid. Allowed values: " + str(allowed))
+
+      min_len = rules.get("minLength", None)
+      if min_len != None and len(value) < min_len:
+        fail("app-config: '" + key + "' must be at least " + str(min_len) + " character(s)")
+
+  validate_against_schema(ctx)

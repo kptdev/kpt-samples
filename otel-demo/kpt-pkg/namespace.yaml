@@ -1,0 +1,9 @@
+# Deployment namespace. The name is a placeholder ("PLACEHOLDER-NS") that the
+# setup-extras mutator rewrites to the value in app-config (data.namespace)
+# during render, so each deployment clone ships a Namespace object matching its
+# own namespace. Applied and pruned by Flux like any other resource (no
+# imperative `kubectl create namespace` needed).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: otel-demo
