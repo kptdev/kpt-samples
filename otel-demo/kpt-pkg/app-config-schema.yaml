@@ -1,0 +1,36 @@
+# app-config-schema.yaml — the schema for app-config, as a KRM resource with
+# STRUCTURED data (not a JSON string), so the starlark validator can read it
+# natively — the kpt starlark runtime has no json parser.
+#
+# The validator-all starlark walks .spec.properties and enforces, for each
+# app-config data key: the enum (if present) and minLength (if present).
+# Edit this file to change what values are allowed — no validator change needed.
+apiVersion: fn.kpt.dev/v1alpha1
+kind: JsonSchema
+metadata:
+  name: app-config-schema
+  annotations:
+    config.kubernetes.io/local-config: "true"
+spec:
+  required:
+    - namespace
+    - storeType
+    - region
+    - profile
+    - chaos
+  properties:
+    namespace:
+      type: string
+      minLength: 1
+    storeType:
+      type: string
+      enum: ["astronomy", "florist"]
+    region:
+      type: string
+      enum: ["us", "india", "czech-republic", "china", "ireland", "sweden", "hungary"]
+    profile:
+      type: string
+      enum: ["default", "small", "medium", "large"]
+    chaos:
+      type: string
+      enum: ["off", "payment-outage", "high-load", "broken-catalog", "memory-leak"]
