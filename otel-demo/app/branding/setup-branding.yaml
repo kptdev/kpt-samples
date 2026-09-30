@@ -42,17 +42,17 @@ source: |-
         "llm_image": UPSTREAM_PREFIX + "florist-llm:v1",
         "load_generator_image": UPSTREAM_PREFIX + "florist-load-generator:v1",
         "llm_product_id": "FLR001",
-        "email_image":UPSTREAM_PREFIX + "email:v1"
+        "email_image": UPSTREAM_PREFIX + "florist-email:v1"
       },
       "astronomy": {
         "init_configmap": "astronomy-postgresql-init",
         "image_provider": "ghcr.io/open-telemetry/demo:2.2.0-image-provider",
         "frontend_image": UPSTREAM_PREFIX + "astronomy-frontend:v1",
-        "ad_image": UPSTREAM_PREFIX + "UPSTREAM_PREFIX + "astronomy-ad:v1":v1",
+        "ad_image": UPSTREAM_PREFIX + "astronomy-ad:v1",
         "llm_image": UPSTREAM_PREFIX + "astronomy-llm:v1",
         "load_generator_image": "ghcr.io/open-telemetry/demo:2.2.0-load-generator",
         "llm_product_id": "L9ECAV7KIM",
-        "email_image":UPSTREAM_PREFIX + "astronomy-email:v1"
+        "email_image": UPSTREAM_PREFIX + "astronomy-email:v1"
       },
     }
 
