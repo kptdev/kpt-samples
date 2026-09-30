@@ -120,6 +120,15 @@ kpt live init .
 kpt live apply . 
 ```
 
+# Open the application on your browser
+
+```bash
+kubectl port-forward -n otel-demo svc/frontend-proxy 8080:8080
+```
+
+The UI is available at `http://localhost:8080/`.
+
+
 > Tip: you can render only one subpackage (e.g. `kpt fn render shop/`) if you want to iterate without the root pipeline.
 
 ---
