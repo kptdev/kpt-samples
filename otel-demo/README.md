@@ -1,6 +1,6 @@
 # Astronomy Shop for kpt
 
-A GSoC 2026 sample that packages the [OpenTelemetry Astronomy Shop](https://opentelemetry.io/docs/demo/) — a microservices e‑commerce demo — as a composable [kpt](https://kpt.dev) package and shows how the same package can be rebranded, regionalized, wired up for telemetry, and updated safely using **Configuration as Data** and **KRM Functions**.
+A sample that packages the [OpenTelemetry Astronomy Shop](https://opentelemetry.io/docs/demo/) — a microservices e‑commerce demo — as a composable [kpt](https://kpt.dev) package and shows how the same package can be rebranded, regionalized, wired up for telemetry, and updated safely using **Configuration as Data** and **KRM Functions**.
 
 
 
@@ -83,7 +83,8 @@ app/                              (ROOT PACKAGE)
 
 - A working Kubernetes cluster (kind, minikube, or any conformant cluster).
 - Docker as container engine.
-- If you want to build the images, you may run the provided script (this is for a kind cluster):
+- By default, the package deploys prebuilt images from `ghcr.io/kptdev/kpt-samples/otel-demo/*`, so no local build is required.
+- If you'd rather build the images yourself, set `imageSource: local` in `app/branding/branding-config.yaml` (see [Branding](#branding)) and run the provided script (this is for a kind cluster):
   ```bash
   ./scripts/build_and_load.sh <cluster_name>
   ```
@@ -100,7 +101,7 @@ kubectl create namespace otel-demo
 Clone the repository and enter the root package:
 
 ```bash
-kpt pkg get https://github.com/<your-org>/gsoc-otel-demo.git/app@main app
+kpt pkg get https://github.com/kptdev/kpt-samples/otel-demo/app@main app
 cd app
 ```
 
@@ -145,13 +146,14 @@ The branding layer turns the upstream Astronomy Shop into a Florist store — di
 ```yaml
 data:
   storeType: astronomy     # change to "florist" to rebrand
+  imageSource: upstream    # change to "local" to use images built by scripts/build_and_load.sh
 ```
 
 **How the pipeline works:**
 
 | Step | Function | What it does |
 | --- | --- | --- |
-| 1 | `setup-branding` (Starlark) | Reads `storeType`, looks up the matching folder under `app/branding/` (`astronomy/` or `florist/`), then materializes `value-store` (image references + product ID) and `active-postgresql-init` (SQL). |
+| 1 | `setup-branding` (Starlark) | Reads `storeType`, looks up the matching folder under `app/branding/` (`astronomy/` or `florist/`), then materializes `value-store` (image references + product ID) and `active-postgresql-init` (SQL). `imageSource` picks whether the image references point at prebuilt `ghcr.io` images (`upstream`, the default) or the local tags produced by `scripts/build_and_load.sh` (`local`). |
 | 2 | `replace-postgresql-init` (ApplyReplacements) | Copies `active-postgresql-init.data["init.sql"]` into the `postgresql-init` ConfigMap that ships with `shop/`. |
 | 3 | `branding-image-provider` (ApplyReplacements) | Reads `value-store` and writes each image field into the matching Deployment in `shop/` (`frontend`, `image-provider`, `ad`, `llm`, `load-generator`). |
 | 4 | `validator-branding` (Starlark) | Verifies `storeType ∈ {astronomy, florist}` and aborts the render otherwise. |
@@ -190,6 +192,24 @@ The generic e‑commerce workflow stays identical — `cart`, `checkout`, `payme
 
 No changes to `app/shop/` are required.
 
+#### Choosing Image Source: Upstream vs. Local
+
+By default (`imageSource: upstream`), the branding pipeline wires in prebuilt images published to `ghcr.io/kptdev/kpt-samples/otel-demo/*` — no local Docker build required.
+
+If you're iterating on a service's source code, set `imageSource: local` in `app/branding/branding-config.yaml` and build/load the images yourself:
+
+```yaml
+data:
+  storeType: astronomy
+  imageSource: local
+```
+
+```bash
+./scripts/build_and_load.sh <cluster_name>
+kpt fn render .
+```
+
+This swaps in the same image tags that `scripts/build_and_load.sh` builds and loads into the cluster (e.g. `astronomy-frontend:v1` instead of `ghcr.io/kptdev/kpt-samples/otel-demo/astronomy-frontend:v1`).
 
 ### Regional
 

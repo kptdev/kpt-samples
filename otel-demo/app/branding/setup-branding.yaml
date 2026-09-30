@@ -7,38 +7,58 @@ metadata:
 source: |-
   load("krmfn.star", "krmfn")
 
+  # Prebuilt images published to ghcr.io (used when imageSource == "upstream", the default).
+  UPSTREAM_PREFIX = "ghcr.io/kptdev/kpt-samples/otel-demo/"
+
+  # Strip the upstream prefix to get the local tag (as built by
+  # scripts/build_and_load.sh and loaded into the cluster), unless the
+  # image already lives outside our registry (e.g. upstream OTel demo images).
+  def local_tag(image):
+    if image.startswith(UPSTREAM_PREFIX):
+      return image[len(UPSTREAM_PREFIX):]
+    return image
+
   def setup_branding(resources):
     store_type = ""
+    image_source = "upstream"
     for r in resources:
       if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "branding-config"):
         store_type = r.get("data", {}).get("storeType", "")
+        image_source = r.get("data", {}).get("imageSource", "upstream")
         break
 
     if store_type == "":
       fail("storeType not found in branding-config")
 
+    if image_source not in ["upstream", "local"]:
+      fail("imageSource '" + image_source + "' is invalid. Allowed values: upstream, local")
+
     store_data = {
       "florist": {
         "init_configmap": "florist-postgresql-init",
-        "image_provider": "florist-image-provider:v1",
-        "frontend_image": "florist-frontend:v1",
-        "ad_image": "florist-ad:v1",
-        "llm_image": "florist-llm:v1",
-        "load_generator_image": "florist-load-generator:v1",
+        "image_provider": UPSTREAM_PREFIX + "florist-image-provider:v1",
+        "frontend_image": UPSTREAM_PREFIX + "florist-frontend:v1",
+        "ad_image": UPSTREAM_PREFIX + "florist-ad:v1",
+        "llm_image": UPSTREAM_PREFIX + "florist-llm:v1",
+        "load_generator_image": UPSTREAM_PREFIX + "florist-load-generator:v1",
         "llm_product_id": "FLR001",
-        "email_image":"email:v1"
+        "email_image":UPSTREAM_PREFIX + "email:v1"
       },
       "astronomy": {
         "init_configmap": "astronomy-postgresql-init",
         "image_provider": "ghcr.io/open-telemetry/demo:2.2.0-image-provider",
-        "frontend_image": "astronomy-frontend:v1",
-        "ad_image": "astronomy-ad:v1",
-        "llm_image": "astronomy-llm:v1",
+        "frontend_image": UPSTREAM_PREFIX + "astronomy-frontend:v1",
+        "ad_image": UPSTREAM_PREFIX + "UPSTREAM_PREFIX + "astronomy-ad:v1":v1",
+        "llm_image": UPSTREAM_PREFIX + "astronomy-llm:v1",
         "load_generator_image": "ghcr.io/open-telemetry/demo:2.2.0-load-generator",
         "llm_product_id": "L9ECAV7KIM",
-        "email_image":"astronomy-email:v1"
+        "email_image":UPSTREAM_PREFIX + "astronomy-email:v1"
       },
     }
+
+    if image_source == "local":
+      for image_key in ["image_provider", "frontend_image", "ad_image", "llm_image", "load_generator_image", "email_image"]:
+        store_data[store_type][image_key] = local_tag(store_data[store_type][image_key])
 
     if store_type not in store_data:
       fail("Unsupported storeType: " + store_type)
