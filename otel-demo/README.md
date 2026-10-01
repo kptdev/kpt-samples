@@ -82,19 +82,22 @@ app/                              (ROOT PACKAGE)
 ### Prerequisites
 
 - A working Kubernetes cluster (kind, minikube, or any conformant cluster).
-- Docker as container engine.
-- By default, the package deploys prebuilt images from `ghcr.io/kptdev/kpt-samples/otel-demo/*`, so no local build is required.
-- If you'd rather build the images yourself, set `imageSource: local` in `app/branding/branding-config.yaml` (see [Branding](#branding)) and run the provided script (this is for a kind cluster):
+- Docker or Podman as container engine.
+- By default, the package deploys prebuilt images from `ghcr.io/kptdev/kpt-samples/otel-demo/*`, so no local build is
+  required.
+- If you'd rather build the images yourself, set `imageSource: local` in `app/branding/branding-config.yaml`
+  (see [Branding](#branding)) and run the provided script (this is for a kind cluster):
   ```bash
   ./scripts/build_and_load.sh <cluster_name>
   ```
-
 - [`kubectl`](https://kubernetes.io/docs/tasks/tools/) — for cluster interaction.
 - [`kpt`](https://kpt.dev/installation/kpt-cli) — for fetching, rendering, and applying the package.
 - Create a namespace called `otel-demo`
 ```bash
 kubectl create namespace otel-demo
 ```
+
+A detailed guide for installing the prerequisites is available [here](pre-requisites.md).
 
 ### Installation
 
