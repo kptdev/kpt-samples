@@ -18,6 +18,7 @@ apply-telemetry.yaml
 # root-level customization ConfigMap + KRM function configs + schema
 app-config.yaml
 app-config-schema.yaml
+version-config.yaml
 setup-*.yaml
 validator-*.yaml
 replace-*.yaml

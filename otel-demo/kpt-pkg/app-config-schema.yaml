@@ -25,6 +25,9 @@ spec:
     storeType:
       type: string
       enum: ["astronomy", "florist"]
+    imageSource:
+      type: string
+      enum: ["upstream", "local"]
     region:
       type: string
       enum: ["us", "india", "czech-republic", "china", "ireland", "sweden", "hungary"]

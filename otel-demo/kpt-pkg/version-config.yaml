@@ -1,0 +1,19 @@
+# version-config — a standalone counter that drives a render-time memory bump.
+#
+# On each upgrade, deploy.sh increments `version` here. A dedicated Starlark block
+# in setup-extras.yaml (bump_versioned_memory) then adds `version * 1Mi` to EVERY
+# container's memory limit, AFTER setup_profile has reset limits to their baseline.
+# Because the value changes every upgrade, every pod's spec changes and all pods
+# RESTART — a simple, uniform replacement for the old per-service flagd/checkout bump.
+#
+# This is a local-config ConfigMap (not applied to the cluster; consumed only at
+# render time), kept separate from app-config so the restart mechanism is decoupled
+# from the app's functional inputs.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: version-config
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  version: "0"

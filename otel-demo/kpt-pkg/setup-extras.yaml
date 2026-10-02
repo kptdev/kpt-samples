@@ -54,6 +54,9 @@ source: |
     "kafka": "700Mi",
     "postgresql": "100Mi",
     "flagd": "300Mi",
+    # flagd-ui (the sidecar in the flagd Deployment) intentionally gets NO memory
+    # limit — a hard limit OOMKills it at startup (it sizes its heap to the cgroup
+    # limit). It is not listed here; any limit is stripped by unlimit_flagd_ui() below.
     "valkey-cart": "20Mi",
     # Observability — Deployments
     "grafana": "256Mi",
@@ -634,9 +637,50 @@ source: |
     fix_collector_lease_ns(resources, ns)
 
   # ═══════════════════════════════════════════════════════════════════════
+  # Versioned memory bump — a uniform restart mechanism.
+  #
+  # Reads an integer `version` from the version-config ConfigMap and adds
+  # version * 1Mi to EVERY container's memory limit. Runs AFTER setup_profile
+  # (which resets limits to their baseline), so the bump lands on top of the
+  # baseline and is deterministic for a given version. deploy.sh increments
+  # `version` on each upgrade, so every upgrade changes every pod spec → all pods
+  # RESTART. Replaces the old per-service flagd/checkout +10Mi bump.
+  #
+  # Containers with no memory limit (e.g. flagd-ui, llm) are left untouched — we
+  # never introduce a limit, only bump an existing one.
+  # ═══════════════════════════════════════════════════════════════════════
+  def bump_versioned_memory(resources):
+    version = 0
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "version-config"):
+        raw = r.get("data", {}).get("version", "0")
+        if raw == None or raw == "":
+          raw = "0"
+        version = int(raw)
+        break
+    if version <= 0:
+      return  # version 0 (or unset) → no bump
+
+    kinds = ["Deployment", "StatefulSet", "DaemonSet"]
+    for r in resources:
+      if r.get("kind", "") not in kinds:
+        continue
+      pod = r.get("spec", {}).get("template", {}).get("spec", {})
+      for c in pod.get("containers", []):
+        res = c.get("resources", None)
+        if not res:
+          continue
+        limits = res.get("limits", None)
+        if not limits or "memory" not in limits:
+          continue
+        mb = parse_memory(limits["memory"])
+        limits["memory"] = format_memory(mb + version)
+
+  # ═══════════════════════════════════════════════════════════════════════
   # Dispatch — same order as the original 3 pipeline steps.
   # ═══════════════════════════════════════════════════════════════════════
   _items = ctx.resource_list["items"]
   setup_profile(_items)
+  bump_versioned_memory(_items)
   setup_chaos(_items)
   setup_cluster_scope(_items)
