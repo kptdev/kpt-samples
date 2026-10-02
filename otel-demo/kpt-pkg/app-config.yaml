@@ -25,5 +25,5 @@ data:
   storeType: astronomy
   imageSource: upstream
   region: us
-  profile: default
+  profile: small
   chaos: payment-outage

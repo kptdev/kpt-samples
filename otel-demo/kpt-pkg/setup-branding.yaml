@@ -162,4 +162,37 @@ source: |-
           resources[i] = replace_value(resources[i], old_id, data["llm_product_id"])
           break
 
+    # Stamp the active storeType onto every workload's POD TEMPLATE annotations.
+    # A ConfigMap change (init SQL, flags, env) does NOT restart a running pod, so
+    # a store switch would otherwise leave stateful pods (e.g. postgresql, which
+    # only seeds its DB on a fresh container) serving the OLD store's data. By
+    # putting the storeType in spec.template.metadata.annotations, switching stores
+    # changes the pod spec, which forces Flux/Kubernetes to roll every workload —
+    # so postgres re-seeds and all services pick up the new store.
+    stamp_store_annotation(resources, store_type)
+
+  # ─── Helpers ───
+
+  def stamp_store_annotation(resources, store_type):
+    workload_kinds = ["Deployment", "StatefulSet", "DaemonSet"]
+    for r in resources:
+      if r.get("kind", "") not in workload_kinds:
+        continue
+      # Navigate/create spec.template.metadata.annotations and set the stamp.
+      spec = r.get("spec", None)
+      if spec == None:
+        continue
+      template = spec.get("template", None)
+      if template == None:
+        continue
+      meta = template.get("metadata", None)
+      if meta == None:
+        meta = {}
+        template["metadata"] = meta
+      ann = meta.get("annotations", None)
+      if ann == None:
+        ann = {}
+        meta["annotations"] = ann
+      ann["otel-demo/store-type"] = store_type
+
   setup_branding(ctx.resource_list["items"])
