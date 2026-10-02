@@ -1,0 +1,686 @@
+# setup-extras.yaml
+# Consolidated StarlarkRun that runs the three order-independent mutators in a
+# single starlark invocation (instead of three), in the same order as before:
+#   1. setup_profile        — replica / memory / cpu scaling per profile
+#   2. setup_chaos          — flagd feature-flag chaos scenarios
+#   3. setup_cluster_scope  — multi-namespace fixes + YAML round-trip cleanups
+#
+# These three ran back-to-back at the end of the mutator pipeline (after all
+# apply-replacements steps) and do not depend on each other, so merging them is
+# output-equivalent. setup-branding.yaml and setup-region.yaml stay as separate
+# steps because each is immediately followed by an apply-replacements that
+# consumes its output.
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: setup-extras
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |
+  load("krmfn.star", "krmfn")
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # 1) PROFILE — replica / memory / cpu scaling (was profiles/setup-profile.yaml)
+  # ═══════════════════════════════════════════════════════════════════════
+
+  # === UPSTREAM DEFAULT RESOURCE VALUES ===
+  # Extracted from opentelemetry-demo.yaml — the source of truth.
+  # All profile scaling is computed from these baselines, never from
+  # the current (possibly already-mutated) values in the YAML files.
+
+  UPSTREAM_MEMORY_LIMITS = {
+    # Shop — tier-1 (user-facing)
+    "frontend": "250Mi",
+    "frontend-proxy": "65Mi",
+    # Shop — tier-2 (business-critical)
+    "checkout": "100Mi",
+    "cart": "160Mi",
+    "payment": "140Mi",
+    "product-catalog": "100Mi",
+    # Shop — tier-3 (supporting)
+    "shipping": "20Mi",
+    "quote": "40Mi",
+    "currency": "20Mi",
+    "recommendation": "500Mi",
+    "ad": "300Mi",
+    "email": "100Mi",
+    "accounting": "120Mi",
+    "fraud-detection": "300Mi",
+    "image-provider": "50Mi",
+    "load-generator": "1500Mi",
+    "product-reviews": "100Mi",
+    # llm has no resource limits in upstream — omitted intentionally
+    # Shop — infra
+    "kafka": "700Mi",
+    "postgresql": "100Mi",
+    "flagd": "300Mi",
+    # flagd-ui (the sidecar in the flagd Deployment) intentionally gets NO memory
+    # limit — a hard limit OOMKills it at startup (it sizes its heap to the cgroup
+    # limit). It is not listed here; any limit is stripped by unlimit_flagd_ui() below.
+    "valkey-cart": "20Mi",
+    # Observability — Deployments
+    "grafana": "256Mi",
+    "jaeger": "600Mi",
+    "prometheus": "400Mi",
+    # Observability — StatefulSet
+    "opensearch": "1100Mi",
+    # Observability — DaemonSet
+    "otel-collector-agent": "200Mi",
+  }
+
+  # Only services that have memory requests in upstream
+  UPSTREAM_MEMORY_REQUESTS = {
+    "opensearch": "100Mi",
+  }
+
+  # Only services that have CPU limits in upstream
+  UPSTREAM_CPU_LIMITS = {
+    "grafana": "150m",
+  }
+
+  # Only services that have CPU requests in upstream
+  UPSTREAM_CPU_REQUESTS = {
+    "opensearch": "1000m",
+  }
+
+  def setup_profile(resources):
+    profile = "medium"
+
+    # Read profile from config
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "app-config"):
+        profile = r.get("data", {}).get("profile", "medium")
+
+    if profile == None:
+      profile = "medium"
+    if profile == "":
+      fail("profile cannot be empty in app-config")
+
+    # === THE PROFILE MATRIX ===
+    # Defines per-service scaling for each profile.
+    # Services not listed here keep their upstream defaults.
+
+    # Service tiers for replica scaling:
+    #   tier-1 (user-facing): frontend, frontend-proxy
+    #   tier-2 (business-critical): checkout, cart, payment, product-catalog
+    #   tier-3 (supporting): all other shop services
+    #   infra: kafka, postgresql, flagd, valkey-cart
+    #   observability: otel-collector, prometheus, grafana, jaeger, opensearch
+
+    profiles = {
+      "default": {
+        "description": "Upstream defaults from the OpenTelemetry demo",
+        # --- Replicas ---
+        "tier1_replicas": 1,
+        "tier2_replicas": 1,
+        "tier3_replicas": 1,
+        "infra_replicas": 1,
+        # --- Observability enablement ---
+        "grafana_replicas": 1,
+        "jaeger_replicas": 1,
+        "opensearch_replicas": 1,
+        "prometheus_replicas": 1,
+        # --- Memory scaling factor (applied to upstream defaults) ---
+        "memory_factor": 1.0,
+        # --- CPU requests ---
+        "add_cpu_requests": False,
+      },
+      "small": {
+        "description": "Minimal footprint for local development and CI",
+        # --- Replicas ---
+        "tier1_replicas": 1,
+        "tier2_replicas": 1,
+        "tier3_replicas": 1,
+        "infra_replicas": 1,
+        # --- Observability enablement ---
+        "grafana_replicas": 0,       # disabled
+        "jaeger_replicas": 0,        # disabled
+        "opensearch_replicas": 0,    # disabled
+        "prometheus_replicas": 1,    # kept for basic metrics
+        # --- Memory scaling factor (applied to upstream defaults) ---
+        "memory_factor": 0.75,
+        # --- CPU requests (none for small) ---
+        "add_cpu_requests": False,
+      },
+      "medium": {
+        "description": "Balanced for staging and demos",
+        # --- Replicas ---
+        "tier1_replicas": 2,
+        "tier2_replicas": 2,
+        "tier3_replicas": 1,
+        "infra_replicas": 2,
+        # --- Observability enablement ---
+        "grafana_replicas": 1,
+        "jaeger_replicas": 1,
+        "opensearch_replicas": 1,
+        "prometheus_replicas": 1,
+        # --- Memory scaling factor ---
+        "memory_factor": 1.0,
+        # --- CPU requests ---
+        "add_cpu_requests": True,
+      },
+      "large": {
+        "description": "Production-grade with high availability",
+        # --- Replicas ---
+        "tier1_replicas": 3,
+        "tier2_replicas": 3,
+        "tier3_replicas": 2,
+        "infra_replicas": 2,
+        # --- Observability enablement ---
+        "grafana_replicas": 1,
+        "jaeger_replicas": 1,
+        "opensearch_replicas": 1,
+        "prometheus_replicas": 1,
+        # --- Memory scaling factor ---
+        "memory_factor": 2.0,
+        # --- CPU requests ---
+        "add_cpu_requests": True,
+      },
+    }
+
+    if profile not in profiles:
+      fail("Unsupported profile: " + profile + ". Allowed: default, small, medium, large")
+
+    p = profiles[profile]
+
+    # === SERVICE CLASSIFICATION ===
+    tier1 = ["frontend", "frontend-proxy"]
+    tier2 = ["checkout", "cart", "payment", "product-catalog"]
+    tier3 = [
+      "shipping", "quote", "currency", "recommendation", "ad",
+      "email", "accounting", "fraud-detection", "image-provider",
+      "llm", "load-generator", "product-reviews",
+    ]
+    infra = ["kafka", "postgresql", "flagd", "valkey-cart"]
+
+    # Build name -> replicas mapping
+    replica_map = {}
+    for name in tier1:
+      replica_map[name] = p["tier1_replicas"]
+    for name in tier2:
+      replica_map[name] = p["tier2_replicas"]
+    for name in tier3:
+      replica_map[name] = p["tier3_replicas"]
+    for name in infra:
+      replica_map[name] = p["infra_replicas"]
+
+    # Observability overrides
+    obs_replica_map = {
+      "grafana": p["grafana_replicas"],
+      "jaeger": p["jaeger_replicas"],
+      "prometheus": p["prometheus_replicas"],
+    }
+    obs_statefulset_map = {
+      "opensearch": p["opensearch_replicas"],
+    }
+
+    # === APPLY MUTATIONS ===
+    for r in resources:
+      kind = r.get("kind", "")
+      name = r.get("metadata", {}).get("name", "")
+
+      # --- Shop Deployments: replicas + memory + cpu ---
+      if kind == "Deployment" and name in replica_map:
+        r["spec"]["replicas"] = replica_map[name]
+        reset_resources(r, name, p["memory_factor"])
+        if p["add_cpu_requests"]:
+          add_cpu(r, name, profile)
+        else:
+          reset_cpu(r, name)
+
+      # --- Observability Deployments: replicas + memory ---
+      if kind == "Deployment" and name in obs_replica_map:
+        r["spec"]["replicas"] = obs_replica_map[name]
+        reset_resources(r, name, p["memory_factor"])
+
+      # --- Observability StatefulSets: replicas + memory ---
+      if kind == "StatefulSet" and name in obs_statefulset_map:
+        r["spec"]["replicas"] = obs_statefulset_map[name]
+        reset_resources(r, name, p["memory_factor"])
+
+      # --- DaemonSets (otel-collector): memory only ---
+      if kind == "DaemonSet":
+        reset_resources(r, name, p["memory_factor"])
+
+  # ─── Helper functions ───
+
+  def parse_memory(value):
+    """Parse a Kubernetes memory string (e.g., '250Mi', '1Gi') into megabytes."""
+    if value.endswith("Gi"):
+      return int(float(value[:-2]) * 1024)
+    elif value.endswith("Mi"):
+      return int(value[:-2])
+    elif value.endswith("Ki"):
+      return int(float(value[:-2]) / 1024)
+    return int(value)
+
+  def format_memory(mb):
+    """Format megabytes back into a Kubernetes memory string."""
+    if mb >= 1024 and mb % 1024 == 0:
+      return str(mb // 1024) + "Gi"
+    return str(mb) + "Mi"
+
+  def reset_resources(resource, name, memory_factor):
+    """Reset a resource's limits/requests to upstream defaults scaled by memory_factor.
+
+    Instead of multiplying the current (possibly stale) values, this always
+    computes: upstream_default * memory_factor.  This makes every profile
+    transition idempotent — large -> default correctly restores the original
+    memory values instead of leaving them doubled.
+    """
+    upstream_mem_limit = UPSTREAM_MEMORY_LIMITS.get(name, "")
+    upstream_mem_request = UPSTREAM_MEMORY_REQUESTS.get(name, "")
+    upstream_cpu_limit = UPSTREAM_CPU_LIMITS.get(name, "")
+    upstream_cpu_request = UPSTREAM_CPU_REQUESTS.get(name, "")
+
+    # Nothing to set for this service (e.g. llm has no resources)
+    if not upstream_mem_limit and not upstream_mem_request:
+      return
+
+    containers = resource.get("spec", {}).get("template", {}).get("spec", {}).get("containers", [])
+    for container in containers:
+      res = container.get("resources") or {}
+      limits = res.get("limits") or {}
+      requests = res.get("requests") or {}
+
+      # --- Memory limit: always set from upstream baseline * factor ---
+      if upstream_mem_limit:
+        base_mb = parse_memory(upstream_mem_limit)
+        scaled_mb = max(int(base_mb * memory_factor), 16)  # floor at 16Mi
+        limits["memory"] = format_memory(scaled_mb)
+      elif "memory" in limits:
+        # Service has no upstream memory limit — remove any stale one
+        limits.pop("memory")
+
+      # --- Memory request: always set from upstream baseline * factor ---
+      if upstream_mem_request:
+        base_mb = parse_memory(upstream_mem_request)
+        scaled_mb = max(int(base_mb * memory_factor), 16)  # floor at 16Mi
+        requests["memory"] = format_memory(scaled_mb)
+      elif "memory" in requests:
+        # Service has no upstream memory request — remove any stale one
+        requests.pop("memory")
+
+      # --- CPU limit: restore upstream value (not scaled) ---
+      if upstream_cpu_limit:
+        limits["cpu"] = upstream_cpu_limit
+      elif "cpu" in limits:
+        # Service has no upstream CPU limit — remove any stale one
+        limits.pop("cpu")
+
+      # --- CPU request: restore upstream value (not scaled) ---
+      # Note: profile-added CPU requests are handled separately by add_cpu/reset_cpu
+      if upstream_cpu_request:
+        requests["cpu"] = upstream_cpu_request
+      # Don't remove cpu requests here — reset_cpu/add_cpu handles that
+
+      # Write back
+      if limits:
+        res["limits"] = limits
+      if requests:
+        res["requests"] = requests
+      container["resources"] = res
+
+  def reset_cpu(resource, name):
+    """Remove profile-added CPU requests, restoring to upstream defaults.
+
+    If the service has an upstream CPU request (e.g. opensearch: 1000m),
+    that value is preserved. Otherwise, any CPU request is removed.
+    """
+    upstream_cpu_request = UPSTREAM_CPU_REQUESTS.get(name, "")
+    containers = resource.get("spec", {}).get("template", {}).get("spec", {}).get("containers", [])
+    for container in containers:
+      res = container.get("resources")
+      if not res:
+        continue
+      requests = res.get("requests")
+      if not requests:
+        continue
+      if "cpu" in requests:
+        if upstream_cpu_request:
+          requests["cpu"] = upstream_cpu_request
+        else:
+          requests.pop("cpu")
+
+  def add_cpu(resource, name, profile):
+    """Add CPU requests for medium/large profiles on high-traffic services."""
+    cpu_map = {
+      "medium": {
+        "frontend": "100m", "checkout": "100m", "cart": "50m",
+        "payment": "50m", "product-catalog": "50m", "kafka": "200m",
+        "postgresql": "100m", "recommendation": "100m",
+      },
+      "large": {
+        "frontend": "250m", "checkout": "200m", "cart": "100m",
+        "payment": "100m", "product-catalog": "100m", "kafka": "500m",
+        "postgresql": "250m", "recommendation": "200m",
+        "ad": "100m", "llm": "200m", "load-generator": "200m",
+      },
+    }
+    if profile not in cpu_map or name not in cpu_map[profile]:
+      return
+    containers = resource.get("spec", {}).get("template", {}).get("spec", {}).get("containers", [])
+    for container in containers:
+      if container.get("name") == name:
+        res = container.get("resources") or {}
+        requests = res.get("requests") or {}
+        requests["cpu"] = cpu_map[profile][name]
+        res["requests"] = requests
+        container["resources"] = res
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # 2) CHAOS — flagd feature-flag scenarios (was chaos/setup-chaos.yaml)
+  # ═══════════════════════════════════════════════════════════════════════
+
+  def setup_chaos(resources):
+    scenario = "off"
+
+    # Read chaos scenario from config
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "app-config"):
+        scenario = r.get("data", {}).get("chaos", "off")
+
+    if scenario == None:
+      scenario = "off"
+    if scenario == "":
+      fail("chaos cannot be empty in app-config")
+
+    # Define the chaos mapping
+    chaos_matrix = {
+      "off": {},
+      "payment-outage": {
+        "paymentFailure": "100%",
+        "paymentUnreachable": "on"
+      },
+      "high-load": {
+        "loadGeneratorFloodHomepage": "on",
+        "adHighCpu": "on",
+        "kafkaQueueProblems": "on"
+      },
+      "broken-catalog": {
+        "productCatalogFailure": "on",
+        "recommendationCacheFailure": "on"
+      },
+      "memory-leak": {
+        "emailMemoryLeak": "100x",
+        "adManualGc": "on"
+      }
+    }
+
+    if scenario not in chaos_matrix:
+      fail("Unsupported chaos scenario: " + scenario)
+
+    flags_to_enable = chaos_matrix[scenario]
+
+    # Gather all chaos flags we know about
+    all_chaos_flags = []
+    for scenario_name, scenario_flags in chaos_matrix.items():
+      for f in scenario_flags:
+        if f not in all_chaos_flags:
+          all_chaos_flags.append(f)
+
+    # Find the flagd-config ConfigMap and mutate the JSON string
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "flagd-config"):
+        raw_json = r.get("data", {}).get("demo.flagd.json", "")
+        if raw_json == "":
+          fail("demo.flagd.json not found in flagd-config")
+
+        # We don't have a json parser in this starlark environment, so we will use
+        # line-by-line string replacement. We assume the JSON format is consistent.
+        lines = raw_json.split("\n")
+        new_lines = []
+        current_flag = ""
+
+        for line in lines:
+          # Track the current flag context
+          for flag in all_chaos_flags:
+            if '"' + flag + '": {' in line:
+              current_flag = flag
+              break
+
+          # If we are in a known flag's context and hit defaultVariant
+          if current_flag != "" and '"defaultVariant":' in line:
+            variant = flags_to_enable.get(current_flag, "off")
+
+            # Reconstruct the line preserving leading whitespace
+            colon_idx = line.find(":")
+            if colon_idx != -1:
+              prefix = line[:colon_idx+1]
+              suffix = "," if line.strip().endswith(",") else ""
+              line = prefix + ' "' + variant + '"' + suffix
+
+            current_flag = "" # Reset context after updating
+
+          new_lines.append(line)
+
+        r["data"]["demo.flagd.json"] = "\n".join(new_lines)
+        break
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # 3) CLUSTER-SCOPE — multi-namespace fixes + YAML round-trip cleanups
+  #    (was setup-cluster-scope.yaml)
+  # ═══════════════════════════════════════════════════════════════════════
+
+  BASE = "otel-demo"
+
+  def find_namespace(resources):
+    for r in resources:
+      meta = r.get("metadata", {})
+      if r.get("kind") == "ConfigMap" and meta.get("name", "") == "app-config":
+        ns = r.get("data", {}).get("namespace", "")
+        if ns == None:
+          return ""
+        return ns
+    return ""
+
+  def rename(name, ns):
+    # normalize a baked-in "otel-demo-" prefix to "<ns>-"; otherwise prefix "<ns>-".
+    if name == "":
+      return name
+    if ns == BASE:
+      return name
+    if name.startswith(BASE + "-"):
+      return ns + "-" + name[len(BASE) + 1:]
+    if name.startswith(ns + "-"):
+      return name  # already normalized (idempotent)
+    return ns + "-" + name
+
+  def rename_cluster_scoped(resources, ns):
+    cluster_kinds = ["ClusterRole", "ClusterRoleBinding"]
+    for r in resources:
+      kind = r.get("kind", "")
+      if kind not in cluster_kinds:
+        continue
+      meta = r.get("metadata", {})
+      meta["name"] = rename(meta.get("name", ""), ns)
+      if kind == "ClusterRoleBinding":
+        ref = r.get("roleRef", {})
+        if ref.get("kind") == "ClusterRole":
+          ref["name"] = rename(ref.get("name", ""), ns)
+
+  def fix_collector_lease_ns(resources, ns):
+    for r in resources:
+      if r.get("kind") != "ConfigMap":
+        continue
+      if r.get("metadata", {}).get("name", "") != "otel-collector-agent":
+        continue
+      data = r.get("data", {})
+      relay = data.get("relay", "")
+      old = "lease_namespace: " + BASE
+      if relay != "" and old in relay:
+        data["relay"] = relay.replace(old, "lease_namespace: " + ns)
+
+  def strip_collector_hostports(resources):
+    # The otel-collector-agent DaemonSet declares hostPorts (4317/4318/6831/...).
+    # In-cluster workloads reach the collector via the ClusterIP Service DNS name
+    # (http://otel-collector:4317), NOT via node hostPorts, so the hostPorts are
+    # unused here. Removing them lets multiple agents (one per deployment namespace)
+    # schedule on a single-node cluster without hostPort collisions.
+    for r in resources:
+      if r.get("kind") != "DaemonSet":
+        continue
+      if r.get("metadata", {}).get("name", "") != "otel-collector-agent":
+        continue
+      containers = r.get("spec", {}).get("template", {}).get("spec", {}).get("containers", [])
+      for c in containers:
+        for p in c.get("ports", []):
+          if "hostPort" in p:
+            p.pop("hostPort")
+
+  def unlimit_flagd_ui(resources):
+    # The flagd-ui sidecar image sizes its heap to the cgroup memory LIMIT and
+    # OOMKills at startup whenever a hard limit is set (fails at 300Mi/512Mi/1Gi).
+    # With no memory limit it sizes to available memory and runs fine. Strip any
+    # memory limit on the flagd-ui container so the optional admin UI starts.
+    for r in resources:
+      if r.get("kind") != "Deployment":
+        continue
+      if r.get("metadata", {}).get("name", "") != "flagd":
+        continue
+      spec = r.get("spec", {}).get("template", {}).get("spec", {})
+      for c in spec.get("containers", []):
+        if c.get("name") == "flagd-ui":
+          res = c.get("resources", None)
+          if res and "limits" in res and res["limits"] and "memory" in res["limits"]:
+            res["limits"].pop("memory")
+            if not res["limits"]:
+              res.pop("limits")
+            if not res:
+              c.pop("resources")
+
+  def bump_loadgen_memory(resources):
+    # With browser (Playwright) traffic disabled by default, plain HTTP load only
+    # needs a modest limit. Set 512Mi (the upstream 1500Mi / old 2Gi band-aids were
+    # only needed for browser traffic). Adjust LOCUST_USERS to reduce load if needed.
+    for r in resources:
+      if r.get("kind") != "Deployment":
+        continue
+      if r.get("metadata", {}).get("name", "") != "load-generator":
+        continue
+      spec = r.get("spec", {}).get("template", {}).get("spec", {})
+      for c in spec.get("containers", []):
+        if c.get("name") == "load-generator":
+          res = c.setdefault("resources", {})
+          res.setdefault("limits", {})["memory"] = "512Mi"
+
+  def clean_empty_volumes(resources):
+    # Upstream deployments carry `volumes: null` / `volumeMounts: null`. Porch's
+    # YAML round-trip serializes these to `{}` (empty MAP), which is invalid for
+    # these list-typed fields and makes Flux's server-side-apply dry-run fail
+    # ("expected list, got map[]"). Drop the empty/null keys entirely so they are
+    # simply absent.
+    kinds = ["Deployment", "StatefulSet", "DaemonSet"]
+    for r in resources:
+      if r.get("kind", "") not in kinds:
+        continue
+      pod = r.get("spec", {}).get("template", {}).get("spec", {})
+      if not pod:
+        continue
+      vols = pod.get("volumes", "keep")
+      if vols == None or vols == {} or vols == []:
+        if "volumes" in pod:
+          pod.pop("volumes")
+      for c in pod.get("containers", []) + pod.get("initContainers", []):
+        vm = c.get("volumeMounts", "keep")
+        if vm == None or vm == {} or vm == []:
+          if "volumeMounts" in c:
+            c.pop("volumeMounts")
+
+  def clean_empty_strategy(resources):
+    # `strategy.rollingUpdate: null` in source becomes `{}` after Porch's YAML
+    # round-trip. With `strategy.type: Recreate`, Kubernetes forbids rollingUpdate
+    # being present at all ("may not be specified when strategy type is Recreate").
+    # Drop empty/null rollingUpdate so it is absent.
+    for r in resources:
+      if r.get("kind", "") != "Deployment":
+        continue
+      strat = r.get("spec", {}).get("strategy", None)
+      if not strat:
+        continue
+      ru = strat.get("rollingUpdate", "keep")
+      if ru == None or ru == {}:
+        if "rollingUpdate" in strat:
+          strat.pop("rollingUpdate")
+
+  def set_namespace_object(resources, ns):
+    # Rewrite the placeholder Namespace object's name to the target namespace so
+    # the package ships its own Namespace (created/pruned by Flux). set-namespace
+    # does not touch Namespace names, so we do it here.
+    for r in resources:
+      if r.get("kind") == "Namespace":
+        meta = r.get("metadata", {})
+        if meta.get("name", "") == "PLACEHOLDER-NS" or meta.get("name", "") != ns:
+          # only rewrite our placeholder / stale value; leave unrelated NS objects alone
+          if meta.get("name", "") in ("PLACEHOLDER-NS", BASE) or meta.get("name","").endswith("-otel-demo"):
+            meta["name"] = ns
+
+  def setup_cluster_scope(resources):
+    # namespace-independent adjustments
+    clean_empty_volumes(resources)
+    clean_empty_strategy(resources)
+    strip_collector_hostports(resources)
+    unlimit_flagd_ui(resources)
+    bump_loadgen_memory(resources)
+    ns = find_namespace(resources)
+    if ns == "":
+      return
+    # metadata.namespace is set by the set-namespace catalog function (pipeline
+    # step). Here we only do the namespace-dependent fixups set-namespace can't:
+    # rename the Namespace object, prefix cluster-scoped names, fix the collector
+    # lease namespace.
+    # always set the Namespace object's name (including for the base namespace)
+    set_namespace_object(resources, ns)
+    if ns == BASE:
+      return
+    rename_cluster_scoped(resources, ns)
+    fix_collector_lease_ns(resources, ns)
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # Versioned memory bump — a uniform restart mechanism.
+  #
+  # Reads an integer `version` from the version-config ConfigMap and adds
+  # version * 1Mi to EVERY container's memory limit. Runs AFTER setup_profile
+  # (which resets limits to their baseline), so the bump lands on top of the
+  # baseline and is deterministic for a given version. deploy.sh increments
+  # `version` on each upgrade, so every upgrade changes every pod spec → all pods
+  # RESTART. Replaces the old per-service flagd/checkout +10Mi bump.
+  #
+  # Containers with no memory limit (e.g. flagd-ui, llm) are left untouched — we
+  # never introduce a limit, only bump an existing one.
+  # ═══════════════════════════════════════════════════════════════════════
+  def bump_versioned_memory(resources):
+    version = 0
+    for r in resources:
+      if krmfn.match_gvk(r, "v1", "ConfigMap") and krmfn.match_name(r, "version-config"):
+        raw = r.get("data", {}).get("version", "0")
+        if raw == None or raw == "":
+          raw = "0"
+        version = int(raw)
+        break
+    if version <= 0:
+      return  # version 0 (or unset) → no bump
+
+    kinds = ["Deployment", "StatefulSet", "DaemonSet"]
+    for r in resources:
+      if r.get("kind", "") not in kinds:
+        continue
+      pod = r.get("spec", {}).get("template", {}).get("spec", {})
+      for c in pod.get("containers", []):
+        res = c.get("resources", None)
+        if not res:
+          continue
+        limits = res.get("limits", None)
+        if not limits or "memory" not in limits:
+          continue
+        mb = parse_memory(limits["memory"])
+        limits["memory"] = format_memory(mb + version)
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # Dispatch — same order as the original 3 pipeline steps.
+  # ═══════════════════════════════════════════════════════════════════════
+  _items = ctx.resource_list["items"]
+  setup_profile(_items)
+  bump_versioned_memory(_items)
+  setup_chaos(_items)
+  setup_cluster_scope(_items)

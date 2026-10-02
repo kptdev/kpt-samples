@@ -1,0 +1,29 @@
+# app-config.yaml — the single source of truth for configuring this package.
+#
+# Edit these values (in a Porch clone, or inject via PackageVariant) and the
+# Kptfile function pipeline re-renders the whole package accordingly. This one
+# ConfigMap replaces the previous five separate config ConfigMaps
+# (namespace-config, branding-config, region-config, profile-config, chaos-config).
+#
+#   namespace  Target Kubernetes namespace for the whole deployment.
+#   storeType  Store branding: astronomy | florist
+#   imageSource  Which branded images to use: upstream (prebuilt ghcr.io images,
+#                default) | local (locally-built images from scripts/build_and_load.sh)
+#   region     Locale/currency/tax region: us | india | czech-republic | china |
+#              ireland | sweden | hungary
+#   profile    Resource-scaling profile: default | small | medium | large
+#   chaos      flagd chaos scenario: off | payment-outage | high-load |
+#              broken-catalog | memory-leak
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  namespace: otel-demo
+  storeType: astronomy
+  imageSource: upstream
+  region: us
+  profile: small
+  chaos: payment-outage
