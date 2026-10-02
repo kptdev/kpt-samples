@@ -7,6 +7,22 @@ metadata:
 source: |-
   load("krmfn.star", "krmfn")
 
+  def stamp_postgres_catalog(resources, catalog_id):
+    """Stamp the catalog identity (storeType-region) onto the postgresql pod
+    template so a store/region switch rolls the pod and re-seeds the DB.
+
+    PostgreSQL only runs init.sql on a fresh data dir, and a ConfigMap change
+    alone won't restart the pod. Changing a pod-template annotation forces
+    `kpt live apply` to roll it. Relies on postgres being ephemeral (no PVC).
+    """
+    for r in resources:
+      if krmfn.match_gvk(r, "apps/v1", "Deployment") and krmfn.match_name(r, "postgresql"):
+        template = r.setdefault("spec", {}).setdefault("template", {})
+        meta = template.setdefault("metadata", {})
+        annotations = meta.setdefault("annotations", {})
+        annotations["otel-demo/catalog"] = catalog_id
+        return
+
   def setup_region(resources):
     region = "us"
     store_type = "astronomy"
@@ -119,6 +135,9 @@ source: |-
 
     if init_sql == "":
       fail("init.sql not found in " + data["init_configmap"])
+
+    # Roll postgres on a store/region switch so init.sql re-seeds the DB.
+    stamp_postgres_catalog(resources, store_type + "-" + region)
 
     # --- Create/Update active-region-postgresql-init ---
     active_found = False
