@@ -1,0 +1,21 @@
+apiVersion: kpt.dev/v1
+kind: Kptfile
+metadata:
+  name: nginx-shop
+  annotations:
+    config.kubernetes.io/local-config: "true"
+info:
+  description: A lightweight, buildless analog of the otel-demo shop. Stock nginx serves a static site from a ConfigMap web root; a Starlark KRM function stamps the chosen storeType (astronomy | florist) and locale (en-US | hi-IN | cs-CZ | zh-CN) into config.js, and the browser renders the matching store/locale. No image build or pull beyond the stock nginx base image.
+pipeline:
+  mutators:
+    - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+      configPath: set-shop.yaml
+    - image: ghcr.io/kptdev/krm-functions-catalog/set-namespace:v0.4.5
+      configPath: ui-config.yaml
+  validators:
+    - image: ghcr.io/kptdev/krm-functions-catalog/starlark:v0.5.5
+      configPath: validate-shop.yaml
+    - image: ghcr.io/kptdev/krm-functions-catalog/kubeconform:latest
+      configMap:
+        ignore_missing_schemas: "true"
+        strict: "true"

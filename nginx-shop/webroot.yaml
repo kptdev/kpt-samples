@@ -1,0 +1,337 @@
+# webroot.yaml — the nginx web root, served from stock nginx.
+#
+# This ConfigMap is mounted at /usr/share/nginx/html. The site is GENERIC: the
+# same index.html / app.js / style.css / content.js serve every store and
+# locale. Only config.js changes — the set-shop mutator overwrites it on render
+# with the storeType + locale from ui-config. app.js reads window.SHOP_CONFIG
+# and renders the matching cell from content.js entirely in the browser.
+#
+# Layout mimics the otel-demo storefront: a white top nav (logo + currency +
+# cart) and a two-column hero (tinted panel with headline + button on the left,
+# a photographic hero image on the right). Hero/logo photos are loaded at
+# runtime from the public kptdev/kpt-samples repo via raw.githubusercontent.com,
+# so nginx itself serves only small text files (no image build or pull). Inline
+# SVG fallbacks keep the page intact if the images can't be fetched (offline).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-shop-webroot
+  namespace: nginx-shop
+data:
+  # Overwritten by the set-shop mutator on every render. The committed default
+  # keeps the site working even before the first render.
+  config.js: |
+    window.SHOP_CONFIG = { storeType: "astronomy", locale: "cs-CZ" };
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>OpenTelemetry demo</title>
+      <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+      <nav class="topbar">
+        <a class="brand" href="/">
+          <span class="brand-logo" id="brand-logo"></span>
+          <span class="brand-text" id="brand-text"></span>
+        </a>
+        <div class="nav-right">
+          <div class="currency" id="currency">
+            <span class="cur-sym" id="cur-sym">$</span>
+            <span class="cur-code" id="cur-code">USD</span>
+            <span class="cur-chevron">&#9662;</span>
+          </div>
+          <div class="cart" aria-label="cart">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                 stroke="#111" stroke-width="1.6">
+              <circle cx="9" cy="20" r="1.4" fill="#111"/>
+              <circle cx="18" cy="20" r="1.4" fill="#111"/>
+              <path d="M2 3h3l2.2 11.3a1.5 1.5 0 0 0 1.5 1.2h8.3a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/>
+            </svg>
+          </div>
+        </div>
+      </nav>
+
+      <section class="hero" id="hero">
+        <div class="hero-left">
+          <h1 id="headline"></h1>
+          <a class="cta" id="cta" href="#"></a>
+        </div>
+        <div class="hero-right" id="hero-right">
+          <img id="hero-img" alt="" />
+          <div class="hero-fallback" id="hero-fallback"></div>
+        </div>
+      </section>
+
+      <section class="arrivals">
+        <h2 id="arrivals-heading"></h2>
+        <ul id="products" class="products"></ul>
+      </section>
+
+      <footer class="footer">
+        <span id="footer-note"></span>
+        <span class="meta">store=<span id="meta-store"></span> ·
+          locale=<span id="meta-locale"></span> · stock nginx</span>
+      </footer>
+
+      <script src="config.js"></script>
+      <script src="content.js"></script>
+      <script src="app.js"></script>
+    </body>
+    </html>
+  style.css: |
+    :root {
+      --accent:#4845b2;        /* OpenTelemetry purple CTA */
+      --ink:#16192c;           /* headline ink */
+      --panel:#eceded;         /* astronomy tinted panel (grey) */
+      --brand:#4845b2;
+    }
+    body.florist {
+      --accent:#4845b2;
+      --ink:#143d2b;
+      --panel:#e7f0ea;         /* florist tinted panel (pale green) */
+      --brand:#1f5a3a;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--ink); background:#fff;
+    }
+    /* top nav */
+    .topbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 1rem 2.5rem; border-bottom:1px solid #e6e6e6; background:#fff;
+    }
+    .brand { display:flex; align-items:center; gap:.7rem; text-decoration:none; }
+    .brand-logo { display:inline-flex; align-items:center; }
+    .brand-logo svg { width:52px; height:52px; object-fit:contain; }
+    .brand-logo img { height:52px; width:auto; max-width:240px; object-fit:contain; display:block; }
+    /* The florist logo is a wide banner graphic (cream bg, flowers in the
+       corners, "Flourish Florist" wreath in the centre). Give it a generous
+       height so the wordmark is legible — the same full-banner look otel-demo
+       uses in its header. */
+    body.florist .topbar { padding: .4rem 2.5rem; }
+    body.florist .brand-logo img { height:112px; max-width:360px; }
+    .brand-text { font-size:1.25rem; font-weight:700; color:var(--brand); line-height:1.05; }
+    .nav-right { display:flex; align-items:center; gap:1.3rem; }
+    .currency {
+      display:flex; align-items:center; gap:.4rem; border:1px solid #d9d9d9;
+      border-radius:8px; padding:.5rem .8rem; font-weight:600; font-size:.95rem;
+    }
+    .cur-sym { font-weight:700; }
+    .cur-chevron { color:#888; font-size:.7rem; }
+    .cart { cursor:pointer; display:flex; }
+    /* hero */
+    .hero { display:grid; grid-template-columns: 1fr 1fr; min-height: 560px; }
+    .hero-left {
+      background: var(--panel); display:flex; flex-direction:column;
+      justify-content:center; gap:2rem; padding: 3rem 4rem;
+    }
+    .hero-left h1 {
+      font-size: 3.4rem; line-height:1.1; font-weight:800; margin:0;
+      max-width: 9em;
+    }
+    .cta {
+      align-self:flex-start; background:var(--accent); color:#fff;
+      text-decoration:none; font-weight:700; font-size:1.05rem;
+      padding: .9rem 1.6rem; border-radius:10px;
+    }
+    .hero-right { position:relative; background:var(--panel); overflow:hidden;
+      display:flex; align-items:center; justify-content:center; }
+    .hero-right img { width:100%; height:100%; object-fit:cover; display:block; }
+    .hero-fallback { position:absolute; inset:0; display:flex;
+      align-items:center; justify-content:center; }
+    .hero-fallback svg { width:60%; height:60%; }
+    /* fresh arrivals */
+    .arrivals { padding: 3rem 4rem; }
+    .arrivals h2 { font-size:1.8rem; font-weight:800; margin:0 0 1.5rem; }
+    .products { list-style:none; margin:0; padding:0; display:grid;
+      grid-template-columns: repeat(5, 1fr); gap:1.5rem; }
+    .products li { border:1px solid #ececec; border-radius:14px; overflow:hidden;
+      background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.05);
+      display:flex; flex-direction:column; }
+    .products .thumb { aspect-ratio:1/1; background:var(--panel);
+      display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .products .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .products .thumb svg { width:55%; height:55%; }
+    @media (max-width: 1100px) { .products { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 720px)  { .products { grid-template-columns: repeat(2, 1fr); } }
+    .products .name { padding:.9rem 1rem; font-weight:600; }
+    .footer {
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 1.2rem 2.5rem; border-top:1px solid #e6e6e6; color:#555;
+      font-size:.9rem;
+    }
+    .meta { color:#999; font-size:.8rem; }
+    @media (max-width: 820px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-left h1 { font-size: 2.4rem; }
+    }
+  content.js: |
+    // All store x locale content lives here. app.js selects
+    // CONTENT[storeType][locale] at runtime based on config.js.
+    //
+    // Hero/logo photos load from the public kptdev/kpt-samples repo at runtime;
+    // inline-SVG fallbacks render if the fetch fails (offline). Everything nginx
+    // serves is text — no image build or pull.
+    window.RAW = "https://raw.githubusercontent.com/kptdev/kpt-samples/main/otel-demo";
+    // Florist product photos (this repo) and astronomy product photos (upstream
+    // OpenTelemetry demo repo) — both referenced by raw URL, fetched by the
+    // browser. nginx serves only text; no image build or pull.
+    window.FLR = window.RAW + "/florist/image-provider/static/products";
+    window.FLRSTATIC = window.RAW + "/florist/image-provider/static";
+    window.AST = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-demo/main/src/image-provider/static/products";
+    window.ASTSTATIC = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-demo/main/src/image-provider/static";
+
+    // Per-store art. logoImg/hero are real images from the repos (SVG logo kept
+    // as an offline fallback); products[] carries the real { name, img } catalog.
+    window.ART = {
+      astronomy: {
+        brand: "OpenTelemetry demo",
+        logoImg: window.ASTSTATIC + "/opentelemetry-demo-logo.png",
+        hero: window.ASTSTATIC + "/Banner.png",
+        logo: '<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><circle cx="26" cy="30" r="16" fill="#4845b2"/><circle cx="48" cy="12" r="2" fill="#4845b2"/><circle cx="40" cy="6" r="1.3" fill="#4845b2"/><path d="M34 20 l12-12 4 4 -12 12z" fill="#f5a623"/><path d="M30 24 l6 6 -8 2 2-8z" fill="#f5a623"/></svg>',
+        heroFallback: '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="240" fill="#dfe3ea"/><circle cx="170" cy="70" r="30" fill="#aab0c4"/><rect x="40" y="150" width="140" height="14" rx="7" fill="#6f768c" transform="rotate(-18 110 157)"/></svg>'
+      },
+      florist: {
+        brand: "Flourish Florist",
+        logoImg: window.FLRSTATIC + "/opentelemetry-demo-logo.png",
+        hero: window.FLRSTATIC + "/Banner.png",
+        logo: '<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><g fill="#c76b86"><circle cx="28" cy="16" r="6"/><circle cx="19" cy="25" r="6"/><circle cx="37" cy="25" r="6"/><circle cx="23" cy="34" r="6"/><circle cx="33" cy="34" r="6"/></g><circle cx="28" cy="26" r="5" fill="#e8c15a"/><rect x="26" y="36" width="4" height="16" fill="#3e7d3e"/></svg>',
+        heroFallback: '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="240" fill="#e7f0ea"/><g fill="#d98fa6"><circle cx="110" cy="90" r="26"/><circle cx="76" cy="124" r="24"/><circle cx="144" cy="124" r="24"/></g><circle cx="110" cy="100" r="16" fill="#e8c15a"/><rect x="106" y="130" width="8" height="60" fill="#3e7d3e"/></svg>'
+      }
+    };
+
+    // Real catalogs (name + image). Product names come from otel-demo's catalog
+    // and, like the real demo, are NOT translated — only the UI chrome below is.
+    window.PRODUCTS = {
+      astronomy: [
+        window.AST + "/NationalParkFoundationExplorascope.jpg",
+        window.AST + "/StarsenseExplorer.jpg",
+        window.AST + "/EclipsmartTravelRefractorTelescope.jpg",
+        window.AST + "/SolarSystemColorImager.jpg",
+        window.AST + "/LensCleaningKit.jpg"
+      ],
+      florist: [
+        window.FLR + "/RedRosesBouquet.jpg",
+        window.FLR + "/WhiteLiliesArrangement.png",
+        window.FLR + "/SpringTulipMix.png",
+        window.FLR + "/OrchidElegancePot.jpg",
+        window.FLR + "/SunflowerSunshineBox.jpg"
+      ]
+    };
+
+    window.CONTENT = {
+      astronomy: {
+        "en-US": { headline:"The best telescopes to see the world closer", cta:"Go Shopping",
+          arrivals:"Fresh arrivals", cur:{sym:"$",code:"USD"}, footer:"Reach for the stars.",
+          products:["National Park Foundation Explorascope","Starsense Explorer Refractor Telescope","Eclipsmart Travel Refractor Telescope","Solar System Color Imager","Lens Cleaning Kit"] },
+        "hi-IN": { headline:"दुनिया को और करीब से देखने के लिए बेहतरीन दूरबीन", cta:"खरीदारी करें",
+          arrivals:"नए आगमन", cur:{sym:"₹",code:"INR"}, footer:"सितारों तक पहुँचें।",
+          products:["नेशनल पार्क फाउंडेशन एक्सप्लोरास्कोप","स्टारसेंस एक्सप्लोरर रिफ्रैक्टर दूरबीन","एक्लिप्समार्ट ट्रैवल रिफ्रैक्टर दूरबीन","सौर मंडल रंगीन इमेजर","लेंस सफाई किट"] },
+        "cs-CZ": { headline:"Nejlepší dalekohledy, abyste viděli svět zblízka", cta:"Nakupovat",
+          arrivals:"Novinky", cur:{sym:"Kč",code:"CZK"}, footer:"Sáhněte si na hvězdy.",
+          products:["Dalekohled National Park Foundation Explorascope","Refraktor Starsense Explorer","Cestovní refraktor Eclipsmart","Barevný zobrazovač sluneční soustavy","Sada na čištění čoček"] },
+        "zh-CN": { headline:"最好的望远镜，让你更近地看世界", cta:"去购物",
+          arrivals:"新品上市", cur:{sym:"¥",code:"CNY"}, footer:"触手可及的星空。",
+          products:["国家公园基金会探索望远镜","星感探索者折射望远镜","日食智能旅行折射望远镜","太阳系彩色成像仪","镜头清洁套装"] }
+      },
+      florist: {
+        "en-US": { headline:"Fresh flowers for every occasion", cta:"Shop Bouquets",
+          arrivals:"Fresh arrivals", cur:{sym:"$",code:"USD"}, footer:"Say it with flowers.",
+          products:["Red Roses Bouquet","White Lilies Arrangement","Spring Tulip Mix","Orchid Elegance Pot","Sunflower Sunshine Box"] },
+        "hi-IN": { headline:"हर अवसर के लिए ताज़े फूल", cta:"गुलदस्ते खरीदें",
+          arrivals:"नए आगमन", cur:{sym:"₹",code:"INR"}, footer:"फूलों से कहें।",
+          products:["लाल गुलाब का गुलदस्ता","सफेद लिली की सजावट","वसंत ट्यूलिप मिश्रण","ऑर्किड एलिगेंस गमला","सूरजमुखी सनशाइन बॉक्स"] },
+        "cs-CZ": { headline:"Čerstvé květiny pro každou příležitost", cta:"Koupit kytice",
+          arrivals:"Novinky", cur:{sym:"Kč",code:"CZK"}, footer:"Řekněte to květinami.",
+          products:["Kytice rudých růží","Aranžmá bílých lilií","Jarní směs tulipánů","Elegantní orchidej v květináči","Slunečnicový sluneční box"] },
+        "zh-CN": { headline:"适合每个场合的鲜花", cta:"选购花束",
+          arrivals:"新品上市", cur:{sym:"¥",code:"CNY"}, footer:"用鲜花表达心意。",
+          products:["红玫瑰花束","白百合花艺","春季郁金香组合","兰花优雅盆栽","向日葵阳光礼盒"] }
+      }
+    };
+  app.js: |
+    // Reads window.SHOP_CONFIG (from config.js, stamped by the set-shop mutator)
+    // and renders the matching cell from window.CONTENT / window.ART.
+    (function () {
+      var cfg = window.SHOP_CONFIG || { storeType: "astronomy", locale: "en-US" };
+      var store = (window.CONTENT[cfg.storeType]) ? cfg.storeType : "astronomy";
+      var byStore = window.CONTENT[store];
+      var locale = byStore[cfg.locale] ? cfg.locale : "en-US";
+      var c = byStore[locale];
+      var art = window.ART[store];
+
+      document.body.className = store;
+      document.documentElement.lang = locale.split("-")[0];
+      document.title = art.brand;
+
+      // Brand logo: use the real logo image; fall back to the inline SVG if the
+      // fetch fails (offline). textContent is hidden for stores whose logo image
+      // already includes the wordmark.
+      var logoEl = document.getElementById("brand-logo");
+      var brandTextEl = document.getElementById("brand-text");
+      if (art.logoImg) {
+        var lg = document.createElement("img");
+        lg.alt = art.brand;
+        lg.onerror = function () { logoEl.innerHTML = art.logo; brandTextEl.textContent = art.brand; };
+        lg.src = art.logoImg;
+        logoEl.innerHTML = "";
+        logoEl.appendChild(lg);
+        brandTextEl.textContent = "";   // real logo includes the wordmark
+      } else {
+        logoEl.innerHTML = art.logo;
+        brandTextEl.textContent = art.brand;
+      }
+      document.getElementById("headline").textContent = c.headline;
+      document.getElementById("cta").textContent = c.cta;
+      document.getElementById("cur-sym").textContent = c.cur.sym;
+      document.getElementById("cur-code").textContent = c.cur.code;
+      document.getElementById("arrivals-heading").textContent = c.arrivals;
+      document.getElementById("footer-note").textContent = c.footer;
+      document.getElementById("meta-store").textContent = store;
+      document.getElementById("meta-locale").textContent = locale;
+
+      // Hero: if the store has a photo URL, show it (SVG fallback on error);
+      // otherwise show the SVG hero directly (e.g. astronomy has no photo).
+      var fb = document.getElementById("hero-fallback");
+      fb.innerHTML = art.heroFallback;
+      var img = document.getElementById("hero-img");
+      if (art.hero) {
+        img.alt = art.brand;
+        img.onload = function () { fb.style.display = "none"; };
+        img.onerror = function () { img.style.display = "none"; fb.style.display = "flex"; };
+        img.src = art.hero;
+      } else {
+        img.style.display = "none";
+        fb.style.display = "flex";
+      }
+
+      // Fresh arrivals: pair each translated product name (c.products[i]) with
+      // the store's image at the same index (window.PRODUCTS[store][i]).
+      // Images are language-agnostic; names come from the active locale.
+      var ul = document.getElementById("products");
+      ul.innerHTML = "";
+      var imgs = window.PRODUCTS[store] || [];
+      var names = c.products || [];
+      names.forEach(function (name, i) {
+        var li = document.createElement("li");
+        var thumb = document.createElement("div");
+        thumb.className = "thumb";
+        var im = document.createElement("img");
+        im.alt = name;
+        im.loading = "lazy";
+        im.onerror = function () { thumb.innerHTML = art.heroFallback; };
+        im.src = imgs[i];
+        thumb.appendChild(im);
+        var label = document.createElement("div");
+        label.className = "name";
+        label.textContent = name;
+        li.appendChild(thumb);
+        li.appendChild(label);
+        ul.appendChild(li);
+      });
+    })();

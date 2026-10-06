@@ -1,0 +1,68 @@
+# set-shop.yaml — the branding + locale mutator (analog of otel-demo's
+# setup-branding + setup-region Starlark functions).
+#
+# Reads storeType + locale from the ui-config ConfigMap and:
+#   1. Overwrites config.js in the nginx-shop-webroot ConfigMap so the browser
+#      renders the matching store/locale cell.
+#   2. Stamps a config-hash annotation on the nginx-shop Deployment (and its pod
+#      template) so that changing storeType/locale rolls the pod on apply —
+#      mirrors otel-demo stamping catalog/chaos annotations on render.
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: set-shop
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  def find_by_kind_name(items, kind, name):
+    for r in items:
+      if r.get("kind") == kind and r.get("metadata", {}).get("name") == name:
+        return r
+    return None
+
+  # Tiny deterministic string hash (djb2) -> hex-ish string. Starlark has no
+  # hashlib, so we roll a stable hash just to detect config changes.
+  def cfg_hash(s):
+    h = 5381
+    for i in range(len(s)):
+      h = (h * 33 + ord(s[i])) % 4294967296
+    return str(h)
+
+  def set_shop(ctx):
+    items = ctx.resource_list["items"]
+
+    cfg = find_by_kind_name(items, "ConfigMap", "ui-config")
+    if cfg == None:
+      fail("ui-config ConfigMap not found in the package")
+    data = cfg.get("data", {})
+    store = str(data.get("storeType", ""))
+    locale = str(data.get("locale", ""))
+    if store == "":
+      fail("ui-config: 'storeType' is missing or empty")
+    if locale == "":
+      fail("ui-config: 'locale' is missing or empty")
+
+    webroot = find_by_kind_name(items, "ConfigMap", "nginx-shop-webroot")
+    if webroot == None:
+      fail("nginx-shop-webroot ConfigMap not found in the package")
+    if "data" not in webroot or webroot["data"] == None:
+      webroot["data"] = {}
+
+    config_js = ('window.SHOP_CONFIG = { storeType: "' + store +
+                 '", locale: "' + locale + '" };\n')
+    webroot["data"]["config.js"] = config_js
+
+    h = cfg_hash(store + "/" + locale)
+
+    dep = find_by_kind_name(items, "Deployment", "nginx-shop")
+    if dep != None:
+      meta = dep.setdefault("metadata", {})
+      ann = meta.setdefault("annotations", {})
+      ann["nginx-shop.kpt.dev/config-hash"] = h
+      spec = dep.setdefault("spec", {})
+      tmpl = spec.setdefault("template", {})
+      tmeta = tmpl.setdefault("metadata", {})
+      tann = tmeta.setdefault("annotations", {})
+      tann["nginx-shop.kpt.dev/config-hash"] = h
+
+  set_shop(ctx)
