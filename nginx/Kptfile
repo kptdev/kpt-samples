@@ -1,0 +1,13 @@
+apiVersion: kpt.dev/v1
+kind: Kptfile
+metadata:
+  name: nginx
+info:
+  emails:
+    - wily.e.coyote@theacmecorporation.com
+  description: This is an example nginx package.
+pipeline:
+  validators:
+    - image: ghcr.io/kptdev/krm-functions-catalog/kubeconform:latest
+      configMap:
+        strict: "true"
