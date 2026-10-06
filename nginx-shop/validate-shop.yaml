@@ -1,0 +1,41 @@
+# validate-shop.yaml — the input validator (analog of otel-demo's
+# validator-branding / validator-region). Aborts the render if storeType or
+# locale is outside the allowed sets. To add a store or locale, extend the
+# lists below (and add the matching content in webroot.yaml's content.js).
+apiVersion: fn.kpt.dev/v1alpha1
+kind: StarlarkRun
+metadata:
+  name: validate-shop
+  annotations:
+    config.kubernetes.io/local-config: "true"
+source: |-
+  def find_by_kind_name(items, kind, name):
+    for r in items:
+      if r.get("kind") == kind and r.get("metadata", {}).get("name") == name:
+        return r
+    return None
+
+  def validate_shop(ctx):
+    items = ctx.resource_list["items"]
+
+    valid_stores = ["astronomy", "florist"]
+    valid_locales = ["en-US", "hi-IN", "cs-CZ", "zh-CN"]
+
+    cfg = find_by_kind_name(items, "ConfigMap", "ui-config")
+    if cfg == None:
+      fail("ui-config ConfigMap not found in the package")
+    data = cfg.get("data", {})
+
+    store = str(data.get("storeType", ""))
+    if store == "":
+      fail("ui-config: required field 'storeType' is missing or empty")
+    if store not in valid_stores:
+      fail("ui-config: 'storeType' = '" + store + "' is invalid. Allowed values: " + str(valid_stores))
+
+    locale = str(data.get("locale", ""))
+    if locale == "":
+      fail("ui-config: required field 'locale' is missing or empty")
+    if locale not in valid_locales:
+      fail("ui-config: 'locale' = '" + locale + "' is invalid. Allowed values: " + str(valid_locales))
+
+  validate_shop(ctx)

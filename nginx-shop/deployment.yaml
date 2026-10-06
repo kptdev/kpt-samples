@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-shop
+  namespace: nginx-shop
+  labels:
+    app: nginx-shop
+  annotations:
+    # Stamped by the set-shop mutator with a hash of the active config so that a
+    # storeType/locale change rolls the pod (otel-demo does the same with its
+    # catalog/chaos annotations). Starts empty; filled in on render.
+    nginx-shop.kpt.dev/config-hash: ""
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-shop
+  template:
+    metadata:
+      labels:
+        app: nginx-shop
+      annotations:
+        nginx-shop.kpt.dev/config-hash: ""
+    spec:
+      containers:
+        - name: nginx
+          # Stock nginx — no build, no custom image, no registry pull beyond the
+          # standard cached base image.
+          image: nginx:stable
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 80
+          volumeMounts:
+            - name: webroot
+              mountPath: /usr/share/nginx/html
+              readOnly: true
+      volumes:
+        - name: webroot
+          configMap:
+            name: nginx-shop-webroot

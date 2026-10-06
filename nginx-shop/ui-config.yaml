@@ -1,0 +1,20 @@
+# ui-config.yaml — the single source of truth for this package.
+#
+# Edit these two values (locally, in a Porch clone, or via PackageVariant) and
+# the Kptfile function pipeline re-renders the package: the set-shop mutator
+# stamps them into the web-root ConfigMap's config.js, and validate-shop aborts
+# the render if either value is out of range.
+#
+#   namespace  Target Kubernetes namespace for the whole deployment.
+#   storeType  Store branding: astronomy | florist
+#   locale     UI language:    en-US | hi-IN | cs-CZ | zh-CN
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ui-config
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  namespace: nginx-shop
+  storeType: astronomy
+  locale: cs-CZ
